@@ -10,12 +10,12 @@
 - 기본 CV seed는 42이며, 최종 후보는 42, 52, 62에서 반복 검증한다.
 - 1차 모델은 고정된 Logistic Regression, 2차 모델은 고정된 LightGBM을 사용한다.
 - 주 비교 지표는 전체 OOF 예측의 Macro F1이다.
-- 팀원은 전처리 `fit`과 `transform`만 구현하며, fold·모델·평가·OOF 생성은 공용 코드가 담당한다.
+- 팀원은 sklearn 호환 Transformer 또는 전처리 `Pipeline`만 구현하며, fold·모델·평가·OOF 생성은 공용 코드가 담당한다.
 - feature selection과 통계 학습은 각 fold의 train 부분에서만 수행한다.
 
 ### 영향
 
-- 공용 비교 결과는 `common.preprocessing_benchmark.run_preprocessing_benchmark`로 생성한다.
+- 공용 비교 결과는 `common.preprocessing_benchmark.run_preprocessing_benchmark`에 `preprocessor` 객체를 전달해 생성한다.
 - 탐색 단계의 홀드아웃 결과는 후보 제거에 사용할 수 있지만, 전처리 순위와 최종 후보 선정에는 5-fold OOF 결과를 사용한다.
 - 좋은 전처리만 동일 fold의 LightGBM으로 2차 검증한다.
 
