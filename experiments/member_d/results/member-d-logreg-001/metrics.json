@@ -1,0 +1,29 @@
+{
+  "experiment": "member-d-logreg-001",
+  "owner": "member_d",
+  "model": "LogisticRegression",
+  "seed": 42,
+  "validation": "StratifiedKFold-5",
+  "accuracy": 0.36026,
+  "f1_macro": 0.36305,
+  "n_features": 4231,
+  "hyperparameters": {
+    "max_iter": 1000,
+    "class_weight": "balanced"
+  },
+  "preprocessing": [
+    "fillna('WT')",
+    "binarize (value != 'WT') at gene level",
+    "drop columns constant in the training folds only",
+    "append log1p(row-wise mutated gene count)",
+    "scipy.sparse CSR"
+  ],
+  "environment": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "sklearn": "1.9.0"
+  },
+  "description": "유전자 단위 이진화 + log1p(TMB) 1개, LogisticRegression(balanced). 프로세스 검증용 기준 실험."
+}

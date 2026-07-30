@@ -1,1 +1,2 @@
-experiment,owner,model,seed,validation,accuracy,f1_macro,description
+﻿experiment,owner,model,seed,validation,accuracy,f1_macro,description
+member-d-logreg-001,member_d,LogisticRegression,42,StratifiedKFold-5,0.36026,0.36305,"gene-binary + log1p(TMB), balanced"

@@ -1,0 +1,16 @@
+{
+  "python": "3.12.13",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "numpy": "2.5.1",
+  "pandas": "2.3.3",
+  "scikit-learn": "1.9.0",
+  "scipy": "1.18.0",
+  "seed": 42,
+  "validation": "StratifiedKFold(n_splits=5, shuffle=True, random_state=42)",
+  "hyperparameters": {
+    "max_iter": 1000,
+    "class_weight": "balanced"
+  },
+  "external_data_used": false,
+  "pretrained_model_used": false
+}
