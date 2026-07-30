@@ -1,0 +1,10 @@
+data:
+  train_path: data/raw/train.csv
+  test_path: data/raw/test.csv
+  submission_path: data/raw/sample_submission.csv
+  id_column: ID
+  target_column: SUBCLASS
+
+validation:
+  test_size: 0.25
+  stratify: true

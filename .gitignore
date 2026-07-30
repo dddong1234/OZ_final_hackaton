@@ -1,0 +1,152 @@
+# 환경 변수 / 비밀값
+.env
+.env.*
+!.env.example
+
+# Python 가상환경
+.venv/
+venv/
+env/
+ENV/
+
+# Python 캐시 / 컴파일 결과
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 패키징 / 빌드
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 테스트 / 린트 / 타입 검사 / 커버리지
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.pyre/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+pytestdebug.log
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+profile_default/
+ipython_config.py
+
+# IDE / 에디터
+.idea/
+.vscode/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100/
+.fseventsd/
+.Spotlight-V100/
+.TemporaryItems/
+.Trashes/
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+
+# Linux 데스크톱
+.directory
+.Trash-*
+
+# 로그 / 임시 파일
+*.log
+*.tmp
+*.temp
+*.bak
+*.cache
+tmp/
+temp/
+
+# 원본 / 가공 데이터
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# 공용 실험 산출물
+outputs/*
+!outputs/.gitkeep
+
+# 팀원별 로컬 EDA 산출물
+experiments/member_*/notebooks/eda_summary.json
+experiments/member_*/notebooks/class_distribution.csv
+
+# 팀원별 실험 산출물: 폴더 깊이와 무관하게 설명과 지표만 공유
+experiments/member_*/**/results/**
+!experiments/member_*/**/results/**/
+!experiments/member_*/**/results/**/README.md
+!experiments/member_*/**/results/**/metrics.json
+
+# 공통 이름을 사용하는 예측 산출물
+**/submission*.csv
+**/test_probabilities.*
+**/oof_probabilities.*
+
+# 모델 / 체크포인트 / 직렬화 파일
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+*.h5
+*.hdf5
+*.keras
+*.safetensors
+
+# ML 실험 추적 도구
+wandb/
+mlruns/
+mlartifacts/
+lightning_logs/
+catboost_info/
+runs/
+
+# 프로파일링
+*.prof
+*.lprof
+*.flamegraph
