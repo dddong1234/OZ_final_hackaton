@@ -1,8 +1,8 @@
 """Notebook-friendly benchmark for comparing preprocessing pipelines.
 
 The benchmark owns cross-validation, models, metrics, and OOF generation.
-Experiment authors only provide preprocessing ``fit`` and ``transform``
-callables that follow the same contract as ``common.starter_preprocess``.
+Experiment authors only provide a scikit-learn compatible Transformer or
+preprocessing ``Pipeline``.
 """
 
 from __future__ import annotations
@@ -11,17 +11,17 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 from time import perf_counter
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
+from sklearn.base import clone
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import StratifiedKFold
+from sklearn.pipeline import Pipeline
 
 
-PreprocessFit = Callable[[pd.DataFrame, str, str], Any]
-PreprocessTransform = Callable[[pd.DataFrame, Any, str, str], Any]
 BenchmarkModel = Literal["logistic", "lightgbm"]
 
 BENCHMARK_N_SPLITS = 5
@@ -112,6 +112,53 @@ def _model_params(model_name: BenchmarkModel) -> dict[str, Any]:
     raise ValueError("model은 'logistic' 또는 'lightgbm'이어야 합니다.")
 
 
+def _stable_parameter_value(value: Any) -> Any:
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if callable(value):
+        module = getattr(value, "__module__", value.__class__.__module__)
+        name = getattr(value, "__qualname__", value.__class__.__qualname__)
+        return f"{module}.{name}"
+    if isinstance(value, (list, tuple)):
+        return [_stable_parameter_value(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            str(key): _stable_parameter_value(item)
+            for key, item in value.items()
+        }
+    if callable(getattr(value, "get_params", None)):
+        return f"{value.__class__.__module__}.{value.__class__.__name__}"
+    return f"{value.__class__.__module__}.{value.__class__.__name__}"
+
+
+def _json_safe_parameters(estimator: Any) -> dict[str, Any]:
+    return {
+        name: _stable_parameter_value(value)
+        for name, value in estimator.get_params(deep=True).items()
+    }
+
+
+def _validate_preprocessor(preprocessor: Any) -> None:
+    missing_methods = [
+        method
+        for method in ("fit", "transform", "get_params")
+        if not callable(getattr(preprocessor, method, None))
+    ]
+    if missing_methods:
+        raise TypeError(
+            "preprocessor는 sklearn Transformer 또는 Pipeline이어야 합니다. "
+            f"누락된 메서드: {missing_methods}"
+        )
+    try:
+        clone(preprocessor)
+    except Exception as error:
+        raise TypeError(
+            "preprocessor를 sklearn.base.clone으로 복제할 수 없습니다. "
+            "커스텀 Transformer는 __init__ 파라미터를 그대로 속성에 "
+            "저장해야 합니다."
+        ) from error
+
+
 def _validate_source_data(
     train_df: pd.DataFrame,
     target_column: str,
@@ -141,36 +188,6 @@ def _validate_source_data(
         )
 
 
-def _validate_transformed(
-    x_train: Any,
-    x_valid: Any,
-    expected_train_rows: int,
-    expected_valid_rows: int,
-) -> int:
-    if not hasattr(x_train, "shape") or not hasattr(x_valid, "shape"):
-        raise TypeError("transform 결과는 shape을 가진 2차원 행렬이어야 합니다.")
-    if len(x_train.shape) != 2 or len(x_valid.shape) != 2:
-        raise ValueError("transform 결과는 2차원이어야 합니다.")
-    if x_train.shape[0] != expected_train_rows:
-        raise ValueError(
-            "train transform의 행 수가 원본 fold와 다릅니다: "
-            f"{x_train.shape[0]} != {expected_train_rows}"
-        )
-    if x_valid.shape[0] != expected_valid_rows:
-        raise ValueError(
-            "validation transform의 행 수가 원본 fold와 다릅니다: "
-            f"{x_valid.shape[0]} != {expected_valid_rows}"
-        )
-    if x_train.shape[1] != x_valid.shape[1]:
-        raise ValueError(
-            "train과 validation transform의 열 수가 다릅니다: "
-            f"{x_train.shape[1]} != {x_valid.shape[1]}"
-        )
-    if x_train.shape[1] == 0:
-        raise ValueError("전처리 결과에 feature가 없습니다.")
-    return int(x_train.shape[1])
-
-
 def _aligned_probabilities(
     model: Any,
     features: Any,
@@ -188,8 +205,7 @@ def _aligned_probabilities(
 
 def run_preprocessing_benchmark(
     train_df: pd.DataFrame,
-    fit: PreprocessFit,
-    transform: PreprocessTransform,
+    preprocessor: Any,
     *,
     experiment_id: str,
     preprocessing_name: str | None = None,
@@ -199,19 +215,15 @@ def run_preprocessing_benchmark(
     id_column: str = "ID",
     verbose: bool = True,
 ) -> BenchmarkResult:
-    """Evaluate only the supplied preprocessing under fixed team conditions.
+    """Evaluate a supplied sklearn preprocessor under fixed team conditions.
 
     Parameters
     ----------
     train_df:
         Raw training dataframe containing ID, target, and feature columns.
-    fit:
-        Called once per fold with the fold's training dataframe only.
-        Signature: ``fit(train_fold, target_column, id_column) -> state``.
-    transform:
-        Called with train and validation data using the fold state.
-        Signature:
-        ``transform(dataframe, state, target_column, id_column) -> 2D matrix``.
+    preprocessor:
+        A scikit-learn compatible Transformer or preprocessing Pipeline.
+        It is cloned and fitted independently inside every CV fold.
     experiment_id:
         Identifier stored in the returned metrics.
     preprocessing_name:
@@ -230,8 +242,7 @@ def run_preprocessing_benchmark(
     """
 
     _validate_source_data(train_df, target_column, id_column)
-    if not callable(fit) or not callable(transform):
-        raise TypeError("fit과 transform은 호출 가능한 함수여야 합니다.")
+    _validate_preprocessor(preprocessor)
     if not experiment_id.strip():
         raise ValueError("experiment_id는 비어 있을 수 없습니다.")
 
@@ -245,6 +256,7 @@ def run_preprocessing_benchmark(
     )
     y = train_df[target_column].reset_index(drop=True)
     source = train_df.reset_index(drop=True)
+    features = source.drop(columns=[id_column, target_column])
 
     run_records: list[dict[str, Any]] = []
     fold_records: list[dict[str, Any]] = []
@@ -266,34 +278,22 @@ def run_preprocessing_benchmark(
             splitter.split(source, y)
         ):
             fold_start = perf_counter()
-            train_fold = source.iloc[train_index].copy()
-            valid_fold = source.iloc[valid_index].copy()
+            x_train = features.iloc[train_index].copy()
+            x_valid = features.iloc[valid_index].copy()
+            y_train = y.iloc[train_index]
 
-            state = fit(train_fold, target_column, id_column)
-            x_train = transform(
-                train_fold,
-                state,
-                target_column,
-                id_column,
+            benchmark_pipeline = Pipeline(
+                [
+                    ("preprocessing", clone(preprocessor)),
+                    ("model", _build_model(model)),
+                ]
             )
-            x_valid = transform(
-                valid_fold,
-                state,
-                target_column,
-                id_column,
-            )
-            feature_count = _validate_transformed(
-                x_train,
-                x_valid,
-                len(train_index),
-                len(valid_index),
-            )
-
-            benchmark_model = _build_model(model)
-            benchmark_model.fit(x_train, train_fold[target_column])
-            valid_pred = np.asarray(benchmark_model.predict(x_valid))
+            benchmark_pipeline.fit(x_train, y_train)
+            valid_pred = np.asarray(benchmark_pipeline.predict(x_valid))
+            benchmark_model = benchmark_pipeline.named_steps["model"]
+            feature_count = int(benchmark_model.n_features_in_)
             valid_prob = _aligned_probabilities(
-                benchmark_model,
+                benchmark_pipeline,
                 x_valid,
                 classes,
             )
@@ -385,6 +385,11 @@ def run_preprocessing_benchmark(
             "seeds": list(cv_seeds),
         },
         "model_parameters": _model_params(model),
+        "preprocessor_class": (
+            f"{preprocessor.__class__.__module__}."
+            f"{preprocessor.__class__.__name__}"
+        ),
+        "preprocessor_parameters": _json_safe_parameters(preprocessor),
         "primary_metric": "oof_f1_macro",
         "oof_f1_macro_mean": float(run_metrics["oof_f1_macro"].mean()),
         "oof_f1_macro_std": (
