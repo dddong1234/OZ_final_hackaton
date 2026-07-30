@@ -1,0 +1,85 @@
+{
+  "experiment": "sdh-exp-002-baseline",
+  "preprocessing": "WT/variant binary",
+  "model": "logistic",
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42
+    ]
+  },
+  "model_parameters": {
+    "solver": "lbfgs",
+    "max_iter": 1000,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "primary_metric": "oof_f1_macro",
+  "oof_f1_macro_mean": 0.3445248135869751,
+  "oof_f1_macro_std": 0.0,
+  "oof_accuracy_mean": 0.34284792775358813,
+  "oof_accuracy_std": 0.0,
+  "elapsed_seconds": 52.348145072999614,
+  "per_seed": [
+    {
+      "cv_seed": 42,
+      "oof_accuracy": 0.34284792775358813,
+      "oof_f1_macro": 0.3445248135869751,
+      "elapsed_seconds": 52.34059327700015
+    }
+  ],
+  "per_fold": [
+    {
+      "cv_seed": 42,
+      "fold": 0,
+      "train_rows": 4960,
+      "valid_rows": 1241,
+      "feature_count": 4384,
+      "accuracy": 0.35294117647058826,
+      "f1_macro": 0.3455365076544971,
+      "elapsed_seconds": 10.321842268000182
+    },
+    {
+      "cv_seed": 42,
+      "fold": 1,
+      "train_rows": 4961,
+      "valid_rows": 1240,
+      "feature_count": 4384,
+      "accuracy": 0.32661290322580644,
+      "f1_macro": 0.32893874338524093,
+      "elapsed_seconds": 11.259370412999488
+    },
+    {
+      "cv_seed": 42,
+      "fold": 2,
+      "train_rows": 4961,
+      "valid_rows": 1240,
+      "feature_count": 4384,
+      "accuracy": 0.3419354838709677,
+      "f1_macro": 0.35267132765168563,
+      "elapsed_seconds": 9.786367410000821
+    },
+    {
+      "cv_seed": 42,
+      "fold": 3,
+      "train_rows": 4961,
+      "valid_rows": 1240,
+      "feature_count": 4384,
+      "accuracy": 0.3395161290322581,
+      "f1_macro": 0.34189860767459257,
+      "elapsed_seconds": 10.029753046001133
+    },
+    {
+      "cv_seed": 42,
+      "fold": 4,
+      "train_rows": 4961,
+      "valid_rows": 1240,
+      "feature_count": 4384,
+      "accuracy": 0.3532258064516129,
+      "f1_macro": 0.3470430476350117,
+      "elapsed_seconds": 10.910771074999502
+    }
+  ]
+}
