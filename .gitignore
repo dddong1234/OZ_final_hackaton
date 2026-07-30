@@ -101,10 +101,19 @@ tmp/
 temp/
 
 # 원본 / 가공 데이터
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
+# 운영 공지: 대회 제공 데이터셋은 GitHub 에 올리지 않는다.
+# data/ dataset/ 전체를 제외하고 폴더 구조 유지용 .gitkeep 만 남긴다.
+data/**
+!data/**/
+!data/**/.gitkeep
+dataset/**
+!dataset/**/
+!dataset/**/.gitkeep
+
+# 대회 데이터 파일명 방어 (다른 경로에 두더라도)
+**/train.csv
+**/test.csv
+**/sample_submission.csv
 
 # 공용 실험 산출물
 outputs/*

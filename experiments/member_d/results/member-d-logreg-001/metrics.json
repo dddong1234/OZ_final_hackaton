@@ -3,11 +3,18 @@
   "owner": "member_d",
   "model": "LogisticRegression",
   "seed": 42,
-  "validation": "StratifiedKFold-5",
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42
+    ]
+  },
   "accuracy": 0.36026,
   "f1_macro": 0.36305,
   "n_features": 4231,
-  "hyperparameters": {
+  "model_parameters": {
     "max_iter": 1000,
     "class_weight": "balanced"
   },
