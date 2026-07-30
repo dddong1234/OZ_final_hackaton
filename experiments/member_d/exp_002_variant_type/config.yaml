@@ -1,0 +1,27 @@
+# 트랙 A · 변이 유형 집계 피처
+# 폴더명 exp_002_variant_type / 전역 실험 ID iljun-logreg-002 (GIT_STRATEGY §9.1)
+experiment:
+  id: iljun-logreg-002
+  seeds: [42]
+
+# common.experiment (팀 방식) 이 읽는 모델 설정
+model:
+  max_iter: 1000
+  class_weight: balanced
+
+# common.experiment 은 baseline.yaml 의 validation(holdout 0.25) 을 쓴다.
+# 아래 pipeline 섹션은 내 pipeline.py 전용 — common.experiment 는 무시한다.
+pipeline:
+  blocks: GBVR          # G 유전자 / B 부담 / V 유형카운트 / R 유형비율
+  model: logreg         # logreg | svm | sgd
+  cv:
+    method: StratifiedKFold
+    n_splits: 5
+    shuffle: true
+    seed: 42
+  baseline:
+    experiment: member-d-logreg-001
+    f1_macro: 0.36305
+    accuracy: 0.36026
+  decimals: 3           # 판정 자릿수 (협업 규정 2)
+  submit_gate: true
