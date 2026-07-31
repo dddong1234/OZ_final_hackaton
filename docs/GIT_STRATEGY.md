@@ -362,20 +362,57 @@ train에서 변이 빈도가 매우 낮은 유전자를 제거하면 노이즈�
 - Accuracy
 - Macro F1
 
+### 9.1 실험 폴더명과 전역 실험 ID
+
+실험 폴더명과 `metrics.json`의 실험 ID는 역할이 다르다.
+
+- 실험 폴더명: 개인 폴더 안에서 실험 순서와 목적을 나타낸다.
+- 전역 실험 ID: `leaderboard.csv`, Notion, 결과 파일에서 팀 전체가 실험을 식별하는 공통 키다.
+
+권장 형식:
+
+```text
+실험 폴더명: exp_<번호 3자리>_<실험 목적>
+전역 실험 ID: <owner slug>-<model slug>-<번호 3자리>
+```
+
+예:
+
+```text
+experiments/member_d/exp_001_logreg_baseline/
+experiment: iljun-logreg-001
+```
+
+`owner slug`는 `sdh`, `iljun`처럼 담당자를 식별할 수 있고 브랜치·Notion에서도
+일관되게 사용할 수 있는 짧은 이름을 권장한다. 이미 공유된 `member-a-xgb-003`,
+`member-d-logreg-001` 같은 ID는 기존 기록과 링크를 깨뜨리면서까지 소급 변경하지 않는다.
+
+가능하면 폴더와 전역 실험 ID의 번호를 동일하게 맞춘다.
+
+### 9.2 `validation`과 모델 파라미터
+
+`validation`은 사람이 읽는 문자열이 아니라 구조화된 객체로 저장한다. 검증 방식에
+따라 필요한 설정을 명시해야 나중에 자동 집계와 재현이 가능하다.
+
+모델 설정 키는 `model_parameters`로 통일한다. `parameters`와
+`hyperparameters`는 새 기록에서 사용하지 않는다.
+
 예시:
 
 ```json
 {
-  "owner": "SDH",
-  "experiment": "exp_003_lightgbm",
+  "owner": "iljun",
+  "experiment": "iljun-lightgbm-003",
   "model": "LightGBM",
   "seed": 42,
   "validation": {
-    "method": "StratifiedHoldout",
-    "test_size": 0.25
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [42]
   },
   "preprocessing": "missing->WT; WT=0; variant=1",
-  "parameters": {
+  "model_parameters": {
     "n_estimators": 500,
     "learning_rate": 0.05,
     "num_leaves": 31

@@ -329,7 +329,18 @@ EXPERIMENT_ID = "member-a-xgb-003"
 SEED = 42
 ```
 
-실험 ID는 다른 실험과 겹치지 않게 작성합니다.
+실험 ID는 다른 실험과 겹치지 않도록 다음 형식을 권장합니다.
+
+```text
+<owner slug>-<model slug>-<번호 3자리>
+```
+
+`owner slug`는 `sdh`, `iljun`처럼 담당자를 식별할 수 있고 브랜치와 Notion에서도
+일관되게 사용할 수 있는 짧은 이름을 사용합니다. 개인 폴더 안의 실험 폴더명은
+`exp_003_xgboost`처럼 작성하고, 가능하면 전역 실험 ID와 같은 번호를 사용합니다.
+
+이미 공유된 `member-a-xgb-003` 같은 ID는 기존 기록과 링크를 유지하기 위해 그대로
+둘 수 있습니다.
 
 ---
 
@@ -549,7 +560,17 @@ metrics = {
     "owner": MEMBER,
     "model": type(model).__name__,
     "seed": SEED,
-    "validation": "StratifiedHoldout(test_size=0.25)",
+    "validation": {
+        "method": "StratifiedKFold",
+        "n_splits": 5,
+        "shuffle": True,
+        "seeds": [SEED],
+    },
+    "model_parameters": {
+        "solver": "lbfgs",
+        "max_iter": 1000,
+        "class_weight": "balanced",
+    },
     "accuracy": float(accuracy),
     "f1_macro": float(f1_macro),
     "description": "실험 설명 작성",
