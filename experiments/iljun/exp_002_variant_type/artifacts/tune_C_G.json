@@ -1,0 +1,164 @@
+{
+  "blocks": "G",
+  "features_version": "A_v2_raw_variants",
+  "fixed_params": {
+    "solver": "lbfgs",
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "C_grid": [
+    0.03,
+    0.05,
+    0.1,
+    0.2,
+    0.5
+  ],
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42,
+      52,
+      62
+    ],
+    "model_seed": 42
+  },
+  "results": {
+    "0.03": {
+      "f1_macro": 0.37538,
+      "f1_macro_std": 0.00114,
+      "accuracy": 0.36859,
+      "dim": 4226,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.37586,
+          "accuracy": 0.36913
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.3762,
+          "accuracy": 0.36913
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37408,
+          "accuracy": 0.36752
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.05": {
+      "f1_macro": 0.38097,
+      "f1_macro_std": 0.00361,
+      "accuracy": 0.37338,
+      "dim": 4226,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.38505,
+          "accuracy": 0.37687
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.37966,
+          "accuracy": 0.3722
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37819,
+          "accuracy": 0.37107
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.1": {
+      "f1_macro": 0.38145,
+      "f1_macro_std": 0.00206,
+      "accuracy": 0.37268,
+      "dim": 4226,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.383,
+          "accuracy": 0.37558
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.38224,
+          "accuracy": 0.37284
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37912,
+          "accuracy": 0.36962
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.2": {
+      "f1_macro": 0.37233,
+      "f1_macro_std": 0.00298,
+      "accuracy": 0.36381,
+      "dim": 4226,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.37566,
+          "accuracy": 0.36768
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.37141,
+          "accuracy": 0.36365
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.36992,
+          "accuracy": 0.3601
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.5": {
+      "f1_macro": 0.35109,
+      "f1_macro_std": 0.00321,
+      "accuracy": 0.34532,
+      "dim": 4226,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.3548,
+          "accuracy": 0.34817
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.34934,
+          "accuracy": 0.34462
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.34914,
+          "accuracy": 0.34317
+        }
+      ],
+      "nonconvergence": "0/15"
+    }
+  },
+  "best_C": 0.1,
+  "flat_region": [
+    0.05,
+    0.1
+  ],
+  "recommended_C": 0.05,
+  "anchor_C": 0.1,
+  "note": "후보 중 최댓값 선택이므로 낙관 편향이 있다. σ 안에서는 구간 중앙을 권장.",
+  "fingerprint": {
+    "pipeline": "pipeline.py@exp002_v3",
+    "pipeline_sha256": "8e8661ea4e6584209ff92a3951896e91d6282f6de816fdea9451038331ca8cae",
+    "features": "features_A.py@A_v2_raw_variants",
+    "features_sha256": "bc9a249ad3af41693a2233acc632e8719f7a809ab6fcb2358e75d75225af7ce9",
+    "preprocess_sha256": "2fa768957eeb81b35635ce286a7a9f09cca9a9670acf844853ebf80eb521aed7"
+  }
+}

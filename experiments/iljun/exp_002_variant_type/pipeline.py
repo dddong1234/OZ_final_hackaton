@@ -5,10 +5,10 @@
 만든다. 이 파일은 그것과 별개로 **CV · 제출 게이트 · 지문 · 노트북 교차검증**을 담당한다.
 결과는 results/metrics_cv.json 에 쓴다 (팀 metrics.json 을 덮지 않는다).
 
-    python experiments/member_d/exp_002_variant_type/pipeline.py            # 정본(config.yaml)
-    python experiments/member_d/exp_002_variant_type/pipeline.py --smoke    # 30초 배선 점검
-    python experiments/member_d/exp_002_variant_type/pipeline.py --repeat 2 # 결정성 확인
-    python experiments/member_d/exp_002_variant_type/pipeline.py --check-only
+    python experiments/iljun/exp_002_variant_type/pipeline.py            # 정본(config.yaml)
+    python experiments/iljun/exp_002_variant_type/pipeline.py --smoke    # 30초 배선 점검
+    python experiments/iljun/exp_002_variant_type/pipeline.py --repeat 2 # 결정성 확인
+    python experiments/iljun/exp_002_variant_type/pipeline.py --check-only
 
 노트북에서도 같은 함수를 부른다 (두 경로가 갈라지지 않도록):
     from pipeline import cross_validate, run_pipeline
@@ -149,7 +149,7 @@ def leakage_checks(train, test, cte, gene_cols, blocks, seed, v=True):
 
 def cross_validate(train, y, counts, gene_cols, blocks, model_key="logreg",
                    model_params=None, cv_seed=42, model_seed=MODEL_SEED,
-                   n_splits=5, label=None, v=True):
+                   n_splits=5, label=None, v=True, return_proba=False):
     """단일 CV 실행. fold 안에서 spec 을 다시 fit 한다.
 
     cv_seed 는 폴드 분할만, model_seed 는 모델 초기화만 지배한다 (팀 프로토콜).
@@ -159,20 +159,31 @@ def cross_validate(train, y, counts, gene_cols, blocks, model_key="logreg",
     mp = model_params or DEFAULT_MODEL_PARAMS[model_key]
     cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=cv_seed)
     oof = np.empty(len(y), dtype=object); dim = 0; t = time.time()
+    classes_all = np.array(sorted(set(y)))
+    proba = np.zeros((len(y), len(classes_all))) if return_proba else None
     for i_tr, i_va in cv.split(train, y):
         spec = fit_spec(train.iloc[i_tr], gene_cols, seed=model_seed)
         Xa, _ = build_features(train.iloc[i_tr], counts.iloc[i_tr], spec, blocks)
         Xb, _ = build_features(train.iloc[i_va], counts.iloc[i_va], spec, blocks)
-        oof[i_va] = fn(model_seed, mp).fit(Xa, y[i_tr]).predict(Xb); dim = Xa.shape[1]
+        clf = fn(model_seed, mp).fit(Xa, y[i_tr])
+        oof[i_va] = clf.predict(Xb); dim = Xa.shape[1]
+        if return_proba:
+            # fold 마다 등장 클래스가 다를 수 있으므로 전체 클래스 축에 맞춰 넣는다
+            pos = [int(np.where(classes_all == c)[0][0]) for c in clf.classes_]
+            proba[np.ix_(i_va, pos)] = clf.predict_proba(Xb)
     oof = np.array(list(oof))
     f1 = round(float(f1_score(y, oof, average="macro")), 5)
     acc = round(float(accuracy_score(y, oof)), 5)
     if v:
         print(f"         {(label or ''.join(blocks)):30} cv_seed {cv_seed}  dim {dim:5d}  "
               f"F1 {f1:.5f}  Acc {acc:.5f}  ({time.time() - t:.0f}s)", flush=True)
-    return {"blocks": "".join(blocks), "model": model_key, "model_name": name,
-            "cv_seed": int(cv_seed), "model_seed": int(model_seed),
-            "dim": int(dim), "f1_macro": f1, "accuracy": acc, "oof": oof}
+    out = {"blocks": "".join(blocks), "model": model_key, "model_name": name,
+           "cv_seed": int(cv_seed), "model_seed": int(model_seed),
+           "dim": int(dim), "f1_macro": f1, "accuracy": acc, "oof": oof}
+    if return_proba:
+        out["proba"] = proba
+        out["classes"] = classes_all
+    return out
 
 
 def cross_validate_multi(train, y, counts, gene_cols, blocks, model_key="logreg",
@@ -272,7 +283,7 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
     _log("=" * 72, v)
 
     res = {
-        "experiment": exp_id, "owner": "member_d", "track": "A", "model": name,
+        "experiment": exp_id, "owner": "iljun", "track": "A", "model": name,
         "seed": seed, "validation": validation_spec(n_splits, seed, cv_seeds),
         "model_parameters": mp, "accuracy": acc, "f1_macro": f1,
         "f1_macro_std": std, "accuracy_std": r0["accuracy_std"],
@@ -315,7 +326,7 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
         sub = submission.copy(); sub[TARGET] = pred
 
     if write:
-        out = root / "experiments" / "member_d" / "exp_002_variant_type" / "results"
+        out = root / "experiments" / "iljun" / "exp_002_variant_type" / "results"
         out.mkdir(parents=True, exist_ok=True)
         if sub is not None:
             sp = out / f"submission_f1_{f1:.5f}.csv"
@@ -340,7 +351,7 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
             f"**지문** — pipeline `{fp['pipeline_sha256'][:12]}` · "
             f"features `{fp['features_sha256'][:12]}` · preprocess `{fp['preprocess_sha256'][:12]}`\n\n"
             f"> 상세(비커밋): `metrics_cv.json` · 팀 holdout: `metrics.json` (training.run)\n"
-            f"> 재현: `python3 experiments/member_d/exp_002_variant_type/pipeline.py`\n",
+            f"> 재현: `python3 experiments/iljun/exp_002_variant_type/pipeline.py`\n",
             encoding="utf-8")
         _log(f"[Step 6] results/metrics_cv.json + results/README.md "
              f"(metrics_cv 는 gitignore, README·metrics.json 은 커밋)", v)

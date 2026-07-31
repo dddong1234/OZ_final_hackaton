@@ -2,8 +2,8 @@
 스케일 처리 대조 — 경수님 결과와 우리 결과가 갈리는 원인 좁히기
 ================================================================
 
-    python3 experiments/member_d/exp_002_variant_type/compare_scale.py
-    python3 experiments/member_d/exp_002_variant_type/compare_scale.py --smoke   # 1분
+    python3 experiments/iljun/exp_002_variant_type/compare_scale.py
+    python3 experiments/iljun/exp_002_variant_type/compare_scale.py --smoke   # 1분
 
 ----------------------------------------------------------------------
 왜 이 실험을 하나
@@ -163,7 +163,7 @@ def main(argv=None) -> int:
     print("※ 이 결과는 '어느 구현이 옳은가'가 아니라 'log1p 가 원인인가'만 가른다.")
 
     if not a.smoke:
-        art = root / "experiments" / "member_d" / "exp_002_variant_type" / "artifacts"
+        art = root / "experiments" / "iljun" / "exp_002_variant_type" / "artifacts"
         art.mkdir(parents=True, exist_ok=True)
         tab.to_csv(art / "scale_check_vs_G.csv", index=False, encoding="utf-8-sig")
         eff_tab.to_csv(art / "scale_check_log1p_effect.csv", index=False, encoding="utf-8-sig")

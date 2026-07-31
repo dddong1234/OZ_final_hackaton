@@ -1,0 +1,136 @@
+{
+  "model_parameters": {
+    "solver": "lbfgs",
+    "C": 0.07,
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42,
+      52,
+      62
+    ],
+    "model_seed": 42
+  },
+  "min_count": 5,
+  "token_K": [
+    50,
+    100,
+    200
+  ],
+  "stages": {
+    "G": {
+      "f1_macro": 0.38337,
+      "f1_macro_std": 0.00106,
+      "per_seed": {
+        "42": 0.38311,
+        "52": 0.38454,
+        "62": 0.38247
+      }
+    },
+    "G+B": {
+      "f1_macro": 0.4032,
+      "f1_macro_std": 0.00448,
+      "per_seed": {
+        "42": 0.40096,
+        "52": 0.40836,
+        "62": 0.40029
+      }
+    },
+    "G+B+V": {
+      "f1_macro": 0.41274,
+      "f1_macro_std": 0.00057,
+      "per_seed": {
+        "42": 0.41225,
+        "52": 0.41336,
+        "62": 0.4126
+      }
+    },
+    "G+B+V+tok50": {
+      "f1_macro": 0.41753,
+      "f1_macro_std": 0.00137,
+      "per_seed": {
+        "42": 0.41754,
+        "52": 0.41616,
+        "62": 0.41889
+      }
+    },
+    "G+B+V+tok100": {
+      "f1_macro": 0.41804,
+      "f1_macro_std": 0.00167,
+      "per_seed": {
+        "42": 0.41826,
+        "52": 0.41628,
+        "62": 0.41959
+      }
+    },
+    "G+B+V+tok200": {
+      "f1_macro": 0.4189,
+      "f1_macro_std": 0.00141,
+      "per_seed": {
+        "42": 0.41924,
+        "52": 0.41735,
+        "62": 0.4201
+      }
+    }
+  },
+  "best_stage": "G+B+V+tok200",
+  "artifact_flags_mean": 12.8,
+  "table": [
+    {
+      "단계": "G",
+      "Macro F1": 0.38337,
+      "σ": 0.00106,
+      "직전 대비": "—",
+      "양수seed": "—"
+    },
+    {
+      "단계": "G+B",
+      "Macro F1": 0.4032,
+      "σ": 0.00448,
+      "직전 대비": "+0.01983",
+      "양수seed": "3/3"
+    },
+    {
+      "단계": "G+B+V",
+      "Macro F1": 0.41274,
+      "σ": 0.00057,
+      "직전 대비": "+0.00953",
+      "양수seed": "3/3"
+    },
+    {
+      "단계": "G+B+V+tok50",
+      "Macro F1": 0.41753,
+      "σ": 0.00137,
+      "직전 대비": "+0.00479",
+      "양수seed": "3/3"
+    },
+    {
+      "단계": "G+B+V+tok100",
+      "Macro F1": 0.41804,
+      "σ": 0.00167,
+      "직전 대비": "+0.00051",
+      "양수seed": "3/3"
+    },
+    {
+      "단계": "G+B+V+tok200",
+      "Macro F1": 0.4189,
+      "σ": 0.00141,
+      "직전 대비": "+0.00085",
+      "양수seed": "3/3"
+    }
+  ],
+  "caveat": "토큰 단계 증분은 배치 아티팩트를 포함할 수 있다. LB 로 확인.",
+  "fingerprint": {
+    "pipeline": "pipeline.py@exp002_v3",
+    "pipeline_sha256": "8e8661ea4e6584209ff92a3951896e91d6282f6de816fdea9451038331ca8cae",
+    "features": "features_A.py@A_v2_raw_variants",
+    "features_sha256": "bc9a249ad3af41693a2233acc632e8719f7a809ab6fcb2358e75d75225af7ce9",
+    "preprocess_sha256": "2fa768957eeb81b35635ce286a7a9f09cca9a9670acf844853ebf80eb521aed7",
+    "features_D_sha256": "4c4d32a9fd093aae6d7b4e770c58336545d1f511d65ad71400b6cd9b0de98410"
+  }
+}

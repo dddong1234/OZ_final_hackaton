@@ -1,0 +1,150 @@
+{
+  "base_blocks": "GBV",
+  "model_parameters": {
+    "solver": "lbfgs",
+    "C": 0.1,
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42,
+      52,
+      62
+    ],
+    "model_seed": 42
+  },
+  "min_count": 5,
+  "top_k_list": [
+    25,
+    50,
+    100
+  ],
+  "base": {
+    "f1_macro": 0.41202,
+    "f1_macro_std": 0.00345,
+    "per_seed": {
+      "42": 0.41482,
+      "52": 0.41307,
+      "62": 0.40816
+    }
+  },
+  "results": {
+    "freq:25": {
+      "per_seed": {
+        "42": 0.41704,
+        "52": 0.41623,
+        "62": 0.41343
+      }
+    },
+    "freq:50": {
+      "per_seed": {
+        "42": 0.41923,
+        "52": 0.41842,
+        "62": 0.41502
+      }
+    },
+    "freq:100": {
+      "per_seed": {
+        "42": 0.42104,
+        "52": 0.41851,
+        "62": 0.41559
+      }
+    },
+    "disc:25": {
+      "per_seed": {
+        "42": 0.41558,
+        "52": 0.41552,
+        "62": 0.41051
+      }
+    },
+    "disc:50": {
+      "per_seed": {
+        "42": 0.41604,
+        "52": 0.41621,
+        "62": 0.41142
+      }
+    },
+    "disc:100": {
+      "per_seed": {
+        "42": 0.41662,
+        "52": 0.41761,
+        "62": 0.41243
+      }
+    }
+  },
+  "table": [
+    {
+      "방법": "freq",
+      "K": 25,
+      "Macro F1": 0.41557,
+      "σ": 0.00189,
+      "base 대비": 0.00355,
+      "증분σ": 0.00156,
+      "양수seed": "3/3"
+    },
+    {
+      "방법": "freq",
+      "K": 50,
+      "Macro F1": 0.41756,
+      "σ": 0.00223,
+      "base 대비": 0.00554,
+      "증분σ": 0.00124,
+      "양수seed": "3/3"
+    },
+    {
+      "방법": "freq",
+      "K": 100,
+      "Macro F1": 0.41838,
+      "σ": 0.00273,
+      "base 대비": 0.00636,
+      "증분σ": 0.001,
+      "양수seed": "3/3"
+    },
+    {
+      "방법": "disc",
+      "K": 25,
+      "Macro F1": 0.41387,
+      "σ": 0.00291,
+      "base 대비": 0.00185,
+      "증분σ": 0.00095,
+      "양수seed": "3/3"
+    },
+    {
+      "방법": "disc",
+      "K": 50,
+      "Macro F1": 0.41456,
+      "σ": 0.00272,
+      "base 대비": 0.00254,
+      "증분σ": 0.00114,
+      "양수seed": "3/3"
+    },
+    {
+      "방법": "disc",
+      "K": 100,
+      "Macro F1": 0.41555,
+      "σ": 0.00275,
+      "base 대비": 0.00354,
+      "증분σ": 0.00151,
+      "양수seed": "3/3"
+    }
+  ],
+  "artifact_flags_mean": {
+    "freq": 6.8,
+    "disc": 12.8
+  },
+  "freq_disc_jaccard_mean": 0.24206789224068936,
+  "caveat": "배치 아티팩트가 CV 를 올린다. 최종 판정은 리더보드 제출로.",
+  "fingerprint": {
+    "pipeline": "pipeline.py@exp002_v3",
+    "pipeline_sha256": "8e8661ea4e6584209ff92a3951896e91d6282f6de816fdea9451038331ca8cae",
+    "features": "features_A.py@A_v2_raw_variants",
+    "features_sha256": "bc9a249ad3af41693a2233acc632e8719f7a809ab6fcb2358e75d75225af7ce9",
+    "preprocess_sha256": "2fa768957eeb81b35635ce286a7a9f09cca9a9670acf844853ebf80eb521aed7",
+    "features_D": "features_D.py@D_v1_discriminative_tokens",
+    "features_D_sha256": "4c4d32a9fd093aae6d7b4e770c58336545d1f511d65ad71400b6cd9b0de98410"
+  }
+}
