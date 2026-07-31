@@ -18,7 +18,10 @@ pipeline:
     method: StratifiedKFold
     n_splits: 5
     shuffle: true
-    seed: 42
+    # 팀 common/preprocessing_benchmark.py 와 동일: CV 분할 seed 만 바꾸고
+    # 모델 random_state 는 고정한다. 그래야 팀 3-seed 값과 같은 잣대로 비교된다.
+    seeds: [42, 52, 62]
+    model_seed: 42
   baseline:
     experiment: member-d-logreg-001
     f1_macro: 0.36305
