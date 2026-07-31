@@ -195,3 +195,12 @@
 - 여러 추가 전처리와 feature engineering을 시도했지만, baseline을 일관되게 넘는 방향은 확인되지 않았다.
 - 현재 데이터에서는 복잡한 요약 feature보다 `gene-level binary representation`이 가장 강하게 작동했다.
 - 제출 점수 방어 관점에서는 baseline binary 유지가 가장 보수적이고 안전한 전략이다.
+
+# 향후 Feature Engineering 방향
+다음과 같은 반복 패턴이 확인
+-BRCA: PIK3CA H1047R, E545K, E542K
+-COAD: BRAF V600E, TP53 R175H, R248W
+-GBMLGG·LGG: IDH1, TP53, ATRX
+-LAML: NPM1, IDH1, IDH2, RUNX1
+-KIRC·KIPAN: VHL 중심 패턴
+-기존의 original mutation token 전체 사용과 달리, 의학적으로 의미 있는 변이 상태만 제한적으로 구조화하는 방식
