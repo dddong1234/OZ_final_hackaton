@@ -1,0 +1,32 @@
+# exp_003 · 판별력 기반 변이 토큰 (D 블록)
+# 전역 실험 ID 예: iljun-logreg-003 계열 / 노션 제목 LR-003x-...
+#
+# D 블록을 exp_002 의 GBV 위에 얹는다. exp_002 인프라(pipeline.py·features_A.py)를
+# 그대로 재사용하고, 토큰 선택만 features_D.py 가 담당한다.
+exp003:
+  # 기반 피처 — exp_002 정본과 동일 (유전자이진 + 부담3 + 유형카운트6)
+  blocks: GBV
+  model: logreg
+  # ── 팀 표준 (2026-07-31 확정) ─────────────────────────────────────
+  # 다음 실험부터 LR 은 max_iter=2000 · C=0.07 로 고정하고 그 위에서만 비교한다.
+  # C=0.07 은 #37 C 세부탐색의 평평한 구간 [0.05, 0.1] 기하 중앙이자 곡선 꼭대기.
+  # (참고: 이미 저장된 token_compare_mc5 결과는 C=0.1 에서 잰 것 —
+  #  0.07 과 σ 안에서 같으므로 재실행 없이 그대로 읽어도 된다.)
+  model_params:
+    solver: lbfgs
+    C: 0.07
+    max_iter: 2000
+    class_weight: balanced
+
+  # 토큰 후보 조건
+  #   min_count : fold-train 에서 이만큼 재현된 functional 토큰만 후보.
+  #     10 → 후보 ~100개 (K=100 이면 풀 전체라 freq·disc 가 같아진다)
+  #      5 → 후보 ~429개 (K=100 이 풀보다 작아 freq·disc 가 갈린다)  ← 현재값
+  #     낮출수록 배치 아티팩트 위험이 커진다. CLI --min-count 로도 조절 가능.
+  min_count: 5
+  top_k_list: [25, 50, 100]     # freq·disc 각각 상위 K 개를 얹어 본다
+
+  # 팀 공용 다중 seed 프로토콜
+  cv_seeds: [42, 52, 62]
+  model_seed: 42
+  n_splits: 5
