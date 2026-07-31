@@ -1,0 +1,175 @@
+{
+  "features_version": "A_v2_raw_variants",
+  "features_sha256": "01796ee6db7d840b28d901906c582cdce676f7942fc2cf058fcd3afd02a04957",
+  "cv_seeds": [
+    42,
+    52,
+    62
+  ],
+  "model_seed": 42,
+  "n_splits": 5,
+  "configs": {
+    "G": {
+      "f1_macro": 0.33717,
+      "f1_macro_std": 0.00656,
+      "dim": 4226,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.34469,
+          "accuracy": 0.34317
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.3326,
+          "accuracy": 0.3314
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.33422,
+          "accuracy": 0.33398
+        }
+      ]
+    },
+    "GB": {
+      "f1_macro": 0.36325,
+      "f1_macro_std": 0.01036,
+      "dim": 4229,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.37429,
+          "accuracy": 0.36365
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.35374,
+          "accuracy": 0.35285
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.36173,
+          "accuracy": 0.35768
+        }
+      ]
+    },
+    "Gb": {
+      "f1_macro": 0.36848,
+      "f1_macro_std": 0.00671,
+      "dim": 4229,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.36775,
+          "accuracy": 0.36752
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.36216,
+          "accuracy": 0.36349
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37553,
+          "accuracy": 0.3722
+        }
+      ]
+    },
+    "GBV": {
+      "f1_macro": 0.37713,
+      "f1_macro_std": 0.00512,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.38218,
+          "accuracy": 0.37558
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.37195,
+          "accuracy": 0.36752
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37727,
+          "accuracy": 0.37091
+        }
+      ]
+    },
+    "Gbv": {
+      "f1_macro": 0.37924,
+      "f1_macro_std": 0.00335,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.3772,
+          "accuracy": 0.38333
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.38311,
+          "accuracy": 0.38236
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37742,
+          "accuracy": 0.37784
+        }
+      ]
+    }
+  },
+  "vs_G": [
+    {
+      "구성": "G+B",
+      "설명": "+ 부담 log1p",
+      "평균 증분": 0.02608,
+      "증분 σ": 0.00441,
+      "양수 seed": "3/3"
+    },
+    {
+      "구성": "G+b",
+      "설명": "+ 부담 raw",
+      "평균 증분": 0.03131,
+      "증분 σ": 0.00925,
+      "양수 seed": "3/3"
+    },
+    {
+      "구성": "G+B+V",
+      "설명": "+ 부담·유형 log1p",
+      "평균 증분": 0.03996,
+      "증분 σ": 0.00283,
+      "양수 seed": "3/3"
+    },
+    {
+      "구성": "G+b+v",
+      "설명": "+ 부담·유형 raw",
+      "평균 증분": 0.04207,
+      "증분 σ": 0.00905,
+      "양수 seed": "3/3"
+    }
+  ],
+  "log1p_effect": [
+    {
+      "비교": "부담만  GB − Gb",
+      "평균 차이": -0.00523,
+      "차이 σ": 0.01054,
+      "양수 seed": "1/3"
+    },
+    {
+      "비교": "부담+유형  GBV − Gbv",
+      "평균 차이": -0.00211,
+      "차이 σ": 0.00825,
+      "양수 seed": "1/3"
+    }
+  ],
+  "lbfgs_nonconvergence": {
+    "G": "0/15",
+    "GB": "0/15",
+    "Gb": "15/15",
+    "GBV": "0/15",
+    "Gbv": "15/15"
+  },
+  "note": "경수님 결과와의 충돌 원인 좁히기. log1p 여부만 가른다."
+}

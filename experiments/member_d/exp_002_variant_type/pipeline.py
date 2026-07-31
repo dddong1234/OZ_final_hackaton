@@ -42,8 +42,14 @@ if str(_HERE) not in sys.path:
 import features_A as fa                                          # noqa: E402
 from features_A import build_features, fit_spec, parse_sample_counts, spec_to_json  # noqa: E402
 
-PIPELINE_VERSION = "exp002_v1"
+PIPELINE_VERSION = "exp002_v3"
 TARGET, ID = "SUBCLASS", "ID"
+
+# 팀 common/preprocessing_benchmark.py 와 동일한 다중 seed 프로토콜.
+# CV 폴드 분할 seed 만 바꾸고 모델 random_state 는 고정한다 — 그래야 팀
+# 벤치마크(3-seed Logistic 0.33738 ± 0.00625)와 같은 잣대로 비교된다.
+CONFIRMATION_CV_SEEDS = (42, 52, 62)
+MODEL_SEED = 42
 
 MODELS = {
     "logreg": ("LogisticRegression(balanced)",
@@ -84,9 +90,11 @@ def fingerprint() -> dict:
     }
 
 
-def validation_spec(n_splits: int, seed: int) -> dict:
+def validation_spec(n_splits: int, model_seed: int, cv_seeds=(MODEL_SEED,)) -> dict:
+    """GIT_STRATEGY §9.2 형식. seeds 는 CV 분할 seed 목록이다."""
     return {"method": "StratifiedKFold", "n_splits": int(n_splits),
-            "shuffle": True, "seeds": [int(seed)]}
+            "shuffle": True, "seeds": [int(s) for s in cv_seeds],
+            "model_seed": int(model_seed)}
 
 
 def verdict(f1: float, ref: float, dec: int = 3) -> str:
@@ -140,25 +148,64 @@ def leakage_checks(train, test, cte, gene_cols, blocks, seed, v=True):
 
 
 def cross_validate(train, y, counts, gene_cols, blocks, model_key="logreg",
-                   model_params=None, seed=42, n_splits=5, label=None, v=True):
-    """fold 안에서 spec 을 다시 fit 하는 정직한 CV. 노트북도 이 함수를 쓴다."""
+                   model_params=None, cv_seed=42, model_seed=MODEL_SEED,
+                   n_splits=5, label=None, v=True):
+    """단일 CV 실행. fold 안에서 spec 을 다시 fit 한다.
+
+    cv_seed 는 폴드 분할만, model_seed 는 모델 초기화만 지배한다 (팀 프로토콜).
+    둘을 하나로 묶으면 '분할 변동'과 '모델 변동'이 섞여 σ 를 해석할 수 없다.
+    """
     name, fn = MODELS[model_key]
     mp = model_params or DEFAULT_MODEL_PARAMS[model_key]
-    cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+    cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=cv_seed)
     oof = np.empty(len(y), dtype=object); dim = 0; t = time.time()
     for i_tr, i_va in cv.split(train, y):
-        spec = fit_spec(train.iloc[i_tr], gene_cols, seed=seed)
+        spec = fit_spec(train.iloc[i_tr], gene_cols, seed=model_seed)
         Xa, _ = build_features(train.iloc[i_tr], counts.iloc[i_tr], spec, blocks)
         Xb, _ = build_features(train.iloc[i_va], counts.iloc[i_va], spec, blocks)
-        oof[i_va] = fn(seed, mp).fit(Xa, y[i_tr]).predict(Xb); dim = Xa.shape[1]
+        oof[i_va] = fn(model_seed, mp).fit(Xa, y[i_tr]).predict(Xb); dim = Xa.shape[1]
     oof = np.array(list(oof))
     f1 = round(float(f1_score(y, oof, average="macro")), 5)
     acc = round(float(accuracy_score(y, oof)), 5)
     if v:
-        print(f"         {(label or ''.join(blocks)):34} dim {dim:5d}  F1 {f1:.5f}  "
-              f"Acc {acc:.5f}  ({time.time() - t:.0f}s)", flush=True)
+        print(f"         {(label or ''.join(blocks)):30} cv_seed {cv_seed}  dim {dim:5d}  "
+              f"F1 {f1:.5f}  Acc {acc:.5f}  ({time.time() - t:.0f}s)", flush=True)
     return {"blocks": "".join(blocks), "model": model_key, "model_name": name,
+            "cv_seed": int(cv_seed), "model_seed": int(model_seed),
             "dim": int(dim), "f1_macro": f1, "accuracy": acc, "oof": oof}
+
+
+def cross_validate_multi(train, y, counts, gene_cols, blocks, model_key="logreg",
+                         model_params=None, cv_seeds=CONFIRMATION_CV_SEEDS,
+                         model_seed=MODEL_SEED, n_splits=5, label=None, v=True):
+    """여러 cv_seed 로 반복해 평균과 표준편차를 낸다.
+
+    std 는 ddof=1 (팀 벤치마크와 동일). seed 가 1개면 std 는 None 이다.
+    **주의** — n=3 의 표본표준편차는 그 자체로 불확실하다. σ 를 정밀한 상수처럼
+    쓰지 말고 '이 정도 흔들린다'는 눈금으로만 쓴다.
+    """
+    runs = [cross_validate(train, y, counts, gene_cols, blocks, model_key, model_params,
+                           cv_seed=s, model_seed=model_seed, n_splits=n_splits,
+                           label=label, v=v) for s in cv_seeds]
+    f1s = np.array([r["f1_macro"] for r in runs], dtype=float)
+    accs = np.array([r["accuracy"] for r in runs], dtype=float)
+    std = float(f1s.std(ddof=1)) if len(f1s) > 1 else None
+    out = {
+        "blocks": "".join(blocks), "model": model_key, "model_name": runs[0]["model_name"],
+        "dim": runs[0]["dim"], "cv_seeds": [int(s) for s in cv_seeds],
+        "model_seed": int(model_seed),
+        "f1_macro": round(float(f1s.mean()), 5),
+        "f1_macro_std": round(std, 5) if std is not None else None,
+        "accuracy": round(float(accs.mean()), 5),
+        "accuracy_std": round(float(accs.std(ddof=1)), 5) if len(accs) > 1 else None,
+        "per_seed": [{"cv_seed": r["cv_seed"], "f1_macro": r["f1_macro"],
+                      "accuracy": r["accuracy"]} for r in runs],
+        "oof": runs[0]["oof"],          # 클래스별 분석용 (첫 seed 기준)
+    }
+    if v and len(f1s) > 1:
+        print(f"         {'└ 평균':30} F1 {out['f1_macro']:.5f} ± {out['f1_macro_std']:.5f}  "
+              f"Acc {out['accuracy']:.5f}", flush=True)
+    return out
 
 
 def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
@@ -168,19 +215,25 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
     root = Path(root) if root else find_project_root()
     blocks = blocks or p["blocks"]
     model = model or p["model"]
-    seed = p["cv"]["seed"]
+    seed = p["cv"].get("model_seed", MODEL_SEED)
+    cv_seeds = tuple(p["cv"].get("seeds") or [p["cv"].get("seed", MODEL_SEED)])
+    if smoke:
+        cv_seeds = cv_seeds[:2]
     n_splits = 2 if smoke else p["cv"]["n_splits"]
     dec = p["decimals"]
     gate = p["submit_gate"] if submit_gate is None else submit_gate
     ref = p["baseline"]
-    mp = DEFAULT_MODEL_PARAMS[model]
+    # 모델 파라미터는 config.yaml 이 정본. 없으면 DEFAULT 로 떨어진다.
+    mp = dict(p.get("model_params") or DEFAULT_MODEL_PARAMS[model])
     bt = tuple(blocks)
     name, fn = MODELS[model]
     exp_id = cfg["experiment"]["id"]
 
     _log("=" * 72, v)
     _log(f"  {exp_id} · pipeline {PIPELINE_VERSION} · features_A {fa.__version__}", v)
-    _log(f"  피처 {blocks} · {name} · seed {seed} · StratifiedKFold-{n_splits}", v)
+    _log(f"  피처 {blocks} · {name} · model_seed {seed} · "
+         f"StratifiedKFold-{n_splits} · cv_seeds {list(cv_seeds)}", v)
+    _log(f"  model_params {mp}", v)
     _log(f"  기준선 {ref['experiment']} = {ref['f1_macro']:.5f} (판정 {round(ref['f1_macro'], dec)})", v)
     _log("=" * 72, v)
 
@@ -192,30 +245,42 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
     if not ok:
         raise RuntimeError("Leakage 자가검증 실패")
 
-    _log(f"[Step 4] 교차검증 {repeat}회", v)
-    runs = [cross_validate(train, y, ct, gene_cols, bt, model, mp, seed, n_splits,
-                           label=f"run {i + 1}/{repeat}", v=v) for i in range(repeat)]
-    r0 = runs[0]
-    det = len({r["f1_macro"] for r in runs}) == 1
+    _log(f"[Step 4] 교차검증 · cv_seeds {list(cv_seeds)}", v)
+    r0 = cross_validate_multi(train, y, ct, gene_cols, bt, model, mp,
+                              cv_seeds=cv_seeds, model_seed=seed,
+                              n_splits=n_splits, v=v)
+
+    # 결정성 — 같은 cv_seed 를 한 번 더 돌려 같은 값이 나오는지
+    det = None
     if repeat > 1:
+        again = cross_validate(train, y, ct, gene_cols, bt, model, mp,
+                               cv_seed=cv_seeds[0], model_seed=seed,
+                               n_splits=n_splits, label="결정성 재실행", v=v)
+        det = again["f1_macro"] == r0["per_seed"][0]["f1_macro"]
         _log(f"         결정성 {'PASS' if det else 'FAIL'}", v)
-    f1, acc = r0["f1_macro"], r0["accuracy"]
+
+    f1, acc, std = r0["f1_macro"], r0["accuracy"], r0["f1_macro_std"]
     gate_pass = round(f1, dec) > round(ref["f1_macro"], dec)
 
     _log("=" * 72, v)
-    _log(f"  Macro F1 {f1:.5f} ({f1 - ref['f1_macro']:+.5f})  Acc {acc:.5f}  "
+    _log(f"  Macro F1 {f1:.5f}" + (f" ± {std:.5f}" if std is not None else "") +
+         f"  ({f1 - ref['f1_macro']:+.5f})  Acc {acc:.5f}  "
          f"{verdict(f1, ref['f1_macro'], dec)}", v)
+    if std is not None and std > 0:
+        _log(f"  기준선 대비 {abs(f1 - ref['f1_macro']) / std:.1f}σ "
+             f"(σ 는 cv_seed {len(cv_seeds)}개의 표본표준편차 — n 이 작아 그 자체로 부정확)", v)
     _log("=" * 72, v)
 
     res = {
         "experiment": exp_id, "owner": "member_d", "track": "A", "model": name,
-        "seed": seed, "validation": validation_spec(n_splits, seed),
+        "seed": seed, "validation": validation_spec(n_splits, seed, cv_seeds),
         "model_parameters": mp, "accuracy": acc, "f1_macro": f1,
+        "f1_macro_std": std, "accuracy_std": r0["accuracy_std"],
         "feature_blocks": blocks, "n_features_cv": r0["dim"],
         "baseline": ref, "delta_vs_baseline": round(f1 - ref["f1_macro"], 5),
         "verdict": verdict(f1, ref["f1_macro"], dec),
-        "cv_runs": [{"f1_macro": r["f1_macro"], "accuracy": r["accuracy"]} for r in runs],
-        "deterministic": bool(det) if repeat > 1 else None,
+        "cv_runs": r0["per_seed"],
+        "deterministic": bool(det) if det is not None else None,
         "leakage_checks": checks,
         "submission_gate": {"enabled": gate, "passed": bool(gate_pass),
                             "threshold": round(ref["f1_macro"], dec), "file": None},
@@ -265,7 +330,8 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
         (out / "README.md").write_text(
             f"# {exp_id} — 결과 요약\n\n"
             f"| 지표 | 값 |\n|---|---|\n"
-            f"| CV Macro F1 (StratifiedKFold-{n_splits}, seed {seed}) | **{f1:.5f}** |\n"
+            f"| CV Macro F1 (StratifiedKFold-{n_splits}, cv_seeds {list(cv_seeds)}) | "
+            f"**{f1:.5f}**" + (f" ± {std:.5f}" if std is not None else "") + " |\n"
             f"| CV Accuracy | {acc:.5f} |\n"
             f"| 기준선 {ref['experiment']} | {ref['f1_macro']:.5f} |\n"
             f"| 기준선 대비 | {res['delta_vs_baseline']:+.5f} · {res['verdict']} |\n"
@@ -305,7 +371,8 @@ def main(argv=None) -> int:
         train, test, _, gene_cols = load_data(root, a.smoke)
         _, cte = parse_all(train, test, gene_cols)
         ok, _ = leakage_checks(train, test, cte, gene_cols,
-                               tuple(a.blocks or cfg["blocks"]), cfg["cv"]["seed"])
+                               tuple(a.blocks or cfg["blocks"]),
+                               cfg["cv"].get("model_seed", MODEL_SEED))
         return 0 if ok else 1
     try:
         run_pipeline(root=root, blocks=a.blocks, model=a.model, repeat=a.repeat,
