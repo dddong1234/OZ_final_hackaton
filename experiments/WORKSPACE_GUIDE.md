@@ -1,6 +1,6 @@
 # Jupyter 개인 실험 공간 안내
 
-`member_a`부터 `member_d`까지 각 팀원의 개인 작업 공간입니다.
+`SDH`, `member_b`, `member_c`, `member_d`는 각 팀원의 개인 작업 공간입니다.
 
 ## 필수 규칙
 
@@ -18,12 +18,13 @@
 
 ## 선택형 CLI 베이스라인
 
-각 팀원의 `exp_001_baseline/`은 선택적으로 사용할 수 있는 실행 예제입니다.
+SDH는 `exp_001_EDA/`에서 EDA를 진행합니다. 다른 팀원의
+`exp_001_baseline/`은 선택적으로 사용할 수 있는 실행 예제입니다.
 
 ```bash
-python -m experiments.member_a.notebooks.run_eda
-python -m experiments.member_a.exp_001_baseline.training.run
-python -m experiments.member_a.exp_001_baseline.inference
+python -m experiments.SDH.notebooks.run_eda
+python -m experiments.SDH.exp_001_EDA.training.run
+python -m experiments.SDH.exp_001_EDA.inference
 ```
 
 기본 사용 방식은 Jupyter Notebook입니다. CLI 베이스라인을 복사해서 사용해도 되고,

@@ -2,6 +2,27 @@
 
 프로젝트 전체에 영향을 주는 결정과 검증 결과를 기록합니다. 개인 실험의 세부 과정은 각 팀원의 노트북이나 실험 폴더에 기록하고, 이 문서에는 모두가 알아야 하는 내용만 남깁니다.
 
+## 2026-07-31 — SDH 개인 폴더명 통일
+
+### 결정
+
+- 기존 `experiments/member_a`를 `experiments/SDH`로 통합한다.
+- SDH의 첫 EDA 폴더는 `exp_001_EDA`, baseline 및 OOF 비교 폴더는
+  `exp_002_baseline`으로 구분한다.
+- SDH의 owner slug와 개인 브랜치 접두사는 `sdh`로 사용한다.
+
+### 영향
+
+- `experiments/member_a` 경로는 더 이상 사용하지 않는다.
+- SDH 관련 노트북, CLI 예시, Git 명령은 `experiments/SDH` 경로를 사용한다.
+- 다른 팀원의 `member_b`, `member_c`, `member_d` 경로는 변경하지 않는다.
+
+### 검증
+
+- Git 추적 파일을 이동하여 기존 이력을 보존했다.
+- 공용 README, 작업 공간 안내, AGENTS 규칙에서 `member_a` 경로를 제거했다.
+- SDH Quick Start 노트북과 Python import 예시를 새 경로에 맞췄다.
+
 ## 2026-07-30 — 실험 ID와 metrics 형식 통일
 
 ### 결정
@@ -55,7 +76,8 @@
 
 - Python 버전은 3.12로 통일한다.
 - 초보 팀원이 바로 시작할 수 있도록 JupyterLab을 기본 실험 환경으로 사용한다.
-- 팀원 A, B, C, D는 각각 `experiments/member_a`부터 `member_d`까지 자신의 공간에서 독립적으로 실험한다.
+- SDH는 `experiments/SDH`, 다른 팀원은 `experiments/member_b`부터
+  `experiments/member_d`까지 자신의 공간에서 독립적으로 실험한다.
 - 개인 폴더 내부 구조는 강제하지 않는다. 제공된 `exp_001_baseline`은 선택적으로 참고할 수 있는 예시다.
 - 원본 데이터는 루트의 `data/raw/`에서 공동으로 읽고, 팀원 폴더마다 데이터를 복사하지 않는다.
 - seed, 검증 비율, fold, 전처리, 모델 파라미터는 고정 규칙이 아니라 각 실험에서 변경할 수 있는 변수로 취급한다.

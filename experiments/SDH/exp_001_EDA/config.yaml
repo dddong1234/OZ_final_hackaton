@@ -1,5 +1,5 @@
 experiment:
-  id: member-a-baseline-001
+  id: sdh-eda-001
   seeds: [42]
 model:
   max_iter: 1000

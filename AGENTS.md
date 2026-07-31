@@ -9,8 +9,10 @@ This repository is a shared workspace where four members independently run AI ex
 - Use Python 3.12.
 - Treat JupyterLab notebooks as the primary beginner workflow.
 - Start JupyterLab from the repository root so project-relative paths work consistently.
-- Begin with `experiments/member_<name>/notebooks/00_quick_start.ipynb`.
-- The command-line baseline under each member's `exp_001_baseline` is optional reference code.
+- SDH begins with `experiments/SDH/notebooks/00_quick_start.ipynb`.
+- Other members begin with `experiments/member_<name>/notebooks/00_quick_start.ipynb`.
+- SDH keeps EDA work under `experiments/SDH/exp_001_EDA/`.
+- The command-line baseline under other members' `exp_001_baseline` folders is optional reference code.
 
 ## Ownership and freedom
 
