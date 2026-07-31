@@ -1,5 +1,6 @@
 {
   "experiment": "sdh-exp-002-baseline",
+  "owner": "sdh",
   "preprocessing": "WT/variant binary",
   "model": "logistic",
   "validation": {
