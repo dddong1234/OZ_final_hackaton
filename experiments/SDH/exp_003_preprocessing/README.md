@@ -78,3 +78,7 @@ lgbm_leaderboard = run(
 ```
 
 결과는 `metrics_<case>_lightgbm.json`과 `leaderboard_lightgbm.csv`로 분리된다.
+
+실험 결과와 결론은 `EXPERIMENT_SUMMARY.md`에 정리했다. LR과 LightGBM 모두
+`case_06_mutation_types`가 1위였으며, exp_004에서는 이를 기준으로 빈도 필터와
+hotspot 조합을 비교한다.
