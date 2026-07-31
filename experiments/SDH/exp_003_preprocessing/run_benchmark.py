@@ -7,7 +7,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from common.preprocessing_benchmark import run_preprocessing_benchmark
+from common.preprocessing_benchmark import (
+    BenchmarkModel,
+    run_preprocessing_benchmark,
+)
 from experiments.SDH.exp_003_preprocessing.preprocessing import (
     make_preprocessing_candidates,
 )
@@ -32,6 +35,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="seed 42/52/62 반복 검증을 실행합니다.",
     )
+    parser.add_argument(
+        "--model",
+        choices=("logistic", "lightgbm"),
+        default="logistic",
+        help="공용 벤치마크 모델입니다.",
+    )
     return parser.parse_args()
 
 
@@ -40,6 +49,7 @@ def run(
     results_dir: Path = DEFAULT_RESULTS_DIR,
     selected_cases: list[str] | None = None,
     confirmation: bool = False,
+    model: BenchmarkModel = "logistic",
 ) -> pd.DataFrame:
     train = pd.read_csv(train_path)
     candidates = make_preprocessing_candidates()
@@ -49,6 +59,14 @@ def run(
         raise ValueError(f"알 수 없는 case: {unknown}")
 
     results_dir.mkdir(parents=True, exist_ok=True)
+    suffix_parts = []
+    if model != "logistic":
+        suffix_parts.append(model)
+    if confirmation:
+        suffix_parts.append("confirmation")
+    result_suffix = (
+        f"_{'_'.join(suffix_parts)}" if suffix_parts else ""
+    )
     summaries: list[dict[str, object]] = []
     for case_name in case_names:
         print(f"\n===== {case_name} =====")
@@ -57,10 +75,12 @@ def run(
             candidates[case_name],
             experiment_id=f"exp_003_{case_name}",
             preprocessing_name=case_name,
-            model="logistic",
+            model=model,
             confirmation=confirmation,
         )
-        result.save_metrics(results_dir / f"metrics_{case_name}.json")
+        result.save_metrics(
+            results_dir / f"metrics_{case_name}{result_suffix}.json"
+        )
         summaries.append(result.summary)
 
     leaderboard = (
@@ -68,7 +88,10 @@ def run(
         .sort_values("oof_f1_macro_mean", ascending=False)
         .reset_index(drop=True)
     )
-    leaderboard.to_csv(results_dir / "leaderboard.csv", index=False)
+    leaderboard.to_csv(
+        results_dir / f"leaderboard{result_suffix}.csv",
+        index=False,
+    )
     return leaderboard
 
 
@@ -79,6 +102,7 @@ if __name__ == "__main__":
         results_dir=arguments.results_dir,
         selected_cases=arguments.cases,
         confirmation=arguments.confirmation,
+        model=arguments.model,
     )
     print(
         table[

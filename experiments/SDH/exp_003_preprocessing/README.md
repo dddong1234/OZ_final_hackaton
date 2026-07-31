@@ -45,14 +45,36 @@ leaderboard = run(
 )
 ```
 
-유망 후보 반복 검증:
+1차 결과 상위 후보 반복 검증:
 
 ```python
 leaderboard = run(
-    selected_cases=["case_05_both_burdens"],
+    selected_cases=[
+        "case_06_mutation_types",
+        "case_10_hotspot_top50",
+        "case_09_min_count_10",
+    ],
     confirmation=True,
 )
 ```
 
-`results/metrics_*.json`과 `results/leaderboard.csv`는 실행 결과이므로 커밋하지
-않는다.
+일반 실행은 `metrics_<case>.json`과 `leaderboard.csv`, 반복 검증은
+`metrics_<case>_confirmation.json`과 `leaderboard_confirmation.csv`로 분리된다.
+`results/` 아래 실행 결과는 커밋하지 않는다.
+
+LR에서 선별된 후보의 LightGBM 2차 검증은 `lightgbm_verification.ipynb`에서
+실행한다. 비교 기준을 포함해 다음 네 후보만 실행한다.
+
+```python
+lgbm_leaderboard = run(
+    selected_cases=[
+        "case_01_wt_binary",
+        "case_06_mutation_types",
+        "case_10_hotspot_top50",
+        "case_09_min_count_10",
+    ],
+    model="lightgbm",
+)
+```
+
+결과는 `metrics_<case>_lightgbm.json`과 `leaderboard_lightgbm.csv`로 분리된다.
