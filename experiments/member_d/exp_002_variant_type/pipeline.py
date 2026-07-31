@@ -149,7 +149,7 @@ def leakage_checks(train, test, cte, gene_cols, blocks, seed, v=True):
 
 def cross_validate(train, y, counts, gene_cols, blocks, model_key="logreg",
                    model_params=None, cv_seed=42, model_seed=MODEL_SEED,
-                   n_splits=5, label=None, v=True):
+                   n_splits=5, label=None, v=True, return_proba=False):
     """단일 CV 실행. fold 안에서 spec 을 다시 fit 한다.
 
     cv_seed 는 폴드 분할만, model_seed 는 모델 초기화만 지배한다 (팀 프로토콜).
@@ -159,20 +159,31 @@ def cross_validate(train, y, counts, gene_cols, blocks, model_key="logreg",
     mp = model_params or DEFAULT_MODEL_PARAMS[model_key]
     cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=cv_seed)
     oof = np.empty(len(y), dtype=object); dim = 0; t = time.time()
+    classes_all = np.array(sorted(set(y)))
+    proba = np.zeros((len(y), len(classes_all))) if return_proba else None
     for i_tr, i_va in cv.split(train, y):
         spec = fit_spec(train.iloc[i_tr], gene_cols, seed=model_seed)
         Xa, _ = build_features(train.iloc[i_tr], counts.iloc[i_tr], spec, blocks)
         Xb, _ = build_features(train.iloc[i_va], counts.iloc[i_va], spec, blocks)
-        oof[i_va] = fn(model_seed, mp).fit(Xa, y[i_tr]).predict(Xb); dim = Xa.shape[1]
+        clf = fn(model_seed, mp).fit(Xa, y[i_tr])
+        oof[i_va] = clf.predict(Xb); dim = Xa.shape[1]
+        if return_proba:
+            # fold 마다 등장 클래스가 다를 수 있으므로 전체 클래스 축에 맞춰 넣는다
+            pos = [int(np.where(classes_all == c)[0][0]) for c in clf.classes_]
+            proba[np.ix_(i_va, pos)] = clf.predict_proba(Xb)
     oof = np.array(list(oof))
     f1 = round(float(f1_score(y, oof, average="macro")), 5)
     acc = round(float(accuracy_score(y, oof)), 5)
     if v:
         print(f"         {(label or ''.join(blocks)):30} cv_seed {cv_seed}  dim {dim:5d}  "
               f"F1 {f1:.5f}  Acc {acc:.5f}  ({time.time() - t:.0f}s)", flush=True)
-    return {"blocks": "".join(blocks), "model": model_key, "model_name": name,
-            "cv_seed": int(cv_seed), "model_seed": int(model_seed),
-            "dim": int(dim), "f1_macro": f1, "accuracy": acc, "oof": oof}
+    out = {"blocks": "".join(blocks), "model": model_key, "model_name": name,
+           "cv_seed": int(cv_seed), "model_seed": int(model_seed),
+           "dim": int(dim), "f1_macro": f1, "accuracy": acc, "oof": oof}
+    if return_proba:
+        out["proba"] = proba
+        out["classes"] = classes_all
+    return out
 
 
 def cross_validate_multi(train, y, counts, gene_cols, blocks, model_key="logreg",
