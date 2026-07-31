@@ -159,3 +159,11 @@ runs/
 *.prof
 *.lprof
 *.flamegraph
+
+# iljun workspace (member_d 에서 rename, 2026-07-31)
+experiments/iljun/notebooks/eda_summary.json
+experiments/iljun/notebooks/class_distribution.csv
+experiments/iljun/**/results/**
+!experiments/iljun/**/results/**/
+!experiments/iljun/**/results/**/README.md
+!experiments/iljun/**/results/**/metrics.json

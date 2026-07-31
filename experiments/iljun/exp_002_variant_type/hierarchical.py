@@ -2,8 +2,8 @@
 계층형 분류 — 묶을 쌍을 fold 학습 분할에서 스스로 찾는다
 ========================================================
 
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/hierarchical.py
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/hierarchical.py --smoke
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/hierarchical.py
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/hierarchical.py --smoke
 
 ----------------------------------------------------------------------
 ★ 대회 규칙 (2026-07-31 주최측 확인) 과 이 코드의 관계
@@ -401,7 +401,7 @@ def main(argv=None) -> int:
 
     # ── 저장 ──────────────────────────────────────────────────────────
     if not a.smoke:
-        art = root / "experiments" / "member_d" / "exp_002_variant_type" / "artifacts"
+        art = root / "experiments" / "iljun" / "exp_002_variant_type" / "artifacts"
         art.mkdir(parents=True, exist_ok=True)
         tab.to_csv(art / "hier_by_seed.csv", index=False, encoding="utf-8-sig")
         dd.to_csv(art / "hier_class_change.csv", encoding="utf-8-sig")

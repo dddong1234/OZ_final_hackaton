@@ -1,4 +1,4 @@
-"""팀 방식 학습 진입점 — python -m experiments.member_d.exp_002_variant_type.training.run
+"""팀 방식 학습 진입점 — python -m experiments.iljun.exp_002_variant_type.training.run
 
 common.experiment.run_training 이 holdout(baseline.yaml test_size 0.25) 로 seed 별 학습 후
 확률 평균 앙상블하고, results/metrics.json · submission.csv · model.joblib 을 남긴다.

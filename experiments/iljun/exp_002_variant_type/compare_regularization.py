@@ -2,8 +2,8 @@
 규제(C) × 피처 블록 대조 — 내 피처가 규제와 독립적으로 기여하는가
 ================================================================
 
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/compare_regularization.py
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/compare_regularization.py --smoke
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/compare_regularization.py
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/compare_regularization.py --smoke
 
 ----------------------------------------------------------------------
 왜 이 실험을 하나
@@ -174,7 +174,7 @@ def main(argv=None) -> int:
     print("※ n=3 의 σ 는 그 자체로 부정확하다. 방향과 대략적 크기만 읽는다.")
 
     if not a.smoke:
-        art = root / "experiments" / "member_d" / "exp_002_variant_type" / "artifacts"
+        art = root / "experiments" / "iljun" / "exp_002_variant_type" / "artifacts"
         art.mkdir(parents=True, exist_ok=True)
         c_tab.to_csv(art / "reg_check_C_effect.csv", index=False, encoding="utf-8-sig")
         f_tab.to_csv(art / "reg_check_feature_effect.csv", index=False, encoding="utf-8-sig")

@@ -2,8 +2,8 @@
 판별력 vs 빈도 토큰 — 어느 선택 기준이 나은가
 =============================================
 
-    .venv/bin/python3 experiments/member_d/exp_003_discriminative_tokens/run_tokens.py
-    .venv/bin/python3 experiments/member_d/exp_003_discriminative_tokens/run_tokens.py --smoke
+    .venv/bin/python3 experiments/iljun/exp_003_discriminative_tokens/run_tokens.py
+    .venv/bin/python3 experiments/iljun/exp_003_discriminative_tokens/run_tokens.py --smoke
 
 ----------------------------------------------------------------------
 이 실험이 답하는 질문

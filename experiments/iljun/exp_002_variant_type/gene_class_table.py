@@ -2,7 +2,7 @@
 유전자 × 암종 연결표 — train 데이터에서 직접 만든다
 ====================================================
 
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/gene_class_table.py
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/gene_class_table.py
 
 ----------------------------------------------------------------------
 왜 만드나
@@ -107,7 +107,7 @@ print("\n── 신장암 마커 가용성 (논문에서 지목된 유전자) " 
 for g in ["VHL","PBRM1","SETD2","KDM5C","BAP1","MTOR","TP53"]:
     print(f"  {g:8} {'있음' if g in gene_cols else '없음 ← 우리 데이터에 컬럼 자체가 없다'}")
 
-art = ROOT/"experiments"/"member_d"/"exp_002_variant_type"/"artifacts"; art.mkdir(parents=True, exist_ok=True)
+art = ROOT/"experiments"/"iljun"/"exp_002_variant_type"/"artifacts"; art.mkdir(parents=True, exist_ok=True)
 mk.to_csv(art/"gene_class_markers.csv", index=False, encoding="utf-8-sig")
 tab.to_csv(art/"gene_class_marker_counts.csv", encoding="utf-8-sig")
 print(f"\n저장: artifacts/gene_class_markers.csv · gene_class_marker_counts.csv")

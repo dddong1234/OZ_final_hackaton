@@ -2,7 +2,7 @@
 트랙 A — 변이 표기(mutation notation) 활용 피처
 ================================================
 
-Owner : member_d (iljun)
+Owner : iljun
 Track : A
 Spec  : A_v1_variant_type
 기준선: member-d-logreg-001 · Macro F1 0.36305 (유전자 이진화만)

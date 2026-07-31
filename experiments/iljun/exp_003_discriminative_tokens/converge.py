@@ -2,8 +2,8 @@
 수렴 실험 — 검증된 블록을 C=0.07 에서 쌓아 올린다
 =================================================
 
-    .venv/bin/python3 experiments/member_d/exp_003_discriminative_tokens/converge.py
-    .venv/bin/python3 experiments/member_d/exp_003_discriminative_tokens/converge.py --smoke
+    .venv/bin/python3 experiments/iljun/exp_003_discriminative_tokens/converge.py
+    .venv/bin/python3 experiments/iljun/exp_003_discriminative_tokens/converge.py --smoke
 
 ----------------------------------------------------------------------
 목적 (팀 방침: 새 FE 는 멈추고, 된 것들을 조합)

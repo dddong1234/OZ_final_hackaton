@@ -5,10 +5,10 @@
 만든다. 이 파일은 그것과 별개로 **CV · 제출 게이트 · 지문 · 노트북 교차검증**을 담당한다.
 결과는 results/metrics_cv.json 에 쓴다 (팀 metrics.json 을 덮지 않는다).
 
-    python experiments/member_d/exp_002_variant_type/pipeline.py            # 정본(config.yaml)
-    python experiments/member_d/exp_002_variant_type/pipeline.py --smoke    # 30초 배선 점검
-    python experiments/member_d/exp_002_variant_type/pipeline.py --repeat 2 # 결정성 확인
-    python experiments/member_d/exp_002_variant_type/pipeline.py --check-only
+    python experiments/iljun/exp_002_variant_type/pipeline.py            # 정본(config.yaml)
+    python experiments/iljun/exp_002_variant_type/pipeline.py --smoke    # 30초 배선 점검
+    python experiments/iljun/exp_002_variant_type/pipeline.py --repeat 2 # 결정성 확인
+    python experiments/iljun/exp_002_variant_type/pipeline.py --check-only
 
 노트북에서도 같은 함수를 부른다 (두 경로가 갈라지지 않도록):
     from pipeline import cross_validate, run_pipeline
@@ -283,7 +283,7 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
     _log("=" * 72, v)
 
     res = {
-        "experiment": exp_id, "owner": "member_d", "track": "A", "model": name,
+        "experiment": exp_id, "owner": "iljun", "track": "A", "model": name,
         "seed": seed, "validation": validation_spec(n_splits, seed, cv_seeds),
         "model_parameters": mp, "accuracy": acc, "f1_macro": f1,
         "f1_macro_std": std, "accuracy_std": r0["accuracy_std"],
@@ -326,7 +326,7 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
         sub = submission.copy(); sub[TARGET] = pred
 
     if write:
-        out = root / "experiments" / "member_d" / "exp_002_variant_type" / "results"
+        out = root / "experiments" / "iljun" / "exp_002_variant_type" / "results"
         out.mkdir(parents=True, exist_ok=True)
         if sub is not None:
             sp = out / f"submission_f1_{f1:.5f}.csv"
@@ -351,7 +351,7 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
             f"**지문** — pipeline `{fp['pipeline_sha256'][:12]}` · "
             f"features `{fp['features_sha256'][:12]}` · preprocess `{fp['preprocess_sha256'][:12]}`\n\n"
             f"> 상세(비커밋): `metrics_cv.json` · 팀 holdout: `metrics.json` (training.run)\n"
-            f"> 재현: `python3 experiments/member_d/exp_002_variant_type/pipeline.py`\n",
+            f"> 재현: `python3 experiments/iljun/exp_002_variant_type/pipeline.py`\n",
             encoding="utf-8")
         _log(f"[Step 6] results/metrics_cv.json + results/README.md "
              f"(metrics_cv 는 gitignore, README·metrics.json 은 커밋)", v)

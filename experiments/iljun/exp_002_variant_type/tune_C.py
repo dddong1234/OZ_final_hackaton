@@ -2,9 +2,9 @@
 규제 C 세부 탐색 — 팀 공용
 ==========================
 
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/tune_C.py            # 정본 블록
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/tune_C.py --quick    # 5개만 (빠름)
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/tune_C.py --blocks G # 팀 공용 baseline 조건
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/tune_C.py            # 정본 블록
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/tune_C.py --quick    # 5개만 (빠름)
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/tune_C.py --blocks G # 팀 공용 baseline 조건
 
 ----------------------------------------------------------------------
 왜 지금 이걸 하나 — 팀 전체가 C=1.0 으로 돌고 있다
@@ -193,7 +193,7 @@ def main(argv=None) -> int:
 
     # ── 저장 ──────────────────────────────────────────────────────────
     if not a.smoke:
-        art = root / "experiments" / "member_d" / "exp_002_variant_type" / "artifacts"
+        art = root / "experiments" / "iljun" / "exp_002_variant_type" / "artifacts"
         art.mkdir(parents=True, exist_ok=True)
         stem = f"tune_C_{''.join(blocks)}"
         tab.to_csv(art / f"{stem}.csv", index=False, encoding="utf-8-sig")

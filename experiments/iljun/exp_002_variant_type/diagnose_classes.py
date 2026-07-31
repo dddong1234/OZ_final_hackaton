@@ -2,7 +2,7 @@
 클래스별 진단 — 어디가 왜 막혀 있는가
 ======================================
 
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/diagnose_classes.py
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/diagnose_classes.py
 
 ----------------------------------------------------------------------
 왜 만드나
@@ -185,7 +185,7 @@ def main(argv=None) -> int:
     print(mut.head(8).to_string(index=False))
 
     if not a.smoke:
-        art = root / "experiments" / "member_d" / "exp_002_variant_type" / "artifacts"
+        art = root / "experiments" / "iljun" / "exp_002_variant_type" / "artifacts"
         art.mkdir(parents=True, exist_ok=True)
         agg.to_csv(art / "class_diagnosis.csv", encoding="utf-8-sig")
         pdf.to_csv(art / "confusion_pairs.csv", index=False, encoding="utf-8-sig")

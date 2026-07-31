@@ -1,4 +1,4 @@
-"""팀 방식 추론 진입점 — python -m experiments.member_d.exp_002_variant_type.inference
+"""팀 방식 추론 진입점 — python -m experiments.iljun.exp_002_variant_type.inference
 
 저장된 model.joblib 로 test 를 예측해 results/submission.csv 를 만든다.
 """

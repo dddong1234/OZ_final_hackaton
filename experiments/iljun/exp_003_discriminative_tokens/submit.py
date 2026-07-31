@@ -2,7 +2,7 @@
 제출 파일 생성 — GBV C=0.1  및  GBV + freq 토큰 100
 =====================================================
 
-    .venv/bin/python3 experiments/member_d/exp_003_discriminative_tokens/submit.py
+    .venv/bin/python3 experiments/iljun/exp_003_discriminative_tokens/submit.py
 
 두 개를 만든다:
   1) submission_GBV_C0.1_cv0.41202.csv           토큰 없음 (LR-002 앵커와 비교용)
@@ -104,7 +104,7 @@ def main() -> int:
     min_count = cfg["min_count"]
     name, fn = pa.MODELS[cfg["model"]]
 
-    out = root / "experiments" / "member_d" / "results" / "member-d-exp003"
+    out = root / "experiments" / "iljun" / "results" / "member-d-exp003"
     out.mkdir(parents=True, exist_ok=True)
 
     print("=" * 78)

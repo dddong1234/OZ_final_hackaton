@@ -2,7 +2,7 @@
 클래스 편향 보정 — 재학습 없이 확률만 조정한다
 ================================================
 
-    .venv/bin/python3 experiments/member_d/exp_002_variant_type/tune_class_bias.py
+    .venv/bin/python3 experiments/iljun/exp_002_variant_type/tune_class_bias.py
 
 ----------------------------------------------------------------------
 무슨 문제를 푸나
@@ -194,7 +194,7 @@ def main(argv=None) -> int:
     print(f"  나머지    합계 변화 {other['F1변화'].sum():+.4f}")
 
     if not a.smoke:
-        art = root / "experiments" / "member_d" / "exp_002_variant_type" / "artifacts"
+        art = root / "experiments" / "iljun" / "exp_002_variant_type" / "artifacts"
         art.mkdir(parents=True, exist_ok=True)
         grid.to_csv(art / "bias_grid.csv", index=False, encoding="utf-8-sig")
         vdf.to_csv(art / "bias_verification.csv", index=False, encoding="utf-8-sig")
