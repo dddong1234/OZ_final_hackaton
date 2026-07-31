@@ -168,12 +168,25 @@ class MutationFeatureTransformer(TransformerMixin, BaseEstimator):
                 for position, name in enumerate(type_names):
                     output[f"log1p_{name}_count"] = type_matrix[:, position]
 
-            for hotspot in self.hotspot_tokens_:
-                output[f"hotspot__{hotspot}"] = np.fromiter(
+            hotspot_features = {
+                f"hotspot__{hotspot}": np.fromiter(
                     (hotspot in tokens for tokens in token_rows),
                     dtype=np.int8,
                     count=len(token_rows),
                 ).astype(self.dtype)
+                for hotspot in self.hotspot_tokens_
+            }
+            if hotspot_features:
+                output = pd.concat(
+                    [
+                        output,
+                        pd.DataFrame(
+                            hotspot_features,
+                            index=output.index,
+                        ),
+                    ],
+                    axis=1,
+                )
 
         return output
 

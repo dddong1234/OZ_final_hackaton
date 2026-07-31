@@ -25,3 +25,5 @@ hotspot 목록은 각 fold의 train 부분에서만 학습한다.
 
 JupyterLab에서 `experiment.ipynb`를 실행한다. 결과는 `results/`에 저장되며
 커밋하지 않는다.
+
+완료된 LR 3-seed 및 LightGBM 결과는 `EXPERIMENT_SUMMARY.md`에 정리했다.
