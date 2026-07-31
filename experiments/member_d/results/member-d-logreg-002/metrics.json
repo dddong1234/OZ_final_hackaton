@@ -1,0 +1,100 @@
+{
+  "experiment": "member-d-logreg-002",
+  "owner": "member_d",
+  "track": "A",
+  "model": "LogisticRegression(balanced)",
+  "model_key": "logreg",
+  "seed": 42,
+  "validation": "StratifiedKFold-5",
+  "f1_macro": 0.38389,
+  "accuracy": 0.37671,
+  "feature_blocks": "GBVR",
+  "n_features_cv": 4241,
+  "baseline": {
+    "experiment": "member-d-logreg-001",
+    "f1_macro": 0.36305,
+    "accuracy": 0.36026
+  },
+  "delta_vs_baseline": 0.02084,
+  "verdict": "[+] 향상",
+  "cv_runs": [
+    {
+      "f1_macro": 0.38389,
+      "accuracy": 0.37671
+    },
+    {
+      "f1_macro": 0.38389,
+      "accuracy": 0.37671
+    }
+  ],
+  "deterministic": true,
+  "leakage_checks": [
+    {
+      "check": "부분집합 불변성 (앞 100행 == 전체의 앞 100행)",
+      "passed": true
+    },
+    {
+      "check": "단일 행 독립성 (한 행만 넣어도 같은 값)",
+      "passed": true
+    },
+    {
+      "check": "spec 은 train 만으로 유도 · 재현 가능",
+      "passed": true
+    },
+    {
+      "check": "NaN·inf 없음",
+      "passed": true
+    },
+    {
+      "check": "test 결측을 fillna 로 처리",
+      "passed": true
+    }
+  ],
+  "submission_gate": {
+    "enabled": true,
+    "passed": true,
+    "threshold": 0.363,
+    "file": "submission_f1_0.38389.csv"
+  },
+  "fingerprint": {
+    "pipeline": "pipelines/pipeline_A_v1.py@A_v1",
+    "pipeline_sha256": "36714fe681b0ab0ee377a3bd2c0be2861ebb5b0980e7fea288ab0b152630b001",
+    "features": "features/features_A.py@A_v1_variant_type",
+    "features_sha256": "d164d6e17c32a480c917810793ec5f4568c9a98271a1674bd1be40d213a651c5"
+  },
+  "environment": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "sklearn": "1.9.0"
+  },
+  "smoke": false,
+  "n_features": 4245,
+  "submission_checks": [
+    {
+      "check": "행 수 일치",
+      "passed": true
+    },
+    {
+      "check": "컬럼 [ID, SUBCLASS]",
+      "passed": true
+    },
+    {
+      "check": "ID 순서 일치",
+      "passed": true
+    },
+    {
+      "check": "결측 없음",
+      "passed": true
+    },
+    {
+      "check": "train 클래스 안",
+      "passed": true
+    },
+    {
+      "check": "한 클래스 쏠림 없음",
+      "passed": true
+    }
+  ]
+}

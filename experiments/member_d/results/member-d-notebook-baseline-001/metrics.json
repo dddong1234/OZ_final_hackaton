@@ -1,0 +1,10 @@
+{
+  "experiment": "member-d-notebook-baseline-001",
+  "owner": "member_d",
+  "model": "LogisticRegression",
+  "seed": 42,
+  "validation": "StratifiedHoldout(test_size=0.25)",
+  "accuracy": 0.3236621534493875,
+  "f1_macro": 0.28369926724724487,
+  "description": "WT binary notebook baseline"
+}

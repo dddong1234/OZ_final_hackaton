@@ -1,0 +1,93 @@
+{
+  "blocks": "GBV",
+  "model": "logreg",
+  "model_parameters": {
+    "solver": "lbfgs",
+    "C": 0.1,
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42,
+      52,
+      62
+    ],
+    "model_seed": 42
+  },
+  "groups": {
+    "KIDNEY": [
+      "KIPAN",
+      "KIRC"
+    ],
+    "BRAIN": [
+      "GBMLGG",
+      "LGG"
+    ]
+  },
+  "flat": {
+    "f1_macro": 0.41202,
+    "f1_macro_std": 0.00345,
+    "per_seed": {
+      "42": 0.41482,
+      "52": 0.41307,
+      "62": 0.40816
+    }
+  },
+  "hierarchical": {
+    "f1_macro": 0.40657,
+    "f1_macro_std": 0.00278,
+    "per_seed": {
+      "42": 0.40757,
+      "52": 0.40871,
+      "62": 0.40342
+    }
+  },
+  "oracle": {
+    "f1_macro": 0.47665,
+    "f1_macro_std": 0.00281,
+    "per_seed": {
+      "42": 0.47741,
+      "52": 0.479,
+      "62": 0.47354
+    },
+    "note": "2단계가 완벽하다고 가정한 상한. 실제는 이보다 낮다."
+  },
+  "stage1_24way_f1": {
+    "42": 0.45317,
+    "52": 0.45484,
+    "62": 0.44907
+  },
+  "stage2_standalone": [
+    {
+      "그룹": "BRAIN",
+      "정확도": 0.6,
+      "다수클래스": 0.6681,
+      "MacroF1": 0.5872,
+      "다수클래스 대비": -0.0681
+    },
+    {
+      "그룹": "KIDNEY",
+      "정확도": 0.3545,
+      "다수클래스": 0.6066,
+      "MacroF1": 0.3368,
+      "다수클래스 대비": -0.2521
+    }
+  ],
+  "paired_delta": {
+    "mean": -0.00545,
+    "std": 0.00157,
+    "positive_seeds": "0/3"
+  },
+  "detected": false,
+  "fingerprint": {
+    "pipeline": "pipeline.py@exp002_v3",
+    "pipeline_sha256": "8e8661ea4e6584209ff92a3951896e91d6282f6de816fdea9451038331ca8cae",
+    "features": "features_A.py@A_v2_raw_variants",
+    "features_sha256": "bc9a249ad3af41693a2233acc632e8719f7a809ab6fcb2358e75d75225af7ce9",
+    "preprocess_sha256": "2fa768957eeb81b35635ce286a7a9f09cca9a9670acf844853ebf80eb521aed7"
+  }
+}

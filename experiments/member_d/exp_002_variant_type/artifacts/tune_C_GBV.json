@@ -1,0 +1,313 @@
+{
+  "blocks": "GBV",
+  "features_version": "A_v2_raw_variants",
+  "fixed_params": {
+    "solver": "lbfgs",
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "C_grid": [
+    0.01,
+    0.02,
+    0.03,
+    0.05,
+    0.07,
+    0.1,
+    0.15,
+    0.2,
+    0.3,
+    0.5,
+    1.0
+  ],
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42,
+      52,
+      62
+    ],
+    "model_seed": 42
+  },
+  "results": {
+    "0.01": {
+      "f1_macro": 0.36731,
+      "f1_macro_std": 0.00363,
+      "accuracy": 0.3644,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.3632,
+          "accuracy": 0.36139
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.36867,
+          "accuracy": 0.36446
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37006,
+          "accuracy": 0.36736
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.02": {
+      "f1_macro": 0.39182,
+      "f1_macro_std": 0.00301,
+      "accuracy": 0.38263,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.38835,
+          "accuracy": 0.37978
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.39354,
+          "accuracy": 0.38333
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.39358,
+          "accuracy": 0.38478
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.03": {
+      "f1_macro": 0.40354,
+      "f1_macro_std": 0.0019,
+      "accuracy": 0.39413,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.40159,
+          "accuracy": 0.39284
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.40364,
+          "accuracy": 0.39413
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.40539,
+          "accuracy": 0.39542
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.05": {
+      "f1_macro": 0.41088,
+      "f1_macro_std": 0.00146,
+      "accuracy": 0.40182,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.40927,
+          "accuracy": 0.39961
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.41123,
+          "accuracy": 0.403
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.41213,
+          "accuracy": 0.40284
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.07": {
+      "f1_macro": 0.41274,
+      "f1_macro_std": 0.00057,
+      "accuracy": 0.40316,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.41225,
+          "accuracy": 0.40187
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.41336,
+          "accuracy": 0.4051
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.4126,
+          "accuracy": 0.40252
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.1": {
+      "f1_macro": 0.41202,
+      "f1_macro_std": 0.00345,
+      "accuracy": 0.40235,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.41482,
+          "accuracy": 0.40348
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.41307,
+          "accuracy": 0.40493
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.40816,
+          "accuracy": 0.39865
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.15": {
+      "f1_macro": 0.40912,
+      "f1_macro_std": 0.00401,
+      "accuracy": 0.39988,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.41362,
+          "accuracy": 0.40284
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.40592,
+          "accuracy": 0.398
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.40783,
+          "accuracy": 0.39881
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.2": {
+      "f1_macro": 0.40583,
+      "f1_macro_std": 0.00387,
+      "accuracy": 0.39612,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.4093,
+          "accuracy": 0.39929
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.40166,
+          "accuracy": 0.393
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.40654,
+          "accuracy": 0.39607
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.3": {
+      "f1_macro": 0.4022,
+      "f1_macro_std": 0.00305,
+      "accuracy": 0.39166,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.40526,
+          "accuracy": 0.39381
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.39916,
+          "accuracy": 0.38849
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.40218,
+          "accuracy": 0.39268
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "0.5": {
+      "f1_macro": 0.39207,
+      "f1_macro_std": 0.0048,
+      "accuracy": 0.38408,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.39721,
+          "accuracy": 0.38849
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.38769,
+          "accuracy": 0.38187
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.39132,
+          "accuracy": 0.38187
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "1.0": {
+      "f1_macro": 0.37713,
+      "f1_macro_std": 0.00512,
+      "accuracy": 0.37134,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.38218,
+          "accuracy": 0.37558
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.37195,
+          "accuracy": 0.36752
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37727,
+          "accuracy": 0.37091
+        }
+      ],
+      "nonconvergence": "0/15"
+    }
+  },
+  "best_C": 0.07,
+  "flat_region": [
+    0.07
+  ],
+  "recommended_C": 0.07,
+  "anchor_C": 0.1,
+  "note": "후보 중 최댓값 선택이므로 낙관 편향이 있다. σ 안에서는 구간 중앙을 권장.",
+  "fingerprint": {
+    "pipeline": "pipeline.py@exp002_v3",
+    "pipeline_sha256": "8e8661ea4e6584209ff92a3951896e91d6282f6de816fdea9451038331ca8cae",
+    "features": "features_A.py@A_v2_raw_variants",
+    "features_sha256": "bc9a249ad3af41693a2233acc632e8719f7a809ab6fcb2358e75d75225af7ce9",
+    "preprocess_sha256": "2fa768957eeb81b35635ce286a7a9f09cca9a9670acf844853ebf80eb521aed7"
+  }
+}
