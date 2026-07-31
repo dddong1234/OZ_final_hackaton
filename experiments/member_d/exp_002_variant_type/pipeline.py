@@ -42,7 +42,7 @@ if str(_HERE) not in sys.path:
 import features_A as fa                                          # noqa: E402
 from features_A import build_features, fit_spec, parse_sample_counts, spec_to_json  # noqa: E402
 
-PIPELINE_VERSION = "exp002_v2"
+PIPELINE_VERSION = "exp002_v3"
 TARGET, ID = "SUBCLASS", "ID"
 
 # 팀 common/preprocessing_benchmark.py 와 동일한 다중 seed 프로토콜.
@@ -223,7 +223,8 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
     dec = p["decimals"]
     gate = p["submit_gate"] if submit_gate is None else submit_gate
     ref = p["baseline"]
-    mp = DEFAULT_MODEL_PARAMS[model]
+    # 모델 파라미터는 config.yaml 이 정본. 없으면 DEFAULT 로 떨어진다.
+    mp = dict(p.get("model_params") or DEFAULT_MODEL_PARAMS[model])
     bt = tuple(blocks)
     name, fn = MODELS[model]
     exp_id = cfg["experiment"]["id"]
@@ -232,6 +233,7 @@ def run_pipeline(root=None, blocks=None, model=None, repeat=1, smoke=False,
     _log(f"  {exp_id} · pipeline {PIPELINE_VERSION} · features_A {fa.__version__}", v)
     _log(f"  피처 {blocks} · {name} · model_seed {seed} · "
          f"StratifiedKFold-{n_splits} · cv_seeds {list(cv_seeds)}", v)
+    _log(f"  model_params {mp}", v)
     _log(f"  기준선 {ref['experiment']} = {ref['f1_macro']:.5f} (판정 {round(ref['f1_macro'], dec)})", v)
     _log("=" * 72, v)
 

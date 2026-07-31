@@ -12,8 +12,25 @@ model:
 # common.experiment 은 baseline.yaml 의 validation(holdout 0.25) 을 쓴다.
 # 아래 pipeline 섹션은 내 pipeline.py 전용 — common.experiment 는 무시한다.
 pipeline:
-  blocks: GBVR          # G 유전자 / B 부담 / V 유형카운트 / R 유형비율
+  # G 유전자이진 / B 부담3 / V 유형카운트6 / R 유형비율6 / N 유전자수1 / b·v = raw
+  #
+  # R 을 뺐다. 2026-07-31 측정에서 V→R 증분이 +0.00061 (3 seed 중 2개만 양수)로
+  # 검출되지 않았다. GBVR 0.41263 vs GBV 0.41202 — 차이가 σ(0.0035) 안에 있다.
+  # 6차원을 더 쓸 근거가 없다. 되돌리려면 --blocks GBVR.
+  blocks: GBV
   model: logreg         # logreg | svm | sgd
+
+  # 2026-07-31 — SDH exp_002 에서 확인된 C=0.1 을 반영.
+  # C 하나로 모든 블록에서 +0.035~+0.044 (3/3 seed). 6,201행 × 4,384 피처의
+  # 고차원 희소 데이터라 규제가 지배적이다. 부수적으로 seed 편차도 줄었다
+  # (G 의 σ 0.00656 → 0.00206).
+  # ⚠ C 는 1.0 과 0.1 두 값만 봤다. 0.1 이 최적이라는 근거는 없다.
+  #    세부 탐색은 전처리 확정 후 (SDH 문서 §8: [0.03 0.05 0.07 0.1 0.15 0.2 0.3]).
+  model_params:
+    solver: lbfgs
+    C: 0.1
+    max_iter: 2000
+    class_weight: balanced
   cv:
     method: StratifiedKFold
     n_splits: 5
@@ -22,9 +39,22 @@ pipeline:
     # 모델 random_state 는 고정한다. 그래야 팀 3-seed 값과 같은 잣대로 비교된다.
     seeds: [42, 52, 62]
     model_seed: 42
+  # 비교 기준을 팀 공용 벤치마크로 바꿨다.
+  # SDH 【전처리 검증 및 제출 전략】: "이후 전처리의 안정적인 비교 기준은
+  # Logistic Regression 3-seed 평균 0.33738 ± 0.00625 로 사용한다"
+  #
+  # 이전 기준 member-d-logreg-001 (0.36305) 은 seed 42 단일 측정이라
+  # 멀티시드 평균과 직접 비교하면 공정하지 않다. 기록은 아래 previous 에 남긴다.
   baseline:
-    experiment: member-d-logreg-001
-    f1_macro: 0.36305
-    accuracy: 0.36026
+    experiment: sdh-exp-002-baseline
+    f1_macro: 0.33738
+    accuracy: 0.33640
+    f1_macro_std: 0.00625
+    note: "3-seed(42/52/62) 평균. 팀 공용 전처리 벤치마크"
+    previous:
+      experiment: member-d-logreg-001
+      f1_macro: 0.36305
+      accuracy: 0.36026
+      note: "seed 42 단일 · C=1.0. 소급 변경하지 않음 (GIT_STRATEGY §9.1)"
   decimals: 3           # 판정 자릿수 (협업 규정 2)
   submit_gate: true

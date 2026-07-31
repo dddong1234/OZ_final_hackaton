@@ -1,0 +1,358 @@
+{
+  "features_version": "A_v2_raw_variants",
+  "features_sha256": "bc9a249ad3af41693a2233acc632e8719f7a809ab6fcb2358e75d75225af7ce9",
+  "fixed_params": {
+    "solver": "lbfgs",
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "C_values": [
+    1.0,
+    0.1
+  ],
+  "cv_seeds": [
+    42,
+    52,
+    62
+  ],
+  "model_seed": 42,
+  "n_splits": 5,
+  "results": {
+    "G@C1.0": {
+      "f1_macro": 0.33717,
+      "f1_macro_std": 0.00656,
+      "accuracy": 0.33618,
+      "dim": 4226,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.34469,
+          "accuracy": 0.34317
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.3326,
+          "accuracy": 0.3314
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.33422,
+          "accuracy": 0.33398
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "G@C0.1": {
+      "f1_macro": 0.38145,
+      "f1_macro_std": 0.00206,
+      "accuracy": 0.37268,
+      "dim": 4226,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.383,
+          "accuracy": 0.37558
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.38224,
+          "accuracy": 0.37284
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37912,
+          "accuracy": 0.36962
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "GN@C1.0": {
+      "f1_macro": 0.3569,
+      "f1_macro_std": 0.00543,
+      "accuracy": 0.35553,
+      "dim": 4227,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.36305,
+          "accuracy": 0.36026
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.35278,
+          "accuracy": 0.35301
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.35486,
+          "accuracy": 0.35333
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "GN@C0.1": {
+      "f1_macro": 0.39888,
+      "f1_macro_std": 0.0024,
+      "accuracy": 0.38967,
+      "dim": 4227,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.39626,
+          "accuracy": 0.388
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.39941,
+          "accuracy": 0.39074
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.40098,
+          "accuracy": 0.39026
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "GB@C1.0": {
+      "f1_macro": 0.36325,
+      "f1_macro_std": 0.01036,
+      "accuracy": 0.35806,
+      "dim": 4229,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.37429,
+          "accuracy": 0.36365
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.35374,
+          "accuracy": 0.35285
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.36173,
+          "accuracy": 0.35768
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "GB@C0.1": {
+      "f1_macro": 0.40344,
+      "f1_macro_std": 0.0022,
+      "accuracy": 0.39193,
+      "dim": 4229,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.40132,
+          "accuracy": 0.39042
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.40572,
+          "accuracy": 0.39365
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.40329,
+          "accuracy": 0.39171
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "GBV@C1.0": {
+      "f1_macro": 0.37713,
+      "f1_macro_std": 0.00512,
+      "accuracy": 0.37134,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.38218,
+          "accuracy": 0.37558
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.37195,
+          "accuracy": 0.36752
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37727,
+          "accuracy": 0.37091
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "GBV@C0.1": {
+      "f1_macro": 0.41202,
+      "f1_macro_std": 0.00345,
+      "accuracy": 0.40235,
+      "dim": 4235,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.41482,
+          "accuracy": 0.40348
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.41307,
+          "accuracy": 0.40493
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.40816,
+          "accuracy": 0.39865
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "GBVR@C1.0": {
+      "f1_macro": 0.37806,
+      "f1_macro_std": 0.00555,
+      "accuracy": 0.37252,
+      "dim": 4241,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.38389,
+          "accuracy": 0.37671
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.37283,
+          "accuracy": 0.36849
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.37746,
+          "accuracy": 0.37236
+        }
+      ],
+      "nonconvergence": "0/15"
+    },
+    "GBVR@C0.1": {
+      "f1_macro": 0.41263,
+      "f1_macro_std": 0.00363,
+      "accuracy": 0.40327,
+      "dim": 4241,
+      "per_seed": [
+        {
+          "cv_seed": 42,
+          "f1_macro": 0.41407,
+          "accuracy": 0.40364
+        },
+        {
+          "cv_seed": 52,
+          "f1_macro": 0.41531,
+          "accuracy": 0.40687
+        },
+        {
+          "cv_seed": 62,
+          "f1_macro": 0.4085,
+          "accuracy": 0.39929
+        }
+      ],
+      "nonconvergence": "0/15"
+    }
+  },
+  "C_effect": [
+    {
+      "블록": "G",
+      "평균 차이": 0.04428,
+      "차이 σ": 0.00569,
+      "양수 seed": "3/3"
+    },
+    {
+      "블록": "GN",
+      "평균 차이": 0.04199,
+      "차이 σ": 0.00761,
+      "양수 seed": "3/3"
+    },
+    {
+      "블록": "GB",
+      "평균 차이": 0.04019,
+      "차이 σ": 0.01253,
+      "양수 seed": "3/3"
+    },
+    {
+      "블록": "GBV",
+      "평균 차이": 0.03488,
+      "차이 σ": 0.00547,
+      "양수 seed": "3/3"
+    },
+    {
+      "블록": "GBVR",
+      "평균 차이": 0.03457,
+      "차이 σ": 0.00687,
+      "양수 seed": "3/3"
+    }
+  ],
+  "feature_effect": [
+    {
+      "C": 1.0,
+      "블록": "GN",
+      "평균 증분": 0.01973,
+      "증분 σ": 0.00121,
+      "양수 seed": "3/3"
+    },
+    {
+      "C": 1.0,
+      "블록": "GB",
+      "평균 증분": 0.02608,
+      "증분 σ": 0.00441,
+      "양수 seed": "3/3"
+    },
+    {
+      "C": 1.0,
+      "블록": "GBV",
+      "평균 증분": 0.03996,
+      "증분 σ": 0.00283,
+      "양수 seed": "3/3"
+    },
+    {
+      "C": 1.0,
+      "블록": "GBVR",
+      "평균 증분": 0.04089,
+      "증분 σ": 0.0021,
+      "양수 seed": "3/3"
+    },
+    {
+      "C": 0.1,
+      "블록": "GN",
+      "평균 증분": 0.01743,
+      "증분 σ": 0.00431,
+      "양수 seed": "3/3"
+    },
+    {
+      "C": 0.1,
+      "블록": "GB",
+      "평균 증분": 0.02199,
+      "증분 σ": 0.0032,
+      "양수 seed": "3/3"
+    },
+    {
+      "C": 0.1,
+      "블록": "GBV",
+      "평균 증분": 0.03056,
+      "증분 σ": 0.00141,
+      "양수 seed": "3/3"
+    },
+    {
+      "C": 0.1,
+      "블록": "GBVR",
+      "평균 증분": 0.03117,
+      "증분 σ": 0.00185,
+      "양수 seed": "3/3"
+    }
+  ],
+  "sdh_reference_seed42": {
+    "G@C1.0": 0.344525,
+    "G@C0.1": 0.383,
+    "GN@C0.1": 0.396571
+  },
+  "note": "SDH exp_002 의 C=0.1 발견을 내 블록에 적용. max_iter=2000 고정, C 만 변수."
+}

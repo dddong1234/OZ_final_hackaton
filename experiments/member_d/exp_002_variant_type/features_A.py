@@ -218,6 +218,12 @@ def build_features(df: pd.DataFrame, counts: pd.DataFrame, spec: dict,
         parts.append(sparse.csr_matrix(b.astype(np.float32)))
         names += ["A_burden__log_genes", "A_burden__log_events", "A_burden__log_multi"]
 
+    if "N" in blocks:                                    # 부담 · 변이 유전자 수 1개만
+        # SDH exp_002 의 lr_burden 과 같은 정의. 재현 대조용으로 둔다.
+        n = np.log1p(counts[["n_mut_genes"]].values)
+        parts.append(sparse.csr_matrix(n.astype(np.float32)))
+        names += ["A_burden__log_genes_only"]
+
     if "b" in blocks:                                    # 부담 · raw (대조용)
         b = counts[BURDEN].values
         parts.append(sparse.csr_matrix(b.astype(np.float32)))
