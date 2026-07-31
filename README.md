@@ -234,7 +234,7 @@ python -m ipykernel install --user \
 
 ```text
 experiments/
-├─ member_a/notebooks/00_quick_start.ipynb
+├─ SDH/notebooks/00_quick_start.ipynb
 ├─ member_b/notebooks/00_quick_start.ipynb
 ├─ member_c/notebooks/00_quick_start.ipynb
 └─ member_d/notebooks/00_quick_start.ipynb
@@ -265,10 +265,10 @@ Quick Start 노트북은 다음 작업을 수행합니다.
 → submission과 모델 저장
 ```
 
-팀원 A의 결과는 다음 위치에 저장됩니다.
+SDH의 결과는 다음 위치에 저장됩니다.
 
 ```text
-experiments/member_a/results/member-a-notebook-baseline-001/
+experiments/SDH/results/sdh-notebook-baseline-001/
 ├─ metrics.json
 ├─ model.joblib
 └─ submission.csv
@@ -289,7 +289,7 @@ experiments/member_a/results/member-a-notebook-baseline-001/
 개인 노트북 구조는 자유입니다. 다음은 권장 예시일 뿐입니다.
 
 ```text
-experiments/member_a/notebooks/
+experiments/SDH/notebooks/
 ├─ 00_quick_start.ipynb
 ├─ 01_eda.ipynb
 ├─ 02_preprocessing.ipynb
@@ -314,8 +314,8 @@ Markdown 셀 예시:
 ```markdown
 # XGBoost mutation count
 
-- Owner: member_a
-- Experiment ID: member-a-xgb-003
+- Owner: SDH
+- Experiment ID: sdh-xgb-003
 - Seed: 42
 - Validation: StratifiedKFold 5
 - 목적: 변이 개수 피처가 Macro F1에 미치는 영향 확인
@@ -324,8 +324,8 @@ Markdown 셀 예시:
 코드 셀에도 같은 설정을 변수로 둡니다.
 
 ```python
-MEMBER = "member_a"
-EXPERIMENT_ID = "member-a-xgb-003"
+MEMBER = "SDH"
+EXPERIMENT_ID = "sdh-xgb-003"
 SEED = 42
 ```
 
@@ -339,7 +339,7 @@ SEED = 42
 일관되게 사용할 수 있는 짧은 이름을 사용합니다. 개인 폴더 안의 실험 폴더명은
 `exp_003_xgboost`처럼 작성하고, 가능하면 전역 실험 ID와 같은 번호를 사용합니다.
 
-이미 공유된 `member-a-xgb-003` 같은 ID는 기존 기록과 링크를 유지하기 위해 그대로
+이미 공유된 이전 형식의 ID는 기존 기록과 링크를 유지하기 위해 그대로
 둘 수 있습니다.
 
 ---
@@ -679,7 +679,7 @@ Macro F1
 
 ```csv
 experiment,owner,model,seed,validation,accuracy,f1_macro,description
-member-a-xgb-003,member_a,XGBoost,42,StratifiedKFold-5,0.42,0.38,WT binary
+sdh-xgb-003,SDH,XGBoost,42,StratifiedKFold-5,0.42,0.38,WT binary
 ```
 
 ### 사후 확률 앙상블에 참여
@@ -728,13 +728,13 @@ PyTorch/TensorFlow도 자신의 폴더에서 자유롭게 사용할 수 있습�
 간단한 실험은 하나의 노트북에서 진행할 수 있습니다.
 
 ```text
-experiments/member_a/notebooks/10_pytorch_mlp.ipynb
+experiments/SDH/notebooks/10_pytorch_mlp.ipynb
 ```
 
 코드가 길어지면 노트북과 Python 파일을 분리합니다.
 
 ```text
-experiments/member_a/dl_mlp_001/
+experiments/SDH/dl_mlp_001/
 ├─ experiment.ipynb
 ├─ dataset.py
 ├─ model.py
@@ -764,22 +764,22 @@ PyTorch/TensorFlow는 CUDA 환경에 따라 설치 방식이 다르므로 공통
 EDA:
 
 ```bash
-python -m experiments.member_a.notebooks.run_eda
+python -m experiments.SDH.notebooks.run_eda
 ```
 
 학습·검증·테스트 예측:
 
 ```bash
-python -m experiments.member_a.exp_001_baseline.training.run
+python -m experiments.SDH.exp_001_EDA.training.run
 ```
 
 저장 모델 추론:
 
 ```bash
-python -m experiments.member_a.exp_001_baseline.inference
+python -m experiments.SDH.exp_001_EDA.inference
 ```
 
-팀원 B~D는 `member_a`를 자신의 폴더명으로 바꿉니다.
+다른 팀원은 예시의 `SDH`를 자신의 폴더명으로 바꿉니다.
 
 CLI 베이스라인은 참고용이며 개인 노트북에 이 구조를 강제하지 않습니다.
 
@@ -813,7 +813,7 @@ Edit
 jupyter nbconvert \
   --clear-output \
   --inplace \
-  experiments/member_a/notebooks/내노트북.ipynb
+  experiments/SDH/notebooks/내노트북.ipynb
 ```
 
 Quick Start 노트북도 commit 시에는 출력이 없는 상태를 유지합니다.
@@ -827,13 +827,13 @@ Quick Start 노트북도 commit 시에는 출력이 없는 상태를 유지합�
 ```bash
 git switch main
 git pull
-git switch -c member-a/exp-xgboost
+git switch -c sdh/exp-xgboost
 ```
 
 브랜치 예시:
 
 ```text
-member-a/exp-xgboost
+sdh/exp-xgboost
 member-b/eda-target
 member-c/fix-preprocessing
 ```
@@ -850,12 +850,12 @@ submission과 확률 파일은 표시되지 않아야 합니다.
 ### commit과 push
 
 ```bash
-git add experiments/member_a
-git commit -m "exp(member-a): add xgboost notebook"
-git push -u origin member-a/exp-xgboost
+git add experiments/SDH
+git commit -m "exp(sdh): add xgboost notebook"
+git push -u origin sdh/exp-xgboost
 ```
 
-`member_a`는 자신의 폴더명으로 바꿉니다.
+`SDH`는 자신의 폴더명으로 바꿉니다.
 
 공용 파일을 변경했다면 PR 설명에 이유를 적습니다.
 
