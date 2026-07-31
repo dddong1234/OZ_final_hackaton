@@ -1,0 +1,96 @@
+{
+  "experiment": "sdh-exp-002-baseline",
+  "owner": "sdh",
+  "preprocessing": "WT/variant binary",
+  "model": "lightgbm",
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42
+    ]
+  },
+  "model_parameters": {
+    "objective": "multiclass",
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "class_weight": "balanced",
+    "random_state": 42,
+    "n_jobs": -1,
+    "verbosity": -1,
+    "deterministic": true,
+    "force_col_wise": true
+  },
+  "primary_metric": "oof_f1_macro",
+  "oof_f1_macro_mean": 0.2905810385767637,
+  "oof_f1_macro_std": null,
+  "oof_accuracy_mean": 0.3046282857603612,
+  "oof_accuracy_std": null,
+  "fold_f1_macro_mean": 0.28907518795836984,
+  "fold_f1_macro_std": 0.010428032213249304,
+  "fold_accuracy_mean": 0.3046266018559434,
+  "fold_accuracy_std": 0.006608003769999225,
+  "elapsed_seconds": 135.43865865499902,
+  "per_seed": [
+    {
+      "cv_seed": 42,
+      "oof_accuracy": 0.3046282857603612,
+      "oof_f1_macro": 0.2905810385767637,
+      "elapsed_seconds": 135.43522860899975
+    }
+  ],
+  "per_fold": [
+    {
+      "cv_seed": 42,
+      "fold": 0,
+      "train_rows": 4960,
+      "valid_rows": 1241,
+      "feature_count": 4384,
+      "accuracy": 0.3150684931506849,
+      "f1_macro": 0.2983554378991528,
+      "elapsed_seconds": 30.750226771000598
+    },
+    {
+      "cv_seed": 42,
+      "fold": 1,
+      "train_rows": 4961,
+      "valid_rows": 1240,
+      "feature_count": 4384,
+      "accuracy": 0.29758064516129035,
+      "f1_macro": 0.28379942948632775,
+      "elapsed_seconds": 31.61391206299959
+    },
+    {
+      "cv_seed": 42,
+      "fold": 2,
+      "train_rows": 4961,
+      "valid_rows": 1240,
+      "feature_count": 4384,
+      "accuracy": 0.3056451612903226,
+      "f1_macro": 0.3021159707382217,
+      "elapsed_seconds": 23.238332254999477
+    },
+    {
+      "cv_seed": 42,
+      "fold": 3,
+      "train_rows": 4961,
+      "valid_rows": 1240,
+      "feature_count": 4384,
+      "accuracy": 0.3008064516129032,
+      "f1_macro": 0.2822386786950882,
+      "elapsed_seconds": 27.806392316999336
+    },
+    {
+      "cv_seed": 42,
+      "fold": 4,
+      "train_rows": 4961,
+      "valid_rows": 1240,
+      "feature_count": 4384,
+      "accuracy": 0.3040322580645161,
+      "f1_macro": 0.2788664229730586,
+      "elapsed_seconds": 21.74765607900008
+    }
+  ]
+}
