@@ -36,3 +36,11 @@ hotspot, recurrent missense, retained gene, truncating gene 목록은 모두 각
 `experiment.ipynb`를 위에서부터 한 셀씩 실행한다. 각 case가 별도 셀이라 중간
 결과를 확인하거나 특정 case만 다시 실행할 수 있다. 전체 실행을 감싼 `run()`
 래퍼는 두지 않았다.
+
+## 결과
+
+3-seed 확인에서 functional full 조합이 OOF Macro F1
+`0.43189 ± 0.00325`로 reference의 `0.41113 ± 0.00134`보다 `+0.02076`
+높았다. truncating-only 조합도 `0.42896 ± 0.00295`로 강한 개선을 보였다.
+
+상세 결과와 해석은 [EXPERIMENT_SUMMARY.md](EXPERIMENT_SUMMARY.md)에 기록했다.
