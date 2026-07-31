@@ -84,7 +84,27 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
-__version__ = "A_v1_variant_type"
+__version__ = "A_v2_raw_variants"
+
+# ----------------------------------------------------------------------
+# v2 변경점 — 스케일 대조용 블록 추가 (2026-07-31)
+# ----------------------------------------------------------------------
+# 경수님 【EDA 및 전처리 실험】은 sample statistics · mutation type count 가
+# baseline 대비 "큰 폭 하락"이라고 보고했고, 우리 측정은 같은 계열에서 3/3 seed
+# 상승이었다. 두 사람 baseline 이 0.34469 로 5자리까지 같으므로 데이터·프로토콜
+# 차이는 배제되고, 남는 것은 구현 차이다.
+#
+# 가장 의심스러운 지점이 스케일 처리다. 이 구현은 집계에 log1p 를 씌운다.
+# TMB 는 중앙값 14 · 최대 2393 이라 raw 로 넣으면 0/1 이진 열 4,226개 사이에서
+# 스케일이 100배 이상 벌어지고, 정규화 없는 LogisticRegression 은 여기 민감하다.
+#
+# 그래서 **소문자 블록 = raw(로그 없음)** 을 추가했다.
+#   B / b  변이 부담   log1p / raw
+#   V / v  유형 카운트 log1p / raw
+#
+# 기존 G·B·V·R 의 동작은 바뀌지 않았다. 추가만 했다. 따라서 exp_002 의 기록된
+# 점수는 그대로 재현된다. 다만 이 파일의 SHA256 은 바뀌므로, 기록된 지문과
+# 대조하려면 커밋 b7b57fe 의 버전을 봐야 한다.
 
 # ----------------------------------------------------------------------
 # 파서
@@ -193,15 +213,25 @@ def build_features(df: pd.DataFrame, counts: pd.DataFrame, spec: dict,
         parts.append(sparse.csr_matrix(m.astype(np.float32)))
         names += [f"A_gene__{gene_cols[i]}" for i in keep]
 
-    if "B" in blocks:
+    if "B" in blocks:                                    # 부담 · log1p
         b = np.log1p(counts[BURDEN].values)
         parts.append(sparse.csr_matrix(b.astype(np.float32)))
         names += ["A_burden__log_genes", "A_burden__log_events", "A_burden__log_multi"]
 
-    if "V" in blocks:
+    if "b" in blocks:                                    # 부담 · raw (대조용)
+        b = counts[BURDEN].values
+        parts.append(sparse.csr_matrix(b.astype(np.float32)))
+        names += ["A_burdenraw__genes", "A_burdenraw__events", "A_burdenraw__multi"]
+
+    if "V" in blocks:                                    # 유형 카운트 · log1p
         v = np.log1p(counts[KINDS].values)
         parts.append(sparse.csr_matrix(v.astype(np.float32)))
         names += [f"A_vcount__{k}" for k in KINDS]
+
+    if "v" in blocks:                                    # 유형 카운트 · raw (대조용)
+        v = counts[KINDS].values
+        parts.append(sparse.csr_matrix(v.astype(np.float32)))
+        names += [f"A_vcountraw__{k}" for k in KINDS]
 
     if "R" in blocks:
         vals = counts[KINDS].values
