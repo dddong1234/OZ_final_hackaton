@@ -1,0 +1,35 @@
+{
+  "experiment": "moon-exp-006-train-only-eda",
+  "owner": "moon",
+  "data_scope": "train.csv only; test.csv was not opened",
+  "validation": "StratifiedKFold(n_splits=5, shuffle=True, random_state=42)",
+  "model": {
+    "name": "LogisticRegression",
+    "solver": "lbfgs",
+    "max_iter": 1000,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "primary_metric": "OOF Macro F1",
+  "results": [
+    {
+      "candidate": "wt_binary",
+      "oof_accuracy": 0.34284792775358813,
+      "oof_f1_macro": 0.3445248135869751,
+      "delta_vs_wt_binary_oof": 0.0
+    },
+    {
+      "candidate": "gene_burden",
+      "oof_accuracy": 0.3876794065473311,
+      "oof_f1_macro": 0.382890237880688,
+      "delta_vs_wt_binary_oof": 0.03836542429371287
+    },
+    {
+      "candidate": "functional_recurrent",
+      "oof_accuracy": 0.4052572165779713,
+      "oof_f1_macro": 0.4081254025843777,
+      "delta_vs_wt_binary_oof": 0.06360058899740256
+    }
+  ],
+  "note": "Some fixed-LR fits reached max_iter=1000; use this as a feature ablation result and revalidate under a separately specified model-tuning experiment."
+}

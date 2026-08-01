@@ -1,0 +1,28 @@
+experiment_id: moon-exp-006-train-only-eda
+owner: moon
+
+data:
+  train_path: data/raw/train.csv
+  id_column: ID
+  target_column: SUBCLASS
+  # Test data is intentionally not read by EDA or cross-validation.
+
+validation:
+  method: StratifiedKFold
+  n_splits: 5
+  shuffle: true
+  random_state: 42
+
+model:
+  name: LogisticRegression
+  solver: lbfgs
+  max_iter: 1000
+  class_weight: balanced
+  random_state: 42
+
+features:
+  recurrent_missense_min_count: 5
+  candidates:
+    - wt_binary
+    - gene_burden
+    - functional_recurrent
