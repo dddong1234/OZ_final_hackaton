@@ -1,0 +1,2 @@
+experiment_id,model,seed_count,oof_macro_f1_mean,oof_macro_f1_std,oof_accuracy_mean,feature_count_mean,runtime_seconds_mean,convergence_warning_count,leakage_check,nan_as_mutation_count,delta_vs_team_H_AS_reference
+H-AS-LR-exact,logistic,3,0.4334785930832088,0.0024359419335661893,0.42218996935978065,8215.533333333333,288.45242459699875,15,True,0,0.00014959308320877662
