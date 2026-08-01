@@ -300,6 +300,8 @@ CANDIDATES = {
     "H-AS-LR-exact": Candidate("H-AS-LR-exact", H_AS.backbone, LR_EXACT),
     "H-AS-LR-exact-hotspot-top3": Candidate("H-AS-LR-exact-hotspot-top3", H_AS.backbone, LR_EXACT, hotspot_top_k=3),
     "H-AS-LR-exact-confusion-pairs": Candidate("H-AS-LR-exact-confusion-pairs", H_AS.backbone, LR_EXACT, contrast_pairs=CONTRAST_PAIRS),
+    "H-AS-LR-exact-confusion-pairs-Aall-log1p": Candidate("H-AS-LR-exact-confusion-pairs-Aall-log1p", H_AS.backbone, LR_EXACT, contrast_pairs=CONTRAST_PAIRS, amino_mode="all", log1p_counts=True),
+    "H-AS-LR-exact-confusion-pairs-Apair-raw": Candidate("H-AS-LR-exact-confusion-pairs-Apair-raw", H_AS.backbone, LR_EXACT, contrast_pairs=CONTRAST_PAIRS, amino_mode="pair", log1p_counts=False),
     "H-AS-LR-exact-confusion-pairs-Apair-log1p": Candidate("H-AS-LR-exact-confusion-pairs-Apair-log1p", H_AS.backbone, LR_EXACT, contrast_pairs=CONTRAST_PAIRS, amino_mode="pair", log1p_counts=True),
     "H-AS-LR-exact-minus-BRAF-V600E": Candidate("H-AS-LR-exact-minus-BRAF-V600E", H_AS.backbone, without_exact(("BRAF", "V600E"))),
     "H-AS-LR-exact-minus-IDH1-R132H": Candidate("H-AS-LR-exact-minus-IDH1-R132H", H_AS.backbone, without_exact(("IDH1", "R132H"))),
