@@ -170,11 +170,12 @@ def nonconstant_columns(matrix: sparse.csr_matrix) -> np.ndarray:
 
 
 class FoldMatrixBuilder:
-    def __init__(self, cache: RowCache, backbone: str, exact_events=(), gene_pairs=(), gene_groups=()):
+    def __init__(self, cache: RowCache, backbone: str, exact_events=(), gene_pairs=(), gene_groups=(), hotspot_top_k: int = 0, contrast_pairs=()):
         self.cache, self.backbone = cache, backbone
         self.exact_events, self.gene_pairs, self.gene_groups = tuple(exact_events), tuple(gene_pairs), tuple(gene_groups)
+        self.hotspot_top_k, self.contrast_pairs = hotspot_top_k, tuple(contrast_pairs)
 
-    def _domain_matrix(self) -> tuple[sparse.csr_matrix, list[str]]:
+    def _domain_matrix(self, train_index: np.ndarray, labels: pd.Series | np.ndarray | None) -> tuple[sparse.csr_matrix, list[str]]:
         cols: list[sparse.csr_matrix] = []; names: list[str] = []; gene_map = {gene: idx for idx, gene in enumerate(self.cache.genes)}
         lookup = {name: idx for idx, name in enumerate(self.cache.event_names)}
         for gene, event in self.exact_events:
@@ -189,9 +190,42 @@ class FoldMatrixBuilder:
             ids = [gene_map[gene] for gene in genes if gene in gene_map]
             cols.append(sparse.csr_matrix(self.cache.mutation_matrix[:, ids].sum(axis=1) if ids else np.zeros((self.cache.mutation_matrix.shape[0], 1))))
             names.append(f"D__group_count_{name}")
+        if self.hotspot_top_k:
+            assert labels is not None, "fold-train labels are required for hotspot selection"
+            train_labels = np.asarray(labels)[train_index]
+            counts = np.asarray(self.cache.event_matrix[train_index].getnnz(axis=0)).ravel()
+            concentration = np.zeros_like(counts, dtype=np.float64)
+            for class_name in np.unique(train_labels):
+                class_counts = np.asarray(self.cache.event_matrix[train_index][train_labels == class_name].getnnz(axis=0)).ravel()
+                concentration = np.maximum(concentration, class_counts / np.maximum(counts, 1))
+            fixed = {f"{gene}__{event}" for gene, event in self.exact_events}
+            eligible = np.flatnonzero((counts >= 10) & (concentration >= 0.60) & ~np.isin(self.cache.event_names, list(fixed)))
+            ranked = sorted(eligible, key=lambda index: (-counts[index] * concentration[index], -counts[index], self.cache.event_names[index]))[:self.hotspot_top_k]
+            for index in ranked:
+                cols.append(self.cache.event_matrix[:, index]); names.append(f"H__{self.cache.event_names[index]}")
+        if self.contrast_pairs:
+            assert labels is not None, "fold-train labels are required for contrast selection"
+            train_labels = np.asarray(labels)[train_index]
+            for left, right, top_k in self.contrast_pairs:
+                left_mask, right_mask = train_labels == left, train_labels == right
+                if not left_mask.any() or not right_mask.any():
+                    continue
+                left_counts = np.asarray(self.cache.mutation_matrix[train_index][left_mask].getnnz(axis=0)).ravel()
+                right_counts = np.asarray(self.cache.mutation_matrix[train_index][right_mask].getnnz(axis=0)).ravel()
+                support = left_counts + right_counts
+                contrast = left_counts / left_mask.sum() - right_counts / right_mask.sum()
+                eligible = np.flatnonzero(support >= 10)
+                selected = sorted(eligible, key=lambda index: (-abs(contrast[index]), -support[index], self.cache.genes[index]))[:top_k]
+                if not selected:
+                    continue
+                signs = np.sign(contrast[selected]).astype(np.float32)
+                count_col = sparse.csr_matrix(self.cache.mutation_matrix[:, selected].sum(axis=1))
+                contrast_col = self.cache.mutation_matrix[:, selected].dot(sparse.csr_matrix(signs).T)
+                cols += [count_col, contrast_col]
+                names += [f"C__{left}_vs_{right}_count", f"C__{left}_vs_{right}_contrast"]
         return (sparse.hstack(cols, format="csr") if cols else sparse.csr_matrix((self.cache.mutation_matrix.shape[0], 0))), names
 
-    def build(self, train_index: np.ndarray, valid_index: np.ndarray) -> tuple[sparse.csr_matrix, sparse.csr_matrix, list[str]]:
+    def build(self, train_index: np.ndarray, valid_index: np.ndarray, labels: pd.Series | np.ndarray | None = None) -> tuple[sparse.csr_matrix, sparse.csr_matrix, list[str]]:
         cache = self.cache
         active = np.flatnonzero(np.asarray(cache.mutation_matrix[train_index].getnnz(axis=0)).ravel())
         parts = [cache.mutation_matrix[:, active]]; names = [f"G__{cache.genes[i]}" for i in active]
@@ -205,7 +239,7 @@ class FoldMatrixBuilder:
         parts.append(sparse.csr_matrix(np.asarray(cache.event_matrix[:, recurrent].sum(axis=1)))); names.append("R__recurrent_missense_event_count")
         if "+A" in self.backbone: parts.append(sparse.csr_matrix(cache.amino)); names += [f"A__{i}" for i in range(cache.amino.shape[1])]
         if "+S" in self.backbone: parts.append(sparse.csr_matrix(cache.topology)); names += [f"S__{i}" for i in range(cache.topology.shape[1])]
-        domain, domain_names = self._domain_matrix(); parts.append(domain); names += domain_names
+        domain, domain_names = self._domain_matrix(train_index, labels); parts.append(domain); names += domain_names
         all_rows = sparse.hstack(parts, format="csr")
         keep = nonconstant_columns(all_rows[train_index])
         return all_rows[train_index][:, keep], all_rows[valid_index][:, keep], [name for name, included in zip(names, keep) if included]
@@ -218,6 +252,8 @@ class Candidate:
     exact_events: tuple[tuple[str, str], ...] = ()
     gene_pairs: tuple[tuple[str, str], ...] = ()
     gene_groups: tuple[tuple[str, tuple[str, ...]], ...] = ()
+    hotspot_top_k: int = 0
+    contrast_pairs: tuple[tuple[str, str, int], ...] = ()
     lr_max_iter: int = CONFIG.lr_max_iter
 
 
@@ -238,9 +274,24 @@ LR_PAIR = (("IDH1", "TP53"), ("IDH1", "ATRX"), ("APC", "TP53"))
 LGBM_EXACT = (("IDH1", "R132H"), ("BRAF", "V600E"), ("PIK3CA", "E545K"))
 LGBM_PAIR = (("IDH1", "TP53"), ("IDH1", "ATRX"))
 LGBM_GROUP = (("LAML", ("NPM1", "IDH1", "IDH2", "RUNX1")),)
+CONTRAST_PAIRS = (("KIRC", "KIPAN", 5), ("LGG", "GBMLGG", 5))
+
+
+def without_exact(event: tuple[str, str]) -> tuple[tuple[str, str], ...]:
+    """Return the fixed Logistic exact block with one event removed."""
+    assert event in LR_EXACT
+    return tuple(item for item in LR_EXACT if item != event)
+
+
 CANDIDATES = {
     "H-A": H_A, "H-AS": H_AS, "H-AS-control-maxiter5000": H_AS_CONTROL,
     "H-AS-LR-exact": Candidate("H-AS-LR-exact", H_AS.backbone, LR_EXACT),
+    "H-AS-LR-exact-hotspot-top3": Candidate("H-AS-LR-exact-hotspot-top3", H_AS.backbone, LR_EXACT, hotspot_top_k=3),
+    "H-AS-LR-exact-confusion-pairs": Candidate("H-AS-LR-exact-confusion-pairs", H_AS.backbone, LR_EXACT, contrast_pairs=CONTRAST_PAIRS),
+    "H-AS-LR-exact-minus-BRAF-V600E": Candidate("H-AS-LR-exact-minus-BRAF-V600E", H_AS.backbone, without_exact(("BRAF", "V600E"))),
+    "H-AS-LR-exact-minus-IDH1-R132H": Candidate("H-AS-LR-exact-minus-IDH1-R132H", H_AS.backbone, without_exact(("IDH1", "R132H"))),
+    "H-AS-LR-exact-minus-PIK3CA-H1047R": Candidate("H-AS-LR-exact-minus-PIK3CA-H1047R", H_AS.backbone, without_exact(("PIK3CA", "H1047R"))),
+    "H-AS-LR-exact-minus-PIK3CA-E545K": Candidate("H-AS-LR-exact-minus-PIK3CA-E545K", H_AS.backbone, without_exact(("PIK3CA", "E545K"))),
     "H-AS-LR-pair": Candidate("H-AS-LR-pair", H_AS.backbone, gene_pairs=LR_PAIR),
     "H-A-LR-core": Candidate("H-A-LR-core", H_A.backbone, LR_EXACT, LR_PAIR),
     "H-AS-LR-core": Candidate("H-AS-LR-core", H_AS.backbone, LR_EXACT, LR_PAIR),
@@ -253,8 +304,8 @@ def run_oof(cache: RowCache, labels: pd.Series, candidate: Candidate, model_name
     splitter = StratifiedKFold(n_splits=CONFIG.n_splits, shuffle=True, random_state=seed)
     predicted = np.empty(len(labels), dtype=object); scores = []; counts = []; warnings_seen = 0; started = perf_counter()
     for fold, (tr, va) in enumerate(tqdm(splitter.split(np.zeros(len(labels)), labels), total=CONFIG.n_splits, desc=f"{candidate.experiment_id} | {model_name} | seed {seed}"), 1):
-        builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups)
-        train_matrix, valid_matrix, names = builder.build(tr, va); model = make_model(model_name, seed, candidate.lr_max_iter)
+        builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs)
+        train_matrix, valid_matrix, names = builder.build(tr, va, labels); model = make_model(model_name, seed, candidate.lr_max_iter)
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always", ConvergenceWarning); model.fit(train_matrix, labels.iloc[tr])
         fold_prediction = model.predict(valid_matrix); predicted[va] = fold_prediction
@@ -268,8 +319,9 @@ def run_oof(cache: RowCache, labels: pd.Series, candidate: Candidate, model_name
 
 def find_root(start: Path) -> Path:
     for path in (start, *start.parents):
-        if (path / "data" / "raw" / "train.csv").exists(): return path
-    raise FileNotFoundError("data/raw/train.csv를 가진 프로젝트 루트를 찾지 못했습니다.")
+        if (path / "data" / "raw" / "train.csv").exists() or (path / "experiments" / "gs").exists():
+            return path
+    raise FileNotFoundError("data/raw 또는 experiments/gs를 가진 프로젝트 루트를 찾지 못했습니다.")
 
 
 def nan_as_mutation_count(frame: pd.DataFrame, genes: list[str]) -> int:
@@ -281,20 +333,84 @@ def nan_as_mutation_count(frame: pd.DataFrame, genes: list[str]) -> int:
     return count
 
 
+def make_submission(train: pd.DataFrame, test: pd.DataFrame, genes: list[str], candidate: Candidate, model_name: str, seed: int) -> tuple[pd.DataFrame, dict]:
+    """Fit only on train, then apply the fixed train-derived feature rules to test."""
+    combined = pd.concat([train[genes], test[genes]], axis=0, ignore_index=True)
+    cache = RowCache.build(combined, genes)
+    train_index = np.arange(len(train))
+    test_index = np.arange(len(train), len(combined))
+    builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs)
+    train_matrix, test_matrix, names = builder.build(train_index, test_index, train[CONFIG.target_col])
+    model = make_model(model_name, seed, candidate.lr_max_iter)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", ConvergenceWarning)
+        model.fit(train_matrix, train[CONFIG.target_col])
+    prediction = model.predict(test_matrix)
+    warnings_seen = sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+    submission = pd.DataFrame({CONFIG.id_col: test[CONFIG.id_col], CONFIG.target_col: prediction})
+    metadata = {
+        "experiment_id": candidate.experiment_id,
+        "model": model_name,
+        "seed": seed,
+        "train_rows": len(train),
+        "test_rows": len(test),
+        "feature_count": len(names),
+        "convergence_warning_count": warnings_seen,
+        "leakage_check": True,
+        "nan_as_mutation_count": 0,
+    }
+    return submission, metadata
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(); parser.add_argument("--candidate", default="H-A", choices=CANDIDATES); parser.add_argument("--model", default="logistic", choices=("logistic", "lightgbm")); parser.add_argument("--seed", type=int, default=42); parser.add_argument("--run-id", default=""); parser.add_argument("--self-check", action="store_true")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--candidate", default="H-A", choices=CANDIDATES)
+    parser.add_argument("--model", default="logistic", choices=("logistic", "lightgbm"))
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--run-id", default="")
+    parser.add_argument("--data-dir", type=Path, default=None)
+    parser.add_argument("--submit", action="store_true")
+    parser.add_argument("--submission-name", default="")
+    parser.add_argument("--self-check", action="store_true")
     args = parser.parse_args()
     if args.self_check:
         assert normalise_cell(np.nan) == () and normalise_cell("WT") == (); print("self-check: parser/NaN contract passed"); return
-    root = find_root(Path.cwd()); train = pd.read_csv(root / "data" / "raw" / "train.csv"); test = pd.read_csv(root / "data" / "raw" / "test.csv")
+    root = find_root(Path.cwd())
+    data_dir = args.data_dir or root / "data" / "raw"
+    train = pd.read_csv(data_dir / "train.csv")
+    test = pd.read_csv(data_dir / "test.csv")
     genes = [col for col in train if col not in (CONFIG.id_col, CONFIG.target_col)]
+    assert list(test.columns) == [CONFIG.id_col, *genes]
     assert int(test[genes].isna().sum().sum()) == CONFIG.expected_test_nan
     assert int(train[genes].isna().sum().sum()) == 0
     assert nan_as_mutation_count(train, genes) == 0
     assert nan_as_mutation_count(test, genes) == 0
-    cache = RowCache.build(train[genes], genes); result, class_result = run_oof(cache, train[CONFIG.target_col], CANDIDATES[args.candidate], args.model, args.seed)
-    output = root / "experiments" / "gs" / "notebooks" / "eda_pre_002" / "result"; output.mkdir(parents=True, exist_ok=True)
-    stem = "_".join(part for part in (args.run_id, args.candidate, args.model, f"seed{args.seed}") if part); pd.DataFrame([result]).to_csv(output / f"{stem}_oof.csv", index=False); class_result.to_csv(output / f"{stem}_class_f1.csv", index=False)
+    result_output = root / "experiments" / "gs" / "notebooks" / "eda_pre_002" / "result"
+    if args.submit:
+        output = root / "experiments" / "gs" / "notebooks" / "submission"
+        output.mkdir(parents=True, exist_ok=True)
+        submission, metadata = make_submission(train, test, genes, CANDIDATES[args.candidate], args.model, args.seed)
+        sample_path = data_dir / "sample_submission.csv"
+        if sample_path.exists():
+            sample = pd.read_csv(sample_path)
+            assert list(sample.columns) == [CONFIG.id_col, CONFIG.target_col]
+            assert list(sample[CONFIG.id_col]) == list(test[CONFIG.id_col])
+            sample[CONFIG.target_col] = submission[CONFIG.target_col]
+            submission = sample
+        default_name = f"submission_{args.candidate}_{args.model}_seed{args.seed}.csv"
+        submission_path = output / (args.submission_name or default_name)
+        submission.to_csv(submission_path, index=False)
+        metadata_path = output / f"{submission_path.stem}_metadata.csv"
+        pd.DataFrame([metadata]).to_csv(metadata_path, index=False)
+        print(json.dumps({**metadata, "submission_path": str(submission_path)}, ensure_ascii=False, indent=2))
+        return
+    output = result_output
+    output.mkdir(parents=True, exist_ok=True)
+    cache = RowCache.build(train[genes], genes)
+    result, class_result = run_oof(cache, train[CONFIG.target_col], CANDIDATES[args.candidate], args.model, args.seed)
+    stem = "_".join(part for part in (args.run_id, args.candidate, args.model, f"seed{args.seed}") if part)
+    pd.DataFrame([result]).to_csv(output / f"{stem}_oof.csv", index=False)
+    class_result.to_csv(output / f"{stem}_class_f1.csv", index=False)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

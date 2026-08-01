@@ -1,0 +1,2 @@
+experiment_id,model,seed,oof_macro_f1,oof_accuracy,fold_macro_f1_mean,fold_macro_f1_std,feature_count_mean,runtime_seconds,convergence_warning_count,leakage_check,nan_as_mutation_count
+H-AS-LR-exact-minus-BRAF-V600E,logistic,2024,0.4340144719702953,0.420899854862119,0.43406243152848767,0.007336965485003967,8216.0,288.0019926659952,5,True,0
