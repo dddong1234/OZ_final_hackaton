@@ -170,10 +170,12 @@ def nonconstant_columns(matrix: sparse.csr_matrix) -> np.ndarray:
 
 
 class FoldMatrixBuilder:
-    def __init__(self, cache: RowCache, backbone: str, exact_events=(), gene_pairs=(), gene_groups=(), hotspot_top_k: int = 0, contrast_pairs=()):
+    def __init__(self, cache: RowCache, backbone: str, exact_events=(), gene_pairs=(), gene_groups=(), hotspot_top_k: int = 0, contrast_pairs=(), amino_mode: str = "all", log1p_counts: bool = False):
         self.cache, self.backbone = cache, backbone
         self.exact_events, self.gene_pairs, self.gene_groups = tuple(exact_events), tuple(gene_pairs), tuple(gene_groups)
         self.hotspot_top_k, self.contrast_pairs = hotspot_top_k, tuple(contrast_pairs)
+        assert amino_mode in {"all", "pair"}
+        self.amino_mode, self.log1p_counts = amino_mode, log1p_counts
 
     def _domain_matrix(self, train_index: np.ndarray, labels: pd.Series | np.ndarray | None) -> tuple[sparse.csr_matrix, list[str]]:
         cols: list[sparse.csr_matrix] = []; names: list[str] = []; gene_map = {gene: idx for idx, gene in enumerate(self.cache.genes)}
@@ -229,7 +231,9 @@ class FoldMatrixBuilder:
         cache = self.cache
         active = np.flatnonzero(np.asarray(cache.mutation_matrix[train_index].getnnz(axis=0)).ravel())
         parts = [cache.mutation_matrix[:, active]]; names = [f"G__{cache.genes[i]}" for i in active]
-        parts += [sparse.csr_matrix(cache.burden), sparse.csr_matrix(cache.variant)]
+        burden = np.log1p(cache.burden) if self.log1p_counts else cache.burden
+        variant = np.log1p(cache.variant) if self.log1p_counts else cache.variant
+        parts += [sparse.csr_matrix(burden), sparse.csr_matrix(variant)]
         names += ["B__mutated_gene_count", "B__event_count", "B__multi_event_gene_count"] + [f"V__{kind.lower()}_event_count" for kind in EVENT_TYPES]
         trunc = np.flatnonzero(np.asarray(cache.truncation_matrix[train_index].getnnz(axis=0)).ravel())
         parts.append(cache.truncation_matrix[:, trunc]); names += [f"T__{cache.genes[i]}" for i in trunc]
@@ -237,7 +241,13 @@ class FoldMatrixBuilder:
         recurrent = np.flatnonzero((np.asarray(cache.event_matrix[train_index].getnnz(axis=0)).ravel() >= CONFIG.recurrent_min_count) & cache.event_is_missense)
         parts.append(cache.event_matrix[:, recurrent]); names += [f"R__{cache.event_names[i]}" for i in recurrent]
         parts.append(sparse.csr_matrix(np.asarray(cache.event_matrix[:, recurrent].sum(axis=1)))); names.append("R__recurrent_missense_event_count")
-        if "+A" in self.backbone: parts.append(sparse.csr_matrix(cache.amino)); names += [f"A__{i}" for i in range(cache.amino.shape[1])]
+        if "+A" in self.backbone:
+            if self.amino_mode == "pair":
+                amino = np.log1p(cache.amino[:, 40:420]) if self.log1p_counts else cache.amino[:, 40:420]
+                parts.append(sparse.csr_matrix(amino)); names += [f"A_pair__{i}" for i in range(380)]
+            else:
+                amino = np.log1p(cache.amino) if self.log1p_counts else cache.amino
+                parts.append(sparse.csr_matrix(amino)); names += [f"A__{i}" for i in range(cache.amino.shape[1])]
         if "+S" in self.backbone: parts.append(sparse.csr_matrix(cache.topology)); names += [f"S__{i}" for i in range(cache.topology.shape[1])]
         domain, domain_names = self._domain_matrix(train_index, labels); parts.append(domain); names += domain_names
         all_rows = sparse.hstack(parts, format="csr")
@@ -254,6 +264,8 @@ class Candidate:
     gene_groups: tuple[tuple[str, tuple[str, ...]], ...] = ()
     hotspot_top_k: int = 0
     contrast_pairs: tuple[tuple[str, str, int], ...] = ()
+    amino_mode: str = "all"
+    log1p_counts: bool = False
     lr_max_iter: int = CONFIG.lr_max_iter
 
 
@@ -288,6 +300,7 @@ CANDIDATES = {
     "H-AS-LR-exact": Candidate("H-AS-LR-exact", H_AS.backbone, LR_EXACT),
     "H-AS-LR-exact-hotspot-top3": Candidate("H-AS-LR-exact-hotspot-top3", H_AS.backbone, LR_EXACT, hotspot_top_k=3),
     "H-AS-LR-exact-confusion-pairs": Candidate("H-AS-LR-exact-confusion-pairs", H_AS.backbone, LR_EXACT, contrast_pairs=CONTRAST_PAIRS),
+    "H-AS-LR-exact-confusion-pairs-Apair-log1p": Candidate("H-AS-LR-exact-confusion-pairs-Apair-log1p", H_AS.backbone, LR_EXACT, contrast_pairs=CONTRAST_PAIRS, amino_mode="pair", log1p_counts=True),
     "H-AS-LR-exact-minus-BRAF-V600E": Candidate("H-AS-LR-exact-minus-BRAF-V600E", H_AS.backbone, without_exact(("BRAF", "V600E"))),
     "H-AS-LR-exact-minus-IDH1-R132H": Candidate("H-AS-LR-exact-minus-IDH1-R132H", H_AS.backbone, without_exact(("IDH1", "R132H"))),
     "H-AS-LR-exact-minus-PIK3CA-H1047R": Candidate("H-AS-LR-exact-minus-PIK3CA-H1047R", H_AS.backbone, without_exact(("PIK3CA", "H1047R"))),
@@ -304,7 +317,7 @@ def run_oof(cache: RowCache, labels: pd.Series, candidate: Candidate, model_name
     splitter = StratifiedKFold(n_splits=CONFIG.n_splits, shuffle=True, random_state=seed)
     predicted = np.empty(len(labels), dtype=object); scores = []; counts = []; warnings_seen = 0; started = perf_counter()
     for fold, (tr, va) in enumerate(tqdm(splitter.split(np.zeros(len(labels)), labels), total=CONFIG.n_splits, desc=f"{candidate.experiment_id} | {model_name} | seed {seed}"), 1):
-        builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs)
+        builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs, candidate.amino_mode, candidate.log1p_counts)
         train_matrix, valid_matrix, names = builder.build(tr, va, labels); model = make_model(model_name, seed, candidate.lr_max_iter)
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always", ConvergenceWarning); model.fit(train_matrix, labels.iloc[tr])
@@ -339,7 +352,7 @@ def make_submission(train: pd.DataFrame, test: pd.DataFrame, genes: list[str], c
     cache = RowCache.build(combined, genes)
     train_index = np.arange(len(train))
     test_index = np.arange(len(train), len(combined))
-    builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs)
+    builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs, candidate.amino_mode, candidate.log1p_counts)
     train_matrix, test_matrix, names = builder.build(train_index, test_index, train[CONFIG.target_col])
     model = make_model(model_name, seed, candidate.lr_max_iter)
     with warnings.catch_warnings(record=True) as caught:
