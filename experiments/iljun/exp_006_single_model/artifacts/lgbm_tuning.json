@@ -1,0 +1,123 @@
+{
+  "ref_lgbm_gbv_sparse_seed42": 0.37998,
+  "svd_dim_scores_seed42": {
+    "64": 0.28564,
+    "128": 0.28594,
+    "256": 0.29059
+  },
+  "best_svd_dim": 256,
+  "grid_seed42": [
+    {
+      "num_leaves": 31,
+      "min_child_samples": 50,
+      "n_estimators": 150,
+      "seed42": 0.31521
+    },
+    {
+      "num_leaves": 15,
+      "min_child_samples": 50,
+      "n_estimators": 150,
+      "seed42": 0.31506
+    },
+    {
+      "num_leaves": 15,
+      "min_child_samples": 20,
+      "n_estimators": 150,
+      "seed42": 0.31006
+    },
+    {
+      "num_leaves": 31,
+      "min_child_samples": 50,
+      "n_estimators": 300,
+      "seed42": 0.30448
+    },
+    {
+      "num_leaves": 15,
+      "min_child_samples": 50,
+      "n_estimators": 300,
+      "seed42": 0.30116
+    },
+    {
+      "num_leaves": 15,
+      "min_child_samples": 20,
+      "n_estimators": 300,
+      "seed42": 0.29819
+    },
+    {
+      "num_leaves": 31,
+      "min_child_samples": 20,
+      "n_estimators": 300,
+      "seed42": 0.29059
+    },
+    {
+      "num_leaves": 31,
+      "min_child_samples": 20,
+      "n_estimators": 150,
+      "seed42": 0.29055
+    }
+  ],
+  "final": {
+    "model": "LGBM",
+    "svd_dim": 256,
+    "params": {
+      "objective": "multiclass",
+      "class_weight": "balanced",
+      "learning_rate": 0.05,
+      "colsample_bytree": 0.7,
+      "subsample": 0.8,
+      "subsample_freq": 1,
+      "n_jobs": -1,
+      "verbose": -1,
+      "num_leaves": 31,
+      "min_child_samples": 50,
+      "n_estimators": 150
+    },
+    "f1_macro": 0.31407,
+    "f1_macro_std": 0.00452,
+    "per_seed": {
+      "42": 0.31521,
+      "52": 0.30909,
+      "62": 0.31791
+    }
+  },
+  "lr_anchor": {
+    "params": {
+      "solver": "lbfgs",
+      "C": 0.07,
+      "max_iter": 2000,
+      "class_weight": "balanced"
+    },
+    "f1_macro": 0.41274,
+    "f1_macro_std": 0.00057,
+    "per_seed": {
+      "42": 0.41225,
+      "52": 0.41336,
+      "62": 0.4126
+    }
+  },
+  "lgbm_minus_lr": {
+    "mean": -0.09867,
+    "std": 0.00499,
+    "pos": "0/3"
+  },
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42,
+      52,
+      62
+    ],
+    "model_seed": 42
+  },
+  "caveat": "탐색은 seed42, 최종만 3-seed. CV 최고는 LB 로 확인.",
+  "fingerprint": {
+    "pipeline": "pipeline.py@exp002_v3",
+    "pipeline_sha256": "b9214a433aefeb5e8ed7efc2101f639039a60bb366a114af5ed5d4b209d13c87",
+    "features": "features_A.py@A_v2_raw_variants",
+    "features_sha256": "5fdf267faef64447adcfca80e384b455fa840dd001cc5dbcae79a833e9b8de58",
+    "preprocess_sha256": "2fa768957eeb81b35635ce286a7a9f09cca9a9670acf844853ebf80eb521aed7",
+    "features_T_sha256": "1acecda3d3358be87db89b0166fd1a47bf443c0359bcb3128f6b87dafe3ee346"
+  }
+}
