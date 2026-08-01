@@ -138,14 +138,22 @@ def s_matrix(df, gene_cols):
     return sparse.csr_matrix(feats), names
 
 
-def build_P(df, gene_cols, blocks="pair"):
+def build_P(df, gene_cols, blocks="pair", log1p=True):
     """blocks 문자에 따라 P 블록들을 이어붙인다. 'p'air 'm'arg 's'.
-       (leakage 없음 — 전체 df 로 만들어 인덱스로 잘라도 됨)"""
+       log1p=True 면 카운트 블록(pair·marg)에 log1p 를 씌운다 — GBV 이진과 스케일을
+       맞춰 lbfgs 수렴을 돕는다(B/V 블록과 동일한 처리). S 는 이미 파생지표라 그대로.
+       (leakage 없음 — 380쌍·20AA 고정, 전체 df 로 만들어 인덱스로 잘라도 됨)"""
     parts, names = [], []
     if "p" in blocks:
-        M, nm = pair_matrix(df, gene_cols); parts.append(M); names += nm
+        M, nm = pair_matrix(df, gene_cols)
+        if log1p:
+            M = M.copy(); M.data = np.log1p(M.data)
+        parts.append(M); names += nm
     if "m" in blocks:
-        M, nm = marg_matrix(df, gene_cols); parts.append(M); names += nm
+        M, nm = marg_matrix(df, gene_cols)
+        if log1p:
+            M = M.copy(); M.data = np.log1p(M.data)
+        parts.append(M); names += nm
     if "s" in blocks:
         M, nm = s_matrix(df, gene_cols); parts.append(M); names += nm
     X = sparse.hstack(parts, format="csr") if parts else None
