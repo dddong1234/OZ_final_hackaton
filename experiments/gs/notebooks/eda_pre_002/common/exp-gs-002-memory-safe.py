@@ -373,6 +373,15 @@ def _class_f1_frame(labels: pd.Series, predicted: np.ndarray, classes: list[str]
     return report
 
 
+def fixed_three_way_probability_blend(primary_probability: np.ndarray, multinomial_probability: np.ndarray, ovr_probability: np.ndarray) -> np.ndarray:
+    """Fixed 0.50 primary + 0.25 multinomial token + 0.25 OVR token blend."""
+    if primary_probability.shape != multinomial_probability.shape or primary_probability.shape != ovr_probability.shape:
+        raise ValueError("all probability matrices must have identical shapes")
+    blended = 0.50 * primary_probability + 0.25 * multinomial_probability + 0.25 * ovr_probability
+    assert np.allclose(blended.sum(axis=1), 1.0)
+    return blended
+
+
 def event_token_documents(cache: RowCache) -> list[str]:
     """Deterministic row-local mutation documents; no labels or fitted statistics."""
     documents = [[] for _ in range(cache.mutation_matrix.shape[0])]
@@ -479,6 +488,7 @@ def run_event_tfidf_ovr_comparison_oof(cache: RowCache, labels: pd.Series, candi
         "event_tfidf_ovr": ovr_probability,
         "blend_multinomial_0p5": 0.5 * primary_probability + 0.5 * multinomial_probability,
         "blend_ovr_0p5": 0.5 * primary_probability + 0.5 * ovr_probability,
+        "blend_three_way_0p5_0p25_0p25": fixed_three_way_probability_blend(primary_probability, multinomial_probability, ovr_probability),
     }
     predictions = {variant: np.asarray(classes)[probability.argmax(axis=1)] for variant, probability in probabilities.items()}
     scores = {variant: f1_score(labels, prediction, average="macro", zero_division=0) for variant, prediction in predictions.items()}
@@ -496,12 +506,15 @@ def run_event_tfidf_ovr_comparison_oof(cache: RowCache, labels: pd.Series, candi
         "event_tfidf_ovr_oof_macro_f1": scores["event_tfidf_ovr"],
         "blend_multinomial_0p5_oof_macro_f1": scores["blend_multinomial_0p5"],
         "blend_ovr_0p5_oof_macro_f1": scores["blend_ovr_0p5"],
+        "blend_three_way_0p5_0p25_0p25_oof_macro_f1": scores["blend_three_way_0p5_0p25_0p25"],
         "delta_ovr_blend_vs_multinomial_blend": scores["blend_ovr_0p5"] - scores["blend_multinomial_0p5"],
+        "delta_three_way_vs_ovr_blend": scores["blend_three_way_0p5_0p25_0p25"] - scores["blend_ovr_0p5"],
         "primary_oof_accuracy": accuracy["primary"],
         "event_tfidf_multinomial_oof_accuracy": accuracy["event_tfidf_multinomial"],
         "event_tfidf_ovr_oof_accuracy": accuracy["event_tfidf_ovr"],
         "blend_multinomial_0p5_oof_accuracy": accuracy["blend_multinomial_0p5"],
         "blend_ovr_0p5_oof_accuracy": accuracy["blend_ovr_0p5"],
+        "blend_three_way_0p5_0p25_0p25_oof_accuracy": accuracy["blend_three_way_0p5_0p25_0p25"],
         "token_prediction_disagreement_rate": disagreement,
         "feature_count_mean": float(np.mean(feature_counts)),
         "tfidf_vocabulary_size_mean": float(np.mean(vocabulary_sizes)),
@@ -638,6 +651,7 @@ def main() -> None:
     parser.add_argument("--specialist-alpha", type=float, default=0.30)
     parser.add_argument("--event-tfidf", action="store_true")
     parser.add_argument("--event-tfidf-ovr", action="store_true")
+    parser.add_argument("--event-tfidf-three-way", action="store_true")
     parser.add_argument("--tfidf-min-df", type=int, default=3)
     args = parser.parse_args()
     if args.self_check:
@@ -673,9 +687,10 @@ def main() -> None:
     output = result_output
     output.mkdir(parents=True, exist_ok=True)
     cache = RowCache.build(train[genes], genes)
-    if args.event_tfidf_ovr:
+    if args.event_tfidf_ovr or args.event_tfidf_three_way:
         result, class_result = run_event_tfidf_ovr_comparison_oof(cache, train[CONFIG.target_col], CANDIDATES[args.candidate], args.seed, args.tfidf_min_df)
-        stem = "_".join(part for part in (args.run_id, args.candidate, "event-tfidf-ovr", f"seed{args.seed}") if part)
+        mode = "event-tfidf-three-way" if args.event_tfidf_three_way else "event-tfidf-ovr"
+        stem = "_".join(part for part in (args.run_id, args.candidate, mode, f"seed{args.seed}") if part)
         pd.DataFrame([result]).to_csv(output / f"{stem}_oof.csv", index=False)
         class_result.to_csv(output / f"{stem}_class_f1.csv", index=False)
         print(json.dumps(result, ensure_ascii=False, indent=2))

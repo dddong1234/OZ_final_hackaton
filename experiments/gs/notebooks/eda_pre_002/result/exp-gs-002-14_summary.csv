@@ -1,0 +1,2 @@
+experiment_id,seed_count,weights,ovr_blend_macro_f1_mean,ovr_blend_macro_f1_std,three_way_macro_f1_mean,three_way_macro_f1_std,delta_three_way_vs_ovr_mean,delta_three_way_vs_ovr_std,all_seed_three_way_delta_positive,feature_count_mean,tfidf_vocabulary_size_mean,convergence_warning_count,leakage_check,nan_as_mutation_count
+exp-gs-002-14,3,"primary=0.50,multinomial=0.25,ovr=0.25",0.48313013220145273,0.002638186677115952,0.4818527631488321,0.0024297968672850265,-0.0012773690526206,0.0004999149780066167,False,8173.533333333333,5871.266666666667,0,True,0
