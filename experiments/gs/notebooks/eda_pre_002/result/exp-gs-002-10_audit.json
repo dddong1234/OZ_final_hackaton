@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp-gs-002-10",
+  "oof_train_only": true,
+  "seeds": [
+    42,
+    2024,
+    777
+  ],
+  "baseline": "H-AS-LR-exact-confusion-pairs-Apair-log1p",
+  "binning": "H-AS-LR-exact-confusion-pairs-Apair-log1p-Bbins",
+  "bin_feature_count": 12,
+  "all_seed_delta_positive": false,
+  "status": "미검출/기각"
+}
