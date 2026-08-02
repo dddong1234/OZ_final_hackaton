@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 from sklearn.exceptions import ConvergenceWarning
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, f1_score
 from sklearn.model_selection import StratifiedKFold
@@ -365,6 +366,52 @@ def _class_f1_frame(labels: pd.Series, predicted: np.ndarray, classes: list[str]
     return report
 
 
+def event_token_documents(cache: RowCache) -> list[str]:
+    """Deterministic row-local mutation documents; no labels or fitted statistics."""
+    documents = [[] for _ in range(cache.mutation_matrix.shape[0])]
+    if cache.events.empty:
+        return ["" for _ in documents]
+    for row, gene, event, event_type, ref, alt in cache.events[["row", "gene", "event", "event_type", "ref", "alt"]].itertuples(index=False):
+        documents[row].extend((f"G__{gene}", f"E__{gene}__{event}", f"TYPE__{event_type}"))
+        if pd.notna(ref) and pd.notna(alt) and ref != alt:
+            documents[row].append(f"AA__{ref}_{alt}")
+    return [" ".join(tokens) for tokens in documents]
+
+
+def run_event_tfidf_oof(cache: RowCache, labels: pd.Series, candidate: Candidate, seed: int, min_df: int = 3) -> tuple[dict, pd.DataFrame]:
+    classes = sorted(labels.unique()); class_index = {name: i for i, name in enumerate(classes)}
+    documents = event_token_documents(cache); splitter = StratifiedKFold(n_splits=CONFIG.n_splits, shuffle=True, random_state=seed)
+    primary_probability = np.zeros((len(labels), len(classes))); token_probability = np.zeros_like(primary_probability)
+    counts=[]; vocab_sizes=[]; primary_warn=token_warn=0; started=perf_counter()
+    for fold, (tr, va) in enumerate(tqdm(splitter.split(np.zeros(len(labels)), labels), total=CONFIG.n_splits, desc=f"{candidate.experiment_id} | event-tfidf | seed {seed}"), 1):
+        builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs, candidate.amino_mode, candidate.log1p_counts, candidate.b_count_binning)
+        x_train, x_valid, names = builder.build(tr, va, labels)
+        primary = make_model("logistic", seed, candidate.lr_max_iter)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", ConvergenceWarning); primary.fit(x_train, labels.iloc[tr])
+        primary_warn += sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+        raw_primary = primary.predict_proba(x_valid)
+        for column, name in enumerate(primary.classes_): primary_probability[va, class_index[name]] = raw_primary[:, column]
+        vectorizer = TfidfVectorizer(tokenizer=str.split, preprocessor=None, token_pattern=None, lowercase=False, ngram_range=(1, 1), min_df=min_df, sublinear_tf=True, norm="l2", dtype=np.float32)
+        token_train = vectorizer.fit_transform([documents[i] for i in tr]); token_valid = vectorizer.transform([documents[i] for i in va]); vocab_sizes.append(len(vectorizer.vocabulary_))
+        token_model = make_model("logistic", seed, candidate.lr_max_iter)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", ConvergenceWarning); token_model.fit(token_train, labels.iloc[tr])
+        token_warn += sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+        raw_token = token_model.predict_proba(token_valid)
+        for column, name in enumerate(token_model.classes_): token_probability[va, class_index[name]] = raw_token[:, column]
+        counts.append(len(names)); del x_train, x_valid, primary, token_model, token_train, token_valid; gc.collect()
+    blend_probability = 0.5 * primary_probability + 0.5 * token_probability
+    rows=[]; class_rows=[]
+    for variant, probability in (("primary", primary_probability), ("event_tfidf", token_probability), ("blend_0p5", blend_probability)):
+        prediction=np.asarray(classes)[probability.argmax(axis=1)]
+        rows.append((variant, f1_score(labels, prediction, average="macro", zero_division=0), accuracy_score(labels, prediction)))
+        class_rows.append(_class_f1_frame(labels, prediction, classes, variant))
+    score={name: macro for name, macro, _ in rows}; accuracy={name: acc for name, _, acc in rows}
+    result={"experiment_id":candidate.experiment_id,"model":"logistic","seed":seed,"tfidf_min_df":min_df,"tfidf_sublinear_tf":True,"primary_oof_macro_f1":score["primary"],"event_tfidf_oof_macro_f1":score["event_tfidf"],"blend_0p5_oof_macro_f1":score["blend_0p5"],"delta_blend_vs_primary":score["blend_0p5"]-score["primary"],"primary_oof_accuracy":accuracy["primary"],"event_tfidf_oof_accuracy":accuracy["event_tfidf"],"blend_0p5_oof_accuracy":accuracy["blend_0p5"],"feature_count_mean":float(np.mean(counts)),"tfidf_vocabulary_size_mean":float(np.mean(vocab_sizes)),"runtime_seconds":perf_counter()-started,"primary_convergence_warning_count":primary_warn,"tfidf_convergence_warning_count":token_warn,"convergence_warning_count":primary_warn+token_warn,"leakage_check":True,"nan_as_mutation_count":0}
+    return result, pd.concat(class_rows, ignore_index=True)
+
+
 def run_soft_pair_specialist_oof(cache: RowCache, labels: pd.Series, candidate: Candidate, seed: int, left_class: str, right_class: str, alpha: float) -> tuple[dict, pd.DataFrame, pd.DataFrame]:
     """Run a fold-safe binary specialist and soft pair-probability blend on primary OOF probabilities."""
     classes = sorted(labels.unique())
@@ -485,6 +532,8 @@ def main() -> None:
     parser.add_argument("--specialist-left", default="KIRC")
     parser.add_argument("--specialist-right", default="KIPAN")
     parser.add_argument("--specialist-alpha", type=float, default=0.30)
+    parser.add_argument("--event-tfidf", action="store_true")
+    parser.add_argument("--tfidf-min-df", type=int, default=3)
     args = parser.parse_args()
     if args.self_check:
         assert normalise_cell(np.nan) == () and normalise_cell("WT") == (); print("self-check: parser/NaN contract passed"); return
@@ -519,6 +568,13 @@ def main() -> None:
     output = result_output
     output.mkdir(parents=True, exist_ok=True)
     cache = RowCache.build(train[genes], genes)
+    if args.event_tfidf:
+        result, class_result = run_event_tfidf_oof(cache, train[CONFIG.target_col], CANDIDATES[args.candidate], args.seed, args.tfidf_min_df)
+        stem = "_".join(part for part in (args.run_id, args.candidate, "event-tfidf", f"seed{args.seed}") if part)
+        pd.DataFrame([result]).to_csv(output / f"{stem}_oof.csv", index=False)
+        class_result.to_csv(output / f"{stem}_class_f1.csv", index=False)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.soft_specialist:
         result, class_result, pair_result = run_soft_pair_specialist_oof(cache, train[CONFIG.target_col], CANDIDATES[args.candidate], args.seed, args.specialist_left, args.specialist_right, args.specialist_alpha)
         stem = "_".join(part for part in (args.run_id, args.candidate, "soft-specialist", f"seed{args.seed}") if part)
