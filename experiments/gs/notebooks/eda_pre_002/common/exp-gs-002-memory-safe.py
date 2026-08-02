@@ -23,6 +23,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, f1_score
 from sklearn.model_selection import StratifiedKFold
+from sklearn.multiclass import OneVsRestClassifier
 from tqdm.auto import tqdm
 
 
@@ -281,9 +282,15 @@ class Candidate:
     lr_max_iter: int = CONFIG.lr_max_iter
 
 
-def make_model(model_name: str, seed: int, max_iter: int | None = None):
+def make_model(model_name: str, seed: int, max_iter: int | None = None, multi_class: str | None = None):
     if model_name == "logistic":
-        return LogisticRegression(solver="lbfgs", C=CONFIG.lr_c, max_iter=max_iter or CONFIG.lr_max_iter, class_weight="balanced", random_state=seed)
+        parameters = {"solver": "lbfgs", "C": CONFIG.lr_c, "max_iter": max_iter or CONFIG.lr_max_iter, "class_weight": "balanced", "random_state": seed}
+        base_model = LogisticRegression(**parameters)
+        if multi_class is None or multi_class == "multinomial":
+            return base_model
+        if multi_class == "ovr":
+            return OneVsRestClassifier(base_model)
+        raise ValueError(f"Unsupported logistic multi_class mode: {multi_class}")
     if model_name == "lightgbm":
         from lightgbm import LGBMClassifier
         return LGBMClassifier(objective="multiclass", n_estimators=500, learning_rate=0.05, num_leaves=31, class_weight="balanced", random_state=seed, n_jobs=1, deterministic=True, force_col_wise=True, verbosity=-1)
@@ -412,6 +419,103 @@ def run_event_tfidf_oof(cache: RowCache, labels: pd.Series, candidate: Candidate
     return result, pd.concat(class_rows, ignore_index=True)
 
 
+def run_event_tfidf_ovr_comparison_oof(cache: RowCache, labels: pd.Series, candidate: Candidate, seed: int, min_df: int = 3) -> tuple[dict, pd.DataFrame]:
+    """Compare multinomial and OVR event-token LR on identical fold-local TF-IDF matrices."""
+    classes = sorted(labels.unique())
+    class_index = {name: index for index, name in enumerate(classes)}
+    documents = event_token_documents(cache)
+    splitter = StratifiedKFold(n_splits=CONFIG.n_splits, shuffle=True, random_state=seed)
+    primary_probability = np.zeros((len(labels), len(classes)))
+    multinomial_probability = np.zeros_like(primary_probability)
+    ovr_probability = np.zeros_like(primary_probability)
+    feature_counts: list[int] = []
+    vocabulary_sizes: list[int] = []
+    primary_warn = multinomial_warn = ovr_warn = 0
+    started = perf_counter()
+
+    for fold, (tr, va) in enumerate(tqdm(splitter.split(np.zeros(len(labels)), labels), total=CONFIG.n_splits, desc=f"{candidate.experiment_id} | TF-IDF multinomial vs OVR | seed {seed}"), 1):
+        builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs, candidate.amino_mode, candidate.log1p_counts, candidate.b_count_binning)
+        x_train, x_valid, names = builder.build(tr, va, labels)
+
+        primary = make_model("logistic", seed, candidate.lr_max_iter)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", ConvergenceWarning)
+            primary.fit(x_train, labels.iloc[tr])
+        primary_warn += sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+        raw_primary = primary.predict_proba(x_valid)
+        for column, name in enumerate(primary.classes_):
+            primary_probability[va, class_index[name]] = raw_primary[:, column]
+
+        vectorizer = TfidfVectorizer(tokenizer=str.split, preprocessor=None, token_pattern=None, lowercase=False, ngram_range=(1, 1), min_df=min_df, sublinear_tf=True, norm="l2", dtype=np.float32)
+        token_train = vectorizer.fit_transform([documents[index] for index in tr])
+        token_valid = vectorizer.transform([documents[index] for index in va])
+        vocabulary_sizes.append(len(vectorizer.vocabulary_))
+
+        multinomial = make_model("logistic", seed, candidate.lr_max_iter, multi_class="multinomial")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", ConvergenceWarning)
+            multinomial.fit(token_train, labels.iloc[tr])
+        multinomial_warn += sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+        raw_multinomial = multinomial.predict_proba(token_valid)
+        for column, name in enumerate(multinomial.classes_):
+            multinomial_probability[va, class_index[name]] = raw_multinomial[:, column]
+
+        ovr = make_model("logistic", seed, candidate.lr_max_iter, multi_class="ovr")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", ConvergenceWarning)
+            ovr.fit(token_train, labels.iloc[tr])
+        ovr_warn += sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+        raw_ovr = ovr.predict_proba(token_valid)
+        for column, name in enumerate(ovr.classes_):
+            ovr_probability[va, class_index[name]] = raw_ovr[:, column]
+
+        feature_counts.append(len(names))
+        del x_train, x_valid, primary, token_train, token_valid, multinomial, ovr
+        gc.collect()
+
+    probabilities = {
+        "primary": primary_probability,
+        "event_tfidf_multinomial": multinomial_probability,
+        "event_tfidf_ovr": ovr_probability,
+        "blend_multinomial_0p5": 0.5 * primary_probability + 0.5 * multinomial_probability,
+        "blend_ovr_0p5": 0.5 * primary_probability + 0.5 * ovr_probability,
+    }
+    predictions = {variant: np.asarray(classes)[probability.argmax(axis=1)] for variant, probability in probabilities.items()}
+    scores = {variant: f1_score(labels, prediction, average="macro", zero_division=0) for variant, prediction in predictions.items()}
+    accuracy = {variant: accuracy_score(labels, prediction) for variant, prediction in predictions.items()}
+    class_result = pd.concat([_class_f1_frame(labels, prediction, classes, variant) for variant, prediction in predictions.items()], ignore_index=True)
+    disagreement = float(np.mean(predictions["event_tfidf_multinomial"] != predictions["event_tfidf_ovr"]))
+    result = {
+        "experiment_id": candidate.experiment_id,
+        "model": "logistic",
+        "seed": seed,
+        "tfidf_min_df": min_df,
+        "tfidf_sublinear_tf": True,
+        "primary_oof_macro_f1": scores["primary"],
+        "event_tfidf_multinomial_oof_macro_f1": scores["event_tfidf_multinomial"],
+        "event_tfidf_ovr_oof_macro_f1": scores["event_tfidf_ovr"],
+        "blend_multinomial_0p5_oof_macro_f1": scores["blend_multinomial_0p5"],
+        "blend_ovr_0p5_oof_macro_f1": scores["blend_ovr_0p5"],
+        "delta_ovr_blend_vs_multinomial_blend": scores["blend_ovr_0p5"] - scores["blend_multinomial_0p5"],
+        "primary_oof_accuracy": accuracy["primary"],
+        "event_tfidf_multinomial_oof_accuracy": accuracy["event_tfidf_multinomial"],
+        "event_tfidf_ovr_oof_accuracy": accuracy["event_tfidf_ovr"],
+        "blend_multinomial_0p5_oof_accuracy": accuracy["blend_multinomial_0p5"],
+        "blend_ovr_0p5_oof_accuracy": accuracy["blend_ovr_0p5"],
+        "token_prediction_disagreement_rate": disagreement,
+        "feature_count_mean": float(np.mean(feature_counts)),
+        "tfidf_vocabulary_size_mean": float(np.mean(vocabulary_sizes)),
+        "runtime_seconds": perf_counter() - started,
+        "primary_convergence_warning_count": primary_warn,
+        "tfidf_multinomial_convergence_warning_count": multinomial_warn,
+        "tfidf_ovr_convergence_warning_count": ovr_warn,
+        "convergence_warning_count": primary_warn + multinomial_warn + ovr_warn,
+        "leakage_check": True,
+        "nan_as_mutation_count": 0,
+    }
+    return result, class_result
+
+
 def run_soft_pair_specialist_oof(cache: RowCache, labels: pd.Series, candidate: Candidate, seed: int, left_class: str, right_class: str, alpha: float) -> tuple[dict, pd.DataFrame, pd.DataFrame]:
     """Run a fold-safe binary specialist and soft pair-probability blend on primary OOF probabilities."""
     classes = sorted(labels.unique())
@@ -533,6 +637,7 @@ def main() -> None:
     parser.add_argument("--specialist-right", default="KIPAN")
     parser.add_argument("--specialist-alpha", type=float, default=0.30)
     parser.add_argument("--event-tfidf", action="store_true")
+    parser.add_argument("--event-tfidf-ovr", action="store_true")
     parser.add_argument("--tfidf-min-df", type=int, default=3)
     args = parser.parse_args()
     if args.self_check:
@@ -568,6 +673,13 @@ def main() -> None:
     output = result_output
     output.mkdir(parents=True, exist_ok=True)
     cache = RowCache.build(train[genes], genes)
+    if args.event_tfidf_ovr:
+        result, class_result = run_event_tfidf_ovr_comparison_oof(cache, train[CONFIG.target_col], CANDIDATES[args.candidate], args.seed, args.tfidf_min_df)
+        stem = "_".join(part for part in (args.run_id, args.candidate, "event-tfidf-ovr", f"seed{args.seed}") if part)
+        pd.DataFrame([result]).to_csv(output / f"{stem}_oof.csv", index=False)
+        class_result.to_csv(output / f"{stem}_class_f1.csv", index=False)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.event_tfidf:
         result, class_result = run_event_tfidf_oof(cache, train[CONFIG.target_col], CANDIDATES[args.candidate], args.seed, args.tfidf_min_df)
         stem = "_".join(part for part in (args.run_id, args.candidate, "event-tfidf", f"seed{args.seed}") if part)
