@@ -1,0 +1,5 @@
+variant,true_class,predicted_class,confusion_count_mean,confusion_count_std
+primary,KIPAN,KIRC,232.33333333333334,4.163331998932268
+primary,KIRC,KIPAN,151.0,6.082762530298219
+soft_specialist,KIPAN,KIRC,231.66666666666666,5.033222956847164
+soft_specialist,KIRC,KIPAN,151.0,6.082762530298219

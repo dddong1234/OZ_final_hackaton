@@ -344,6 +344,88 @@ def run_oof(cache: RowCache, labels: pd.Series, candidate: Candidate, model_name
     return {"experiment_id": candidate.experiment_id, "model": model_name, "seed": seed, "oof_macro_f1": f1_score(labels, predicted, average="macro", zero_division=0), "oof_accuracy": accuracy_score(labels, predicted), "fold_macro_f1_mean": float(np.mean(scores)), "fold_macro_f1_std": float(np.std(scores)), "feature_count_mean": float(np.mean(counts)), "runtime_seconds": perf_counter()-started, "convergence_warning_count": warnings_seen, "leakage_check": True, "nan_as_mutation_count": 0}, report
 
 
+def soft_blend_pair_probabilities(primary_probability: np.ndarray, left_index: int, right_index: int, expert_left_probability: np.ndarray, alpha: float) -> np.ndarray:
+    """Preserve pair mass and all non-pair probabilities while softly blending pair odds."""
+    if not 0.0 <= alpha <= 1.0:
+        raise ValueError("specialist alpha must be in [0, 1]")
+    blended = primary_probability.copy()
+    pair_mass = primary_probability[:, left_index] + primary_probability[:, right_index]
+    primary_left_ratio = np.divide(primary_probability[:, left_index], pair_mass, out=np.full_like(pair_mass, 0.5), where=pair_mass > 0)
+    blend_weight = alpha * pair_mass
+    final_left_ratio = (1.0 - blend_weight) * primary_left_ratio + blend_weight * expert_left_probability
+    blended[:, left_index] = pair_mass * final_left_ratio
+    blended[:, right_index] = pair_mass * (1.0 - final_left_ratio)
+    assert np.allclose(blended.sum(axis=1), primary_probability.sum(axis=1))
+    return blended
+
+
+def _class_f1_frame(labels: pd.Series, predicted: np.ndarray, classes: list[str], variant: str) -> pd.DataFrame:
+    report = pd.DataFrame(classification_report(labels, predicted, labels=classes, output_dict=True, zero_division=0)).T.loc[classes].reset_index(names="class")
+    report.insert(0, "variant", variant)
+    return report
+
+
+def run_soft_pair_specialist_oof(cache: RowCache, labels: pd.Series, candidate: Candidate, seed: int, left_class: str, right_class: str, alpha: float) -> tuple[dict, pd.DataFrame, pd.DataFrame]:
+    """Run a fold-safe binary specialist and soft pair-probability blend on primary OOF probabilities."""
+    classes = sorted(labels.unique())
+    if left_class not in classes or right_class not in classes:
+        raise ValueError("specialist classes must be present in train labels")
+    left_index, right_index = classes.index(left_class), classes.index(right_class)
+    splitter = StratifiedKFold(n_splits=CONFIG.n_splits, shuffle=True, random_state=seed)
+    primary_probability = np.zeros((len(labels), len(classes)), dtype=np.float64)
+    blended_probability = np.zeros_like(primary_probability)
+    feature_counts: list[int] = []; fold_scores: list[float] = []; primary_warnings = 0; specialist_warnings = 0; pair_train_sizes: list[int] = []
+    started = perf_counter()
+    for fold, (tr, va) in enumerate(tqdm(splitter.split(np.zeros(len(labels)), labels), total=CONFIG.n_splits, desc=f"{candidate.experiment_id} | soft specialist | seed {seed}"), 1):
+        builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs, candidate.amino_mode, candidate.log1p_counts, candidate.b_count_binning)
+        train_matrix, valid_matrix, names = builder.build(tr, va, labels)
+        primary = make_model("logistic", seed, candidate.lr_max_iter)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", ConvergenceWarning)
+            primary.fit(train_matrix, labels.iloc[tr])
+        primary_warnings += sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+        fold_primary = np.zeros((len(va), len(classes)), dtype=np.float64)
+        raw_primary_probability = primary.predict_proba(valid_matrix)
+        for column, class_name in enumerate(primary.classes_):
+            fold_primary[:, classes.index(class_name)] = raw_primary_probability[:, column]
+
+        pair_mask = labels.iloc[tr].isin((left_class, right_class)).to_numpy()
+        pair_train_sizes.append(int(pair_mask.sum()))
+        if np.unique(labels.iloc[tr].to_numpy()[pair_mask]).size != 2:
+            raise ValueError("both specialist classes must be present in every outer-fold train split")
+        specialist = make_model("logistic", seed, candidate.lr_max_iter)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", ConvergenceWarning)
+            specialist.fit(train_matrix[pair_mask], labels.iloc[tr].to_numpy()[pair_mask])
+        specialist_warnings += sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+        specialist_probability = specialist.predict_proba(valid_matrix)
+        expert_left = specialist_probability[:, list(specialist.classes_).index(left_class)]
+        fold_blended = soft_blend_pair_probabilities(fold_primary, left_index, right_index, expert_left, alpha)
+        non_pair_indices = [index for index in range(len(classes)) if index not in (left_index, right_index)]
+        assert np.allclose(fold_blended[:, non_pair_indices], fold_primary[:, non_pair_indices])
+        primary_probability[va] = fold_primary; blended_probability[va] = fold_blended
+        fold_scores.append(f1_score(labels.iloc[va], np.asarray(classes)[fold_blended.argmax(axis=1)], average="macro", zero_division=0)); feature_counts.append(len(names))
+        del train_matrix, valid_matrix, primary, specialist; gc.collect()
+
+    primary_prediction = np.asarray(classes)[primary_probability.argmax(axis=1)]
+    blended_prediction = np.asarray(classes)[blended_probability.argmax(axis=1)]
+    class_result = pd.concat((_class_f1_frame(labels, primary_prediction, classes, "primary"), _class_f1_frame(labels, blended_prediction, classes, "soft_specialist")), ignore_index=True)
+    pair_rows = []
+    for variant, prediction in (("primary", primary_prediction), ("soft_specialist", blended_prediction)):
+        for true_class, predicted_class in ((left_class, right_class), (right_class, left_class)):
+            pair_rows.append({"variant": variant, "true_class": true_class, "predicted_class": predicted_class, "count": int(((labels == true_class) & (prediction == predicted_class)).sum())})
+    result = {
+        "experiment_id": candidate.experiment_id, "model": "logistic", "seed": seed, "specialist_left": left_class, "specialist_right": right_class, "specialist_alpha": alpha,
+        "primary_oof_macro_f1": f1_score(labels, primary_prediction, average="macro", zero_division=0), "soft_specialist_oof_macro_f1": f1_score(labels, blended_prediction, average="macro", zero_division=0),
+        "delta_oof_macro_f1": f1_score(labels, blended_prediction, average="macro", zero_division=0) - f1_score(labels, primary_prediction, average="macro", zero_division=0),
+        "primary_oof_accuracy": accuracy_score(labels, primary_prediction), "soft_specialist_oof_accuracy": accuracy_score(labels, blended_prediction), "fold_soft_specialist_macro_f1_mean": float(np.mean(fold_scores)), "fold_soft_specialist_macro_f1_std": float(np.std(fold_scores)),
+        "feature_count_mean": float(np.mean(feature_counts)), "specialist_train_rows_mean": float(np.mean(pair_train_sizes)), "runtime_seconds": perf_counter() - started,
+        "primary_convergence_warning_count": primary_warnings, "specialist_convergence_warning_count": specialist_warnings, "convergence_warning_count": primary_warnings + specialist_warnings,
+        "leakage_check": True, "nan_as_mutation_count": 0,
+    }
+    return result, class_result, pd.DataFrame(pair_rows)
+
+
 def find_root(start: Path) -> Path:
     for path in (start, *start.parents):
         if (path / "data" / "raw" / "train.csv").exists() or (path / "experiments" / "gs").exists():
@@ -399,6 +481,10 @@ def main() -> None:
     parser.add_argument("--submit", action="store_true")
     parser.add_argument("--submission-name", default="")
     parser.add_argument("--self-check", action="store_true")
+    parser.add_argument("--soft-specialist", action="store_true")
+    parser.add_argument("--specialist-left", default="KIRC")
+    parser.add_argument("--specialist-right", default="KIPAN")
+    parser.add_argument("--specialist-alpha", type=float, default=0.30)
     args = parser.parse_args()
     if args.self_check:
         assert normalise_cell(np.nan) == () and normalise_cell("WT") == (); print("self-check: parser/NaN contract passed"); return
@@ -433,6 +519,14 @@ def main() -> None:
     output = result_output
     output.mkdir(parents=True, exist_ok=True)
     cache = RowCache.build(train[genes], genes)
+    if args.soft_specialist:
+        result, class_result, pair_result = run_soft_pair_specialist_oof(cache, train[CONFIG.target_col], CANDIDATES[args.candidate], args.seed, args.specialist_left, args.specialist_right, args.specialist_alpha)
+        stem = "_".join(part for part in (args.run_id, args.candidate, "soft-specialist", f"seed{args.seed}") if part)
+        pd.DataFrame([result]).to_csv(output / f"{stem}_oof.csv", index=False)
+        class_result.to_csv(output / f"{stem}_class_f1.csv", index=False)
+        pair_result.to_csv(output / f"{stem}_pair_confusion.csv", index=False)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     result, class_result = run_oof(cache, train[CONFIG.target_col], CANDIDATES[args.candidate], args.model, args.seed)
     stem = "_".join(part for part in (args.run_id, args.candidate, args.model, f"seed{args.seed}") if part)
     pd.DataFrame([result]).to_csv(output / f"{stem}_oof.csv", index=False)

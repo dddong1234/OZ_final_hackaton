@@ -1,0 +1,5 @@
+variant,true_class,predicted_class,count
+primary,KIRC,KIPAN,144
+primary,KIPAN,KIRC,229
+soft_specialist,KIRC,KIPAN,144
+soft_specialist,KIPAN,KIRC,227
