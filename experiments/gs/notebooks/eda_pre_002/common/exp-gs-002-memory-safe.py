@@ -635,6 +635,64 @@ def make_submission(train: pd.DataFrame, test: pd.DataFrame, genes: list[str], c
     return submission, metadata
 
 
+def make_event_tfidf_ovr_submission(train: pd.DataFrame, test: pd.DataFrame, genes: list[str], candidate: Candidate, seed: int, min_df: int = 3) -> tuple[pd.DataFrame, dict]:
+    """Fit the fixed exp13 primary/OVR models on train only and blend test probabilities 0.5/0.5."""
+    combined = pd.concat([train[genes], test[genes]], axis=0, ignore_index=True)
+    cache = RowCache.build(combined, genes)
+    train_index = np.arange(len(train))
+    test_index = np.arange(len(train), len(combined))
+    classes = sorted(train[CONFIG.target_col].unique())
+    class_index = {name: index for index, name in enumerate(classes)}
+    builder = FoldMatrixBuilder(cache, candidate.backbone, candidate.exact_events, candidate.gene_pairs, candidate.gene_groups, candidate.hotspot_top_k, candidate.contrast_pairs, candidate.amino_mode, candidate.log1p_counts, candidate.b_count_binning)
+    train_matrix, test_matrix, feature_names = builder.build(train_index, test_index, train[CONFIG.target_col])
+
+    primary = make_model("logistic", seed, candidate.lr_max_iter)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", ConvergenceWarning)
+        primary.fit(train_matrix, train[CONFIG.target_col])
+    primary_warnings = sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+    primary_probability = np.zeros((len(test), len(classes)))
+    raw_primary_probability = primary.predict_proba(test_matrix)
+    for column, name in enumerate(primary.classes_):
+        primary_probability[:, class_index[name]] = raw_primary_probability[:, column]
+
+    documents = event_token_documents(cache)
+    vectorizer = TfidfVectorizer(tokenizer=str.split, preprocessor=None, token_pattern=None, lowercase=False, ngram_range=(1, 1), min_df=min_df, sublinear_tf=True, norm="l2", dtype=np.float32)
+    token_train = vectorizer.fit_transform(documents[:len(train)])
+    token_test = vectorizer.transform(documents[len(train):])
+    ovr = make_model("logistic", seed, candidate.lr_max_iter, multi_class="ovr")
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", ConvergenceWarning)
+        ovr.fit(token_train, train[CONFIG.target_col])
+    ovr_warnings = sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+    ovr_probability = np.zeros_like(primary_probability)
+    raw_ovr_probability = ovr.predict_proba(token_test)
+    for column, name in enumerate(ovr.classes_):
+        ovr_probability[:, class_index[name]] = raw_ovr_probability[:, column]
+
+    blended_probability = 0.5 * primary_probability + 0.5 * ovr_probability
+    prediction = np.asarray(classes)[blended_probability.argmax(axis=1)]
+    submission = pd.DataFrame({CONFIG.id_col: test[CONFIG.id_col], CONFIG.target_col: prediction})
+    metadata = {
+        "experiment_id": "exp-gs-002-13",
+        "candidate": candidate.experiment_id,
+        "model": "primary_logistic_0p5 + event_tfidf_ovr_logistic_0p5",
+        "seed": seed,
+        "tfidf_min_df": min_df,
+        "tfidf_sublinear_tf": True,
+        "train_rows": len(train),
+        "test_rows": len(test),
+        "primary_feature_count": len(feature_names),
+        "tfidf_vocabulary_size": len(vectorizer.vocabulary_),
+        "primary_convergence_warning_count": primary_warnings,
+        "tfidf_ovr_convergence_warning_count": ovr_warnings,
+        "convergence_warning_count": primary_warnings + ovr_warnings,
+        "leakage_check": True,
+        "nan_as_mutation_count": 0,
+    }
+    return submission, metadata
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--candidate", default="H-A", choices=CANDIDATES)
@@ -643,6 +701,7 @@ def main() -> None:
     parser.add_argument("--run-id", default="")
     parser.add_argument("--data-dir", type=Path, default=None)
     parser.add_argument("--submit", action="store_true")
+    parser.add_argument("--submit-event-tfidf-ovr", action="store_true")
     parser.add_argument("--submission-name", default="")
     parser.add_argument("--self-check", action="store_true")
     parser.add_argument("--soft-specialist", action="store_true")
@@ -669,7 +728,12 @@ def main() -> None:
         assert nan_as_mutation_count(test, genes) == 0
         output = root / "experiments" / "gs" / "notebooks" / "submission"
         output.mkdir(parents=True, exist_ok=True)
-        submission, metadata = make_submission(train, test, genes, CANDIDATES[args.candidate], args.model, args.seed)
+        if args.submit_event_tfidf_ovr:
+            if args.model != "logistic":
+                raise ValueError("event-token OVR submission requires --model logistic")
+            submission, metadata = make_event_tfidf_ovr_submission(train, test, genes, CANDIDATES[args.candidate], args.seed, args.tfidf_min_df)
+        else:
+            submission, metadata = make_submission(train, test, genes, CANDIDATES[args.candidate], args.model, args.seed)
         sample_path = data_dir / "sample_submission.csv"
         if sample_path.exists():
             sample = pd.read_csv(sample_path)
@@ -677,7 +741,7 @@ def main() -> None:
             assert list(sample[CONFIG.id_col]) == list(test[CONFIG.id_col])
             sample[CONFIG.target_col] = submission[CONFIG.target_col]
             submission = sample
-        default_name = f"submission_{args.candidate}_{args.model}_seed{args.seed}.csv"
+        default_name = f"submission_exp-gs-002-13_{args.candidate}_primary-ovr-tfidf_seed{args.seed}.csv" if args.submit_event_tfidf_ovr else f"submission_{args.candidate}_{args.model}_seed{args.seed}.csv"
         submission_path = output / (args.submission_name or default_name)
         submission.to_csv(submission_path, index=False)
         metadata_path = output / f"{submission_path.stem}_metadata.csv"
