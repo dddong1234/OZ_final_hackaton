@@ -1,0 +1,2 @@
+experiment_id,seed,mode,feature_count,outer_train_rows,early_stopping_epoch,inner_loss_first,inner_loss_best,loss_finite,runtime_seconds,device,leakage_check,nan_as_mutation_count
+FM-01,42,preflight_first_outer_fold_only,14450,4960,1,2.7611727714538574,2.7611727714538574,True,294.7351513750036,mps,True,0
