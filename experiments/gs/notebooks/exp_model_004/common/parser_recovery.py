@@ -12,6 +12,7 @@ import pandas as pd
 _SPLIT = re.compile(r"\s*(?:;|\||/|,)\s*")
 _AA = re.compile(r"^([A-Z*])([0-9]+)([A-Z*])$")
 _POS = re.compile(r"(?:[A-Z*])?([0-9]+)(?:[A-Z*])?")
+_ATOMIC = re.compile(r"(?:[A-Z*][0-9]+(?:[A-Z*]|FS(?:INS|DEL)?|FRAMESHIFT)|[0-9]+_[0-9]+[A-Z*]+>[A-Z*]+)", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -40,7 +41,7 @@ def _classify(raw: str) -> tuple[str, int | None]:
     if "START" in value and ("LOSS" in value or "LOST" in value): return "START_LOSS", position
     if "STOP" in value and ("LOSS" in value or "LOST" in value): return "STOP_LOSS", position
     if re.search(r"FS|FRAMESHIFT", value): return ("FRAMESHIFT_INS" if "INS" in value else "FRAMESHIFT_DEL"), position
-    if "DELINS" in value or "COMPLEX" in value: return "DELINS_COMPLEX", position
+    if "DELINS" in value or "COMPLEX" in value or re.match(r"^[0-9]+_[0-9]+[A-Z*]+>[A-Z*]+$", value): return "DELINS_COMPLEX", position
     if "DUP" in value: return "DUPLICATION", position
     if "INS" in value: return "INFRAME_INS", position
     if "DEL" in value: return "INFRAME_DEL", position
@@ -60,8 +61,12 @@ def parse_cell(gene: str, value: object) -> list[CanonicalEvent]:
     unique: list[str] = []
     for segment in _SPLIT.split(value.strip()):
         segment = segment.strip()
-        if segment and segment.upper() not in {"WT", "NAN"} and segment not in unique:
-            unique.append(segment)
+        matches = _ATOMIC.findall(segment)
+        pieces = matches if len(matches) >= 2 and _ATOMIC.sub("", segment).strip() == "" else [segment]
+        for piece in pieces:
+            piece = piece.strip()
+            if piece and piece.upper() not in {"WT", "NAN"} and piece not in unique:
+                unique.append(piece)
     events = []
     for segment in unique:
         kind, position = _classify(segment)
@@ -86,8 +91,10 @@ def audit_frame(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
             if not isinstance(value, str): nan_cells += 1; continue
             if not value.strip() or value.strip().upper() == "WT": wt_cells += 1; continue
             delimiters.update(re.findall(r";|\||/|,", value))
-            parts = [part.strip() for part in _SPLIT.split(value) if part.strip() and part.strip().upper() not in {"WT", "NAN"}]
-            raw_segments.extend(parts); multi_cells += int(len(parts) > 1); parsed.extend(parse_cell(gene, value))
+            events = parse_cell(gene, value)
+            raw_segments.extend(event.raw for event in events)
+            multi_cells += int(len(events) > 1)
+            parsed.extend(events)
     type_table = pd.DataFrame(Counter(event.canonical_type for event in parsed).items(), columns=["canonical_type", "count"]).sort_values("count", ascending=False)
     unknown = pd.DataFrame(Counter(event.raw for event in parsed if event.canonical_type == "UNKNOWN").items(), columns=["raw_pattern", "count"]).sort_values("count", ascending=False)
     contract = {"raw_segment_count": len(raw_segments), "parsed_event_count": len(parsed), "unknown_event_count": int((type_table.canonical_type.eq('UNKNOWN') * type_table['count']).sum()) if not type_table.empty else 0, "wt_cell_count": wt_cells, "nan_cell_count": nan_cells, "multi_event_cell_count": multi_cells, "delimiter_counts": dict(delimiters), "segment_conservation": len(raw_segments) == len(parsed)}

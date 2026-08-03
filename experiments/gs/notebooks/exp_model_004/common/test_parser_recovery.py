@@ -19,10 +19,15 @@ class ParserRecoveryTest(unittest.TestCase):
         events = parse_cell("TP53", "R175H; R248Q / R175H")
         self.assertEqual([event.raw for event in events], ["R175H", "R248Q"])
 
+    def test_whitespace_separated_events_are_recovered(self):
+        events = parse_cell("BRAF", "L26V L24V")
+        self.assertEqual([event.raw for event in events], ["L26V", "L24V"])
+
     def test_canonical_types_and_unknown_retention(self):
         self.assertEqual(parse_cell("BRAF", "V600E")[0].canonical_type, "MISSENSE")
         self.assertEqual(parse_cell("APC", "R1450*")[0].canonical_type, "NONSENSE")
         self.assertEqual(parse_cell("BRCA1", "K123fs")[0].canonical_type, "FRAMESHIFT_DEL")
+        self.assertEqual(parse_cell("X", "483_484MP>IA")[0].canonical_type, "DELINS_COMPLEX")
         self.assertEqual(parse_cell("X", "mystery_format")[0].canonical_type, "UNKNOWN")
 
     def test_g1_uses_legacy_parent_and_g2_keeps_canonical(self):
