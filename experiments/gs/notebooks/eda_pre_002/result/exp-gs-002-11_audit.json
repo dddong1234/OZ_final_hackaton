@@ -1,0 +1,7 @@
+{
+  "oof_train_only": true,
+  "alpha": 0.3,
+  "all_seed_delta_positive": false,
+  "pair_f1_not_worse": true,
+  "status": "미검출/기각"
+}

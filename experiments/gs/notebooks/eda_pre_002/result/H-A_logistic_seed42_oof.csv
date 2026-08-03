@@ -1,0 +1,2 @@
+experiment_id,model,seed,oof_macro_f1,oof_accuracy,fold_macro_f1_mean,fold_macro_f1_std,feature_count_mean,runtime_seconds,convergence_warning_count,leakage_check,nan_as_mutation_count
+H-A,logistic,42,0.42638642943928645,0.4155781325592646,0.42514238977228064,0.0069429165639570585,8205.2,250.62735225000142,5,True,0

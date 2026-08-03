@@ -1,0 +1,3 @@
+experiment_id,seed_count,macro_f1_mean,macro_f1_std,feature_count_mean,convergence_warning_count,delta_vs_exact4
+H-AS-LR-exact,3,0.4334785930832088,0.0024359419335661893,8215.533333333333,15,0.0
+H-AS-LR-exact-hotspot-top3,3,0.432543515990464,0.00283895866517683,8218.533333333333,15,-0.0009350770927448182

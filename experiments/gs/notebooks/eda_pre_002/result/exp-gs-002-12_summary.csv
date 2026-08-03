@@ -1,0 +1,2 @@
+experiment_id,seed_count,min_df,primary_macro_f1_mean,event_tfidf_macro_f1_mean,blend_0p5_macro_f1_mean,blend_delta_mean,blend_delta_std,all_seed_blend_delta_positive,tfidf_vocab_size_mean,feature_count_mean,convergence_warning_count,leakage_check,nan_as_mutation_count
+exp-gs-002-12,3,3,0.47850164684994495,0.37573526009599073,0.4803045458589301,0.0018028990089852335,0.001247000334058223,True,5871.266666666667,8173.533333333333,0,True,0

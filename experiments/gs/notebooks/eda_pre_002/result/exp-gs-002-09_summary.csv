@@ -1,0 +1,3 @@
+candidate,model,cv_seed,oof_macro_f1,oof_accuracy,fold_macro_f1_mean,fold_macro_f1_std,feature_count,masked_train_cell_count,validation_masked_cell_count,runtime_seconds,delta_vs_baseline
+lgbm_mask_noise_0p001,lightgbm,42,0.32307773677946455,0.3380099983873569,0.3214150538593022,0.004912294146216309,4384,108741,0,1089.1431642919997,-0.002810008726992108
+lgbm_native_baseline,lightgbm,42,0.32588774550645666,0.33075310433801,0.3240242402103886,0.016410777885642807,4384,0,0,571.1615744169976,0.0

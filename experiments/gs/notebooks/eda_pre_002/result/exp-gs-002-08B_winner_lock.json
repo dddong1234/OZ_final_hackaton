@@ -1,0 +1,12 @@
+{
+  "selected_from": "exp-gs-002-08A",
+  "winner": "H-AS-LR-exact-confusion-pairs-Apair-log1p",
+  "control": "H-AS-LR-exact-confusion-pairs-Aall-log1p",
+  "model": "logistic",
+  "validation_seeds": [
+    52,
+    62,
+    31415
+  ],
+  "fixed_rule": "08B에서는 새 피처·파라미터 탐색 없이, 08A에서 확정한 winner/control만 새 seed로 재평가한다."
+}

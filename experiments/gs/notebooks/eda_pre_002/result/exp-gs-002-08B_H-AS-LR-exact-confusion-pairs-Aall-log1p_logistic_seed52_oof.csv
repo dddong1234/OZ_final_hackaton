@@ -1,0 +1,2 @@
+experiment_id,model,seed,oof_macro_f1,oof_accuracy,fold_macro_f1_mean,fold_macro_f1_std,feature_count_mean,runtime_seconds,convergence_warning_count,leakage_check,nan_as_mutation_count
+H-AS-LR-exact-confusion-pairs-Aall-log1p,logistic,52,0.472688638537702,0.45557168198677633,0.47241898844972763,0.01797192815644982,8216.6,223.64804895799898,0,True,0
