@@ -1,0 +1,123 @@
+{
+  "blocks": "GBV",
+  "lr_params": {
+    "solver": "lbfgs",
+    "C": 0.07,
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "lgbm_params": {
+    "objective": "multiclass",
+    "class_weight": "balanced",
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "min_child_samples": 20,
+    "subsample": 0.8,
+    "colsample_bytree": 0.6,
+    "n_jobs": -1,
+    "verbose": -1
+  },
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42,
+      52,
+      62
+    ],
+    "model_seed": 42
+  },
+  "weights": [
+    1.0,
+    0.9,
+    0.8,
+    0.7,
+    0.6,
+    0.5
+  ],
+  "LR": {
+    "f1_macro": 0.41274,
+    "f1_macro_std": 0.00057,
+    "per_seed": {
+      "42": 0.41225,
+      "52": 0.41336,
+      "62": 0.4126
+    }
+  },
+  "LGBM": {
+    "f1_macro": 0.37594,
+    "f1_macro_std": 0.0058,
+    "per_seed": {
+      "42": 0.37485,
+      "52": 0.37077,
+      "62": 0.38221
+    }
+  },
+  "ensemble": {
+    "w1.0": {
+      "f1_macro": 0.41274,
+      "per_seed": {
+        "42": 0.41225,
+        "52": 0.41336,
+        "62": 0.4126
+      }
+    },
+    "w0.9": {
+      "f1_macro": 0.42114,
+      "per_seed": {
+        "42": 0.42035,
+        "52": 0.419,
+        "62": 0.42407
+      }
+    },
+    "w0.8": {
+      "f1_macro": 0.41536,
+      "per_seed": {
+        "42": 0.41857,
+        "52": 0.41105,
+        "62": 0.41645
+      }
+    },
+    "w0.7": {
+      "f1_macro": 0.40686,
+      "per_seed": {
+        "42": 0.40572,
+        "52": 0.40366,
+        "62": 0.41119
+      }
+    },
+    "w0.6": {
+      "f1_macro": 0.39738,
+      "per_seed": {
+        "42": 0.39868,
+        "52": 0.39267,
+        "62": 0.40079
+      }
+    },
+    "w0.5": {
+      "f1_macro": 0.39016,
+      "per_seed": {
+        "42": 0.39111,
+        "52": 0.38573,
+        "62": 0.39364
+      }
+    }
+  },
+  "best_w": 0.9,
+  "best_vs_lr": {
+    "mean": 0.0084,
+    "std": 0.00293,
+    "pos": "3/3"
+  },
+  "detected": true,
+  "note": "LGBM 파라미터 튜닝 전 1차. CV 이득은 LB 로 확인 필요.",
+  "fingerprint": {
+    "pipeline": "pipeline.py@exp002_v3",
+    "pipeline_sha256": "b9214a433aefeb5e8ed7efc2101f639039a60bb366a114af5ed5d4b209d13c87",
+    "features": "features_A.py@A_v2_raw_variants",
+    "features_sha256": "5fdf267faef64447adcfca80e384b455fa840dd001cc5dbcae79a833e9b8de58",
+    "preprocess_sha256": "2fa768957eeb81b35635ce286a7a9f09cca9a9670acf844853ebf80eb521aed7"
+  }
+}
