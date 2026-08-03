@@ -1,0 +1,25 @@
+{
+  "seed": 42,
+  "permutation_seed": 20260803,
+  "n_classes": 26,
+  "runs": {
+    "real_enrichment": {
+      "tag": "real + enrichment",
+      "oof_macro_f1": 0.5294907492642805,
+      "convergence_warning_count": 0
+    },
+    "permuted_base": {
+      "tag": "permuted + base",
+      "oof_macro_f1": 0.031996427698703284,
+      "convergence_warning_count": 0
+    },
+    "permuted_enrichment": {
+      "tag": "permuted + enrichment",
+      "oof_macro_f1": 0.0330339947263695,
+      "convergence_warning_count": 0
+    }
+  },
+  "permuted_delta": 0.0010375670276662197,
+  "chance_level": 0.038461538461538464,
+  "verdict": "PASS"
+}

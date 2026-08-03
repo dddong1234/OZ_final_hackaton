@@ -1,0 +1,53 @@
+{
+  "block": "gene x functype x 50aa-bin signature",
+  "base": "exp_009 hardened 08 (H-AS + exact4 + contrast + A_pair + log1p)",
+  "min_count": 3,
+  "seeds": [
+    42,
+    2024,
+    777
+  ],
+  "mean_delta": 0.0023296735920230738,
+  "std_delta": 0.004141634950150457,
+  "positive_seeds": "2/3",
+  "mean_oof_macro_f1": 0.4808313204419679,
+  "feature_count_mean": 35473.6,
+  "convergence_warning_count": 0,
+  "reference_claim": {
+    "source": "임경수 Event Ontology 정리",
+    "seed42_delta": 0.004032,
+    "seed42_features": 35183
+  },
+  "per_seed": [
+    {
+      "seed": 42,
+      "oof_macro_f1": 0.48286497938967676,
+      "oof_accuracy": 0.46169972585066926,
+      "feature_count_mean": 35471.4,
+      "convergence_warning_count": 0,
+      "runtime_seconds": 467.72480995883234,
+      "baseline_oof_macro_f1": 0.47814168846488037,
+      "delta": 0.004723290924796397
+    },
+    {
+      "seed": 2024,
+      "oof_macro_f1": 0.4809359168441771,
+      "oof_accuracy": 0.46057087566521526,
+      "feature_count_mean": 35479.0,
+      "convergence_warning_count": 0,
+      "runtime_seconds": 432.70137883303687,
+      "baseline_oof_macro_f1": 0.4762175133106753,
+      "delta": 0.00471840353350178
+    },
+    {
+      "seed": 777,
+      "oof_macro_f1": 0.47869306509205006,
+      "oof_accuracy": 0.4565392678600226,
+      "feature_count_mean": 35470.4,
+      "convergence_warning_count": 0,
+      "runtime_seconds": 443.09043995896354,
+      "baseline_oof_macro_f1": 0.481145738774279,
+      "delta": -0.0024526736822289563
+    }
+  ]
+}

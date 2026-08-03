@@ -1,0 +1,8 @@
+{
+  "identical": true,
+  "rows": 2546,
+  "differing_rows": 0,
+  "a": "outputs/baseline_original.csv",
+  "b": "outputs/patched.csv",
+  "distinct_classes": 26
+}
