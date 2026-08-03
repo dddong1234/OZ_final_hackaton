@@ -27,6 +27,7 @@ OOF Macro F1이며, 대회 제출 점수(LB)는 별도 항목으로 구분한다
 | exp_007 | burden + type + hotspot + truncating + recurrent missense 조합 | functional full **0.43189 ± 0.00325** | 당시 최고 FE |
 | exp_008 | functional full의 중복 피처를 상관/중복 제거 | pruning **0.43174 ± 0.00318**, 원본보다 -0.00015 | 성능 목적 채택 안 함 |
 | exp_009 | 단백질 표기 구조 A(ref/alt/pair/position)와 행 내부 분포 S를 추가 | A pair **0.46360 ± 0.00109**, 기준 대비 +0.03171 | OOF 1위, LB 재검증 필요 |
+| exp_010 | A pair log1p, S, train-only contrast/exact를 순차 누적 | pair log1p **0.48248 ± 0.00098**; 이후 블록은 하락 | pair log1p 채택 |
 
 ## 실험별 해석
 
@@ -60,6 +61,14 @@ ref→alt pair, 단백질 위치 bin, notation type 분포를 추출했다. 3-se
 블록만 추가한 case 06이 가장 안정적이었다. A 전체나 S 전체를 한꺼번에 넣으면
 불필요한 열이 섞여 개선폭이 줄었다.
 
+### exp_010 — A pair 표현과 챔피언 요소 누적
+
+exp009의 A pair raw count를 `log1p`로 바꾸자 seed 42에서 0.46286에서 0.48208로
+상승했고, seed 42/52/62 평균도 0.48248 ± 0.00098로 안정적이었다. 그 위에 S,
+train-only confusion contrast와 train-only exact top-4를 순차 추가하면 각각
+점수가 하락했다. 다만 exp010 기준 파이프는 정확한 GS B04가 아니므로 B04 갱신을
+확정하지 않고, 후속 실험에서 B04 고정 독립 ablation으로 재검증한다.
+
 ## OOF와 실제 LB의 차이
 
 exp_009 `case_06_plus_A_pair`의 OOF Macro F1은 **0.46360 ± 0.00109**였지만,
@@ -73,9 +82,9 @@ train/test 표기 형식 차이다. LB 점수는 피처 선택에 사후 사용�
 
 ## 현재 결론과 후속 연구
 
-1. 로컬 검증 최고 FE는 `functional full + A pair`다.
+1. SDH 계열 로컬 검증 최고 FE는 `functional full + A pair log1p`다.
 2. 실제 제출에서는 OOF-LB gap이 커서 pair 블록 단독 채택을 확정하지 않는다.
-3. 다음에는 pair vocabulary를 train-fold 빈도 기준으로 축소하는 ablation, pair
-   count의 이진화/로그 변환, fold별 pair 안정성(등장률·분산) 검사를 우선한다.
+3. 다음에는 정확한 B04 챔피언을 기준으로 고정하고, 행 내부 profile과 fold-train
+   class enrichment 표현을 각각 독립적으로 추가한다.
 4. 그 전까지 모델 파라미터는 LR `C=0.07`, `max_iter=2000`으로 고정하고, 새
    외부 annotation이나 test 통계를 피처 설계에 사용하지 않는다.

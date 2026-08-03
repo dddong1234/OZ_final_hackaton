@@ -31,3 +31,11 @@
 `experiment.ipynb`를 위에서부터 실행한다. 각 case는 별도 셀로 분리되어 있으며,
 실제 CV 실행은 사용자가 직접 한다. 결과는 `results/` 아래에 저장되고 Git에는
 커밋하지 않는다.
+
+## 최종 결과
+
+`case_02_plus_pair_log1p`가 seed 42에서 0.48208, seed 42/52/62에서
+**0.48248 ± 0.00098**로 가장 높았다. A pair raw 대비 +0.01923 개선이다. 이후
+S, train-only contrast, train-only exact top-4를 누적하면 점수가 차례로 하락해
+채택하지 않았다. 세부 결과와 B04 비교 시 주의점은 `EXPERIMENT_SUMMARY.md`에
+기록했다.
