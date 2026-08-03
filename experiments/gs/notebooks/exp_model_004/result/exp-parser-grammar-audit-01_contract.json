@@ -1,0 +1,10 @@
+{
+  "raw_segment_count": 218893,
+  "parsed_event_count": 218893,
+  "unknown_event_count": 20808,
+  "wt_cell_count": 26966291,
+  "nan_cell_count": 0,
+  "multi_event_cell_count": 0,
+  "delimiter_counts": {},
+  "segment_conservation": true
+}
