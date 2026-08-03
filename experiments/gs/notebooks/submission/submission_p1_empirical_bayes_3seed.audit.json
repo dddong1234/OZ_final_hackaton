@@ -1,0 +1,24 @@
+{
+  "run_id": "submission_p1_empirical_bayes_3seed",
+  "seeds": [
+    42,
+    777,
+    2024
+  ],
+  "model": "P1 + Empirical-Bayes enrichment LR probability average",
+  "lr": {
+    "solver": "lbfgs",
+    "C": 0.07,
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "feature_count": 8425,
+  "convergence_warning_count": 0,
+  "test_nan_cells": 237,
+  "nan_as_mutation_count": 0,
+  "test_used_for_fit": false,
+  "test_read_after_fit_only": true,
+  "matrix_fit_index": "full_train_only",
+  "submission": "/Users/admin/Documents/FinalProject/OZ_fianl_hackaton/experiments/gs/notebooks/submission/submission_p1_empirical_bayes_3seed.csv",
+  "rows": 2546
+}

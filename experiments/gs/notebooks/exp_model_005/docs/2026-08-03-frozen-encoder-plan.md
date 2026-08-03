@@ -2,7 +2,7 @@
 
 **Goal:** Compare a fixed PubMedBERT event-string representation with the fixed P1+EB LR baseline without using test-derived statistics or external biological annotation.
 
-**Fixed contract:** `microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext`; frozen weights; template `gene {gene} type {type} ref {ref} position {pos} alt {alt}`; mean/max pooling; fold-train StandardScaler+LR; fixed blend `.75 P1+EB + .25 encoder`.
+**Fixed contract:** `microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext` at revision `2839b4fc440a3c41dc2b716fb14d530c33c8c1ff`; frozen weights; template `gene {gene} type {type} ref {ref} position {pos} alt {alt}`; mean/max pooling; fold-train StandardScaler+LR; fixed blend `.75 P1+EB + .25 encoder`. This is Microsoft's renamed public checkpoint formerly known as PubMedBERT.
 
 **Files:**
 - `common/frozen_event_encoder.py`: event sentence construction and pooling.

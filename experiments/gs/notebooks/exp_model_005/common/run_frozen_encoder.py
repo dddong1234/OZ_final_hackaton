@@ -43,7 +43,9 @@ def sentence_rows(frame):
 def load_encoder(allow_download):
     try: from transformers import AutoModel, AutoTokenizer
     except ImportError as e: raise RuntimeError("transformers가 없습니다. .venv에 설치 후 다시 실행하세요.") from e
-    kwargs={"revision":MODEL_REVISION,"local_files_only":not allow_download}
+    # This checkpoint is public. Explicit anonymous access prevents a stale local
+    # HF token from turning a public download into a 401 authentication failure.
+    kwargs={"revision":MODEL_REVISION,"local_files_only":not allow_download,"token":False}
     tokenizer=AutoTokenizer.from_pretrained(MODEL_ID,**kwargs); model=AutoModel.from_pretrained(MODEL_ID,**kwargs); model.eval()
     import torch
     device="mps" if torch.backends.mps.is_available() else "cpu"; model.to(device)
@@ -79,12 +81,15 @@ def main():
     train=pd.read_csv(root()/"data/raw/train.csv"); genes=[c for c in train if c not in (base.CFG.id_col,base.CFG.target_col)]
     assert int(train[genes].isna().sum().sum())==0
     tokenizer,model,device,vocab_hash=load_encoder(args.allow_download); x=embed_rows(sentence_rows(train[genes]),tokenizer,model,device)
-    p1,f1,w1=encoder_cv(x,y,classes,legacy.fixed_folds(y,args.seed),args.seed); p2=.75*p0+.25*p1
-    out=Path(__file__).parent.parent/"result"; out.mkdir(exist_ok=True); variants=[("E0_P1_EB",p0,f0,w0),("E1_frozen_encoder",p1,f1,w1),("E2_fixed_blend",p2,f1,w1)]
+    folds=legacy.fixed_folds(y,args.seed)
+    p1,f1,w1=encoder_cv(x,y,classes,folds,args.seed); p2=.75*p0+.25*p1
+    blend_folds=f1.copy()
+    blend_folds["macro_f1"]=[f1_score(y[va],classes[p2[va].argmax(1)],average="macro") for _,va in folds]
+    out=Path(__file__).parent.parent/"result"; out.mkdir(exist_ok=True); variants=[("E0_P1_EB",p0,f0,w0),("E1_frozen_encoder",p1,f1,w1),("E2_fixed_blend",p2,blend_folds,w1)]
     records=[]
     for name,p,folds,w in variants: records.append({"variant":name,"oof_macro_f1":f1_score(y,classes[p.argmax(1)],average="macro"),"feature_count":folds.feature_count.mean(),"convergence_warning_count":w,"leakage_check":True,"nan_as_mutation_count":0})
     summary=pd.DataFrame(records); summary["delta_vs_e0"]=summary.oof_macro_f1-summary.oof_macro_f1.iloc[0]; summary.to_csv(out/f"{args.run_id}_seed{args.seed}_summary.csv",index=False)
-    pd.concat([f0.assign(variant="E0_P1_EB"),f1.assign(variant="E1_frozen_encoder"),f1.assign(variant="E2_fixed_blend")],ignore_index=True).to_csv(out/f"{args.run_id}_seed{args.seed}_fold_metrics.csv",index=False)
+    pd.concat([f0.assign(variant="E0_P1_EB"),f1.assign(variant="E1_frozen_encoder"),blend_folds.assign(variant="E2_fixed_blend")],ignore_index=True).to_csv(out/f"{args.run_id}_seed{args.seed}_fold_metrics.csv",index=False)
     pd.DataFrame({"true_class":y,**{f"{name}_{c}":p[:,i] for name,p,_,_ in variants for i,c in enumerate(classes)}}).to_csv(out/f"{args.run_id}_seed{args.seed}_oof_probabilities.csv",index=False)
     (out/f"{args.run_id}_seed{args.seed}_config.json").write_text(json.dumps({"model_id":MODEL_ID,"revision":MODEL_REVISION,"tokenizer_hash":vocab_hash,"frozen":True,"pooling":"mean_max_log1p_count","max_length":MAX_LENGTH,"scaler_fit":"outer_train_only","test_read":False,"nan_as_mutation_count":0},indent=2),encoding="utf-8")
     print(summary.to_string(index=False))

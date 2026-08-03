@@ -16,7 +16,8 @@ ROOT=next(p for p in (Path.cwd(),*Path.cwd().parents) if (p/"experiments/gs/note
 RUNNER=ROOT/"experiments/gs/notebooks/exp_model_005/common/run_frozen_encoder.py"
 RESULT=ROOT/"experiments/gs/notebooks/exp_model_005/result"
 print({"torch":importlib.util.find_spec("torch") is not None,"transformers":importlib.util.find_spec("transformers") is not None})
-print("모델 ID: microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext")'''),
+print("모델 ID: microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext")
+print("모델 revision: 2839b4fc440a3c41dc2b716fb14d530c33c8c1ff")'''),
 c("code",'''SEED=42
 RUN_EXPERIMENT=False
 ALLOW_MODEL_DOWNLOAD=False

@@ -4,10 +4,22 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from frozen_event_encoder import event_sentence, pool_event_embeddings
+from frozen_event_encoder import MODEL_ID, MODEL_REVISION, event_sentence, pool_event_embeddings
 
 
 class FrozenEncoderTest(unittest.TestCase):
+    def test_uses_public_renamed_biomedbert_with_pinned_revision(self):
+        self.assertEqual(MODEL_ID, "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext")
+        self.assertEqual(MODEL_REVISION, "2839b4fc440a3c41dc2b716fb14d530c33c8c1ff")
+
+    def test_public_checkpoint_does_not_use_a_local_hub_token(self):
+        runner = (Path(__file__).parent / "run_frozen_encoder.py").read_text(encoding="utf-8")
+        self.assertIn('"token":False', runner)
+
+    def test_blend_fold_metrics_are_recomputed_from_blend_probability(self):
+        runner = (Path(__file__).parent / "run_frozen_encoder.py").read_text(encoding="utf-8")
+        self.assertIn("blend_folds", runner)
+
     def test_sentence_is_fixed_and_uses_only_event_fields(self):
         self.assertEqual(event_sentence("TP53", "MISSENSE", "R", 175, "H"), "gene TP53 type MISSENSE ref R position 175 alt H")
 

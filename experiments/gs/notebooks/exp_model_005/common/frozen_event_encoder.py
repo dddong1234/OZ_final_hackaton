@@ -4,8 +4,10 @@ from __future__ import annotations
 import numpy as np
 
 
-MODEL_ID = "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext"
-MODEL_REVISION = "main"
+# Microsoft renamed this public checkpoint from PubMedBERT to BiomedBERT.
+# Pin the published commit so a future `main` update cannot change the experiment.
+MODEL_ID = "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
+MODEL_REVISION = "2839b4fc440a3c41dc2b716fb14d530c33c8c1ff"
 MAX_LENGTH = 32
 BATCH_SIZE = 32
 
