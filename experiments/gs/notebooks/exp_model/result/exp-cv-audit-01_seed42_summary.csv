@@ -1,0 +1,3 @@
+cv_mode,seed,oof_macro_f1,fold_macro_f1_mean,fold_macro_f1_std,feature_count_mean,runtime_seconds,leakage_check,nan_as_mutation_count,delta_vs_random_oof
+stratified_random,42,0.4825927951809337,0.48176231474053155,0.014228029355998395,8175.2,30.196456167002907,True,0,0.0
+stratified_profile_group,42,0.4836270532541717,0.48530660999548453,0.008181489838263532,8168.2,31.01691495801788,True,0,0.0010342580732380369

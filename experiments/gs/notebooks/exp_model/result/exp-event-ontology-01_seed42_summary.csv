@@ -1,0 +1,6 @@
+experiment_id,variant,seed,oof_macro_f1,delta_vs_baseline,feature_count_mean,runtime_seconds,leakage_check,nan_as_mutation_count,position_bin_width,min_token_support
+exp-event-ontology-01,baseline,42,0.4825927951809337,0.0,8175.2,430.53332829201827,True,0,50,3
+exp-event-ontology-01,locus,42,0.4856229198460417,0.003030124665108047,10730.6,430.5424613330106,True,0,50,3
+exp-event-ontology-01,position_bin,42,0.48390970109677245,0.001316905915838773,40797.6,430.5513472080056,True,0,50,3
+exp-event-ontology-01,signature,42,0.486624634945735,0.004031839764801315,35183.0,430.5599154579977,True,0,50,3
+exp-event-ontology-01,all_ontology,42,0.48107485444922,-0.001517940731713685,70360.8,430.56853870800114,True,0,50,3

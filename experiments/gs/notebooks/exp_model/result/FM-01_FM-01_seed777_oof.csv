@@ -1,0 +1,2 @@
+experiment_id,seed,fm_oof_macro_f1,lr08_oof_macro_f1,blend_0p5_oof_macro_f1,delta_fm_vs_lr08,delta_blend_vs_lr08,feature_count_mean,early_stopping_epoch_mean,runtime_seconds,device,loss_finite,leakage_check,nan_as_mutation_count,parameters
+FM-01,777,0.28876287105149445,0.4837840884370487,0.4306836024618992,-0.19502121738555422,-0.05310048597514949,14493.8,1.4,1530.328473874979,mps,True,True,0,"{""rank"": 16, ""lr"": 0.001, ""weight_decay"": 1e-05, ""batch"": 128, ""max_epochs"": 80, ""patience"": 8}"

@@ -1,0 +1,2 @@
+experiment_id,rows,unique_full_event_profiles,duplicate_profile_rows,ambiguous_duplicate_rows,ambiguous_duplicate_rate,mean_duplicate_purity,mean_duplicate_entropy,nearest_label_match_rate,wt_only_rows,leakage_check,nan_as_mutation_count
+exp-input-audit-01,6201,5636,1016,1005,0.16207063376874697,0.5053886032090495,0.994188661943034,0.19851636832768907,94,True,0
