@@ -1,0 +1,3 @@
+variant,oof_macro_f1,feature_count,convergence_warning_count,leakage_check,nan_as_mutation_count,delta_vs_eb
+P1+EB LR,0.5344162926505477,8201.2,0,True,0,0.0
+point_process_eb,0.5182550885517622,8279.2,0,True,0,-0.01616120409878552
