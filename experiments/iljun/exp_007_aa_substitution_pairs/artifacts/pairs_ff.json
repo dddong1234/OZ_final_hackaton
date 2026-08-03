@@ -1,0 +1,84 @@
+{
+  "base": "SDH_functional_full(CombinedMutationTransformer)",
+  "ff_dim": 4286,
+  "model_parameters": {
+    "solver": "lbfgs",
+    "C": 0.07,
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42,
+      52,
+      62
+    ],
+    "model_seed": 42
+  },
+  "stages": {
+    "ff": {
+      "f1_macro": 0.41129,
+      "per_seed": {
+        "42": 0.40891,
+        "52": 0.41208,
+        "62": 0.41288
+      }
+    },
+    "ff+pair": {
+      "f1_macro": 0.46952,
+      "per_seed": {
+        "42": 0.46826,
+        "52": 0.46891,
+        "62": 0.47139
+      }
+    },
+    "ff+pair+S": {
+      "f1_macro": 0.46693,
+      "per_seed": {
+        "42": 0.46467,
+        "52": 0.46593,
+        "62": 0.47018
+      }
+    }
+  },
+  "vs_sdh009": {
+    "sdh_cv": 0.4636,
+    "sdh_lb": 0.34238,
+    "our_ff_pair_cv": 0.46952
+  },
+  "table": [
+    {
+      "단계": "ff",
+      "Macro F1": 0.41129,
+      "σ": 0.0021,
+      "직전 대비": "—",
+      "양수seed": "—"
+    },
+    {
+      "단계": "ff+pair",
+      "Macro F1": 0.46952,
+      "σ": 0.00165,
+      "직전 대비": "+0.05823",
+      "양수seed": "3/3"
+    },
+    {
+      "단계": "ff+pair+S",
+      "Macro F1": 0.46693,
+      "σ": 0.00289,
+      "직전 대비": "-0.00259",
+      "양수seed": "0/3"
+    }
+  ],
+  "note": "SDH 실제 base 재사용. S 의 가치는 LB(제출)로만 판정.",
+  "fingerprint": {
+    "pipeline": "pipeline.py@exp002_v3",
+    "pipeline_sha256": "b9214a433aefeb5e8ed7efc2101f639039a60bb366a114af5ed5d4b209d13c87",
+    "features": "features_A.py@A_v2_raw_variants",
+    "features_sha256": "5fdf267faef64447adcfca80e384b455fa840dd001cc5dbcae79a833e9b8de58",
+    "preprocess_sha256": "2fa768957eeb81b35635ce286a7a9f09cca9a9670acf844853ebf80eb521aed7",
+    "features_P_sha256": "e8755e9457060acea50ab74556527675ffbb2b95158bbbc2f6d16977d06e365b"
+  }
+}

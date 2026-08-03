@@ -1,0 +1,101 @@
+{
+  "base": "GBV+functional_full_tok",
+  "model_parameters": {
+    "solver": "lbfgs",
+    "C": 0.07,
+    "max_iter": 2000,
+    "class_weight": "balanced"
+  },
+  "validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "seeds": [
+      42,
+      52,
+      62
+    ],
+    "model_seed": 42
+  },
+  "tokens": true,
+  "tok_min_count": 3,
+  "stages": {
+    "GBV": {
+      "f1_macro": 0.41937,
+      "per_seed": {
+        "42": 0.41891,
+        "52": 0.41784,
+        "62": 0.42136
+      }
+    },
+    "+pair": {
+      "f1_macro": 0.45647,
+      "per_seed": {
+        "42": 0.45441,
+        "52": 0.45799,
+        "62": 0.45701
+      }
+    },
+    "+pair+marg": {
+      "f1_macro": 0.42556,
+      "per_seed": {
+        "42": 0.4219,
+        "52": 0.42574,
+        "62": 0.42905
+      }
+    },
+    "+pair+marg+S": {
+      "f1_macro": 0.42863,
+      "per_seed": {
+        "42": 0.42802,
+        "52": 0.42736,
+        "62": 0.43051
+      }
+    }
+  },
+  "best_stage": "+pair",
+  "best_vs_GBV": {
+    "mean": 0.0371,
+    "std": 0.00264,
+    "pos": "3/3"
+  },
+  "table": [
+    {
+      "단계": "GBV",
+      "Macro F1": 0.41937,
+      "σ": 0.0018,
+      "직전 대비": "—",
+      "양수seed": "—"
+    },
+    {
+      "단계": "+pair",
+      "Macro F1": 0.45647,
+      "σ": 0.00185,
+      "직전 대비": "+0.03710",
+      "양수seed": "3/3"
+    },
+    {
+      "단계": "+pair+marg",
+      "Macro F1": 0.42556,
+      "σ": 0.00358,
+      "직전 대비": "-0.03091",
+      "양수seed": "0/3"
+    },
+    {
+      "단계": "+pair+marg+S",
+      "Macro F1": 0.42863,
+      "σ": 0.00166,
+      "직전 대비": "+0.00307",
+      "양수seed": "3/3"
+    }
+  ],
+  "note": "P 블록은 고정정의(leakage 없음). CV 이득의 ~64%가 LB 로 전달(exp_003 실측).",
+  "fingerprint": {
+    "pipeline": "pipeline.py@exp002_v3",
+    "pipeline_sha256": "b9214a433aefeb5e8ed7efc2101f639039a60bb366a114af5ed5d4b209d13c87",
+    "features": "features_A.py@A_v2_raw_variants",
+    "features_sha256": "5fdf267faef64447adcfca80e384b455fa840dd001cc5dbcae79a833e9b8de58",
+    "preprocess_sha256": "2fa768957eeb81b35635ce286a7a9f09cca9a9670acf844853ebf80eb521aed7",
+    "features_P_sha256": "0cc5572fcbaf3d30d3b06dea151e0232751ec0d9bfb3a18510a48f8bb45100a7"
+  }
+}
