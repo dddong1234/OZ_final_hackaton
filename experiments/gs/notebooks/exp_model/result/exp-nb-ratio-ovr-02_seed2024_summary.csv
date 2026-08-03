@@ -1,0 +1,7 @@
+experiment_id,variant,model,seed,oof_macro_f1,delta_vs_variant_lr,feature_count_mean,leakage_check,nan_as_mutation_count,convergence_warning_count,smoothing,blend_weight_nb
+exp-nb-ratio-ovr-01,event_core,lr,2024,0.47966653196064707,0.0,8171.0,True,0,0,1.0,0.25
+exp-nb-ratio-ovr-01,event_core,nb_ratio_ovr,2024,0.4588030082435838,-0.020863523717063293,8171.0,True,0,0,1.0,0.25
+exp-nb-ratio-ovr-01,event_core,lr075_nb025,2024,0.48805882538576806,0.008392293425120989,8171.0,True,0,0,1.0,0.25
+exp-nb-ratio-ovr-01,event_core_signature,lr,2024,0.47966653196064707,0.0,35177.8,True,0,0,1.0,0.25
+exp-nb-ratio-ovr-01,event_core_signature,nb_ratio_ovr,2024,0.4465565585276657,-0.03310997343298139,35177.8,True,0,0,1.0,0.25
+exp-nb-ratio-ovr-01,event_core_signature,lr075_nb025,2024,0.49292966880556344,0.013263136844916368,35177.8,True,0,0,1.0,0.25
