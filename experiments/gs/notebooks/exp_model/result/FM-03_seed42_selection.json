@@ -1,0 +1,23 @@
+{
+  "O1_learning_rate": {
+    "candidate_id": "O1_lr_0.0003",
+    "kind": "fm",
+    "rank": 8,
+    "learning_rate": 0.0003,
+    "class_weight": "balanced"
+  },
+  "O2_rank": {
+    "candidate_id": "O2_rank_8",
+    "kind": "fm",
+    "rank": 8,
+    "learning_rate": 0.0003,
+    "class_weight": "balanced"
+  },
+  "screen_winner": {
+    "candidate_id": "O1_lr_0.0003",
+    "kind": "fm",
+    "rank": 8,
+    "learning_rate": 0.0003,
+    "class_weight": "balanced"
+  }
+}
