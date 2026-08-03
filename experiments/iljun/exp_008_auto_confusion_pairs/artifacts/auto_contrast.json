@@ -1,0 +1,131 @@
+{
+  "base_candidate": "H-AS-LR-exact-confusion-pairs-Apair-log1p",
+  "lr": {
+    "C": 0.07,
+    "max_iter": 2000
+  },
+  "n_splits": 5,
+  "seeds": [
+    42,
+    52,
+    62
+  ],
+  "methods": [
+    "confusion"
+  ],
+  "auto_n": [
+    8
+  ],
+  "genes_per_pair": [
+    5,
+    10,
+    15,
+    20
+  ],
+  "stage1_seed42": {
+    "manual2": 0.47911,
+    "confusion_p8_g5": 0.48405,
+    "confusion_p8_g10": 0.4784,
+    "confusion_p8_g15": 0.47965,
+    "confusion_p8_g20": 0.47932
+  },
+  "best_variant": "confusion_p8_g5",
+  "per_seed": {
+    "manual2": {
+      "42": 0.47911,
+      "52": 0.48239,
+      "62": 0.47686
+    },
+    "confusion_p8_g5": {
+      "42": 0.48405,
+      "52": 0.48329,
+      "62": 0.47884
+    },
+    "confusion_p8_g10": {
+      "42": 0.4784
+    },
+    "confusion_p8_g15": {
+      "42": 0.47965
+    },
+    "confusion_p8_g20": {
+      "42": 0.47932
+    }
+  },
+  "final": {
+    "manual2": {
+      "f1_macro": 0.47945,
+      "std": 0.00278
+    },
+    "confusion_p8_g5": {
+      "f1_macro": 0.48206,
+      "std": 0.00281
+    }
+  },
+  "best_vs_manual2": {
+    "mean": 0.00261,
+    "std": 0.00209,
+    "pos": "3/3",
+    "detected": true
+  },
+  "discovered_fold0": {
+    "confusion": [
+      [
+        0.3043,
+        "GBMLGG",
+        "LGG"
+      ],
+      [
+        0.2931,
+        "KIPAN",
+        "KIRC"
+      ],
+      [
+        0.2755,
+        "PCPG",
+        "THYM"
+      ],
+      [
+        0.2192,
+        "PRAD",
+        "THYM"
+      ],
+      [
+        0.2189,
+        "THCA",
+        "THYM"
+      ],
+      [
+        0.1788,
+        "PCPG",
+        "PRAD"
+      ],
+      [
+        0.165,
+        "LAML",
+        "THYM"
+      ],
+      [
+        0.148,
+        "BRCA",
+        "OV"
+      ]
+    ]
+  },
+  "table": [
+    {
+      "변형": "manual2",
+      "Macro F1": 0.47945,
+      "σ": 0.00278,
+      "기준 대비": "—",
+      "양수seed": "—"
+    },
+    {
+      "변형": "confusion_p8_g5",
+      "Macro F1": 0.48206,
+      "σ": 0.00281,
+      "기준 대비": "+0.00261",
+      "양수seed": "3/3"
+    }
+  ],
+  "note": "쌍 선택만 다르고 contrast 피처 코드는 gs 원본 재사용. fold-train 도출이라 규칙 3 안전."
+}
