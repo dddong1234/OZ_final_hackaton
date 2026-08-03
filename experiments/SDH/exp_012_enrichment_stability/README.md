@@ -31,3 +31,22 @@ exp011의 새 챔피언인 `B04 + gene×event-type class-enrichment`를 독립�
 
 모든 비기준 case는 Case 01 또는 B04에서 독립적으로 출발하며 누적하지 않는다.
 실행은 `experiment.ipynb`를 위에서부터 한 셀씩 진행한다.
+
+## 결과 요약
+
+- seed 42 최고: `case_04_shrink10` — OOF Macro F1 `0.52918`
+- 3-seed 최고: `case_04_shrink10` — `0.52824 ± 0.00187`
+- 동일 3-seed B04: `0.47930 ± 0.00253` (`+0.04893`)
+- exp011 winner: `0.52395 ± 0.00202` (`+0.00428`)
+- 차선: `case_02_support5` — `0.52667 ± 0.00229`
+- score 제외 실험은 하락 클래스 자체를 회복시키지 못했고 전체 Macro F1도 대부분
+  낮아졌다. 최종적으로 26개 class score를 모두 유지한다.
+- 모든 실행에서 수렴 경고는 0회였다.
+
+따라서 exp012의 최종 후보는
+`B04 + gene×event-type enrichment(support=10, shrinkage=10, 26 scores)`다.
+여기서 shrinkage는 LR의 `C`가 아니라 enrichment token weight를 줄이는 FE
+파라미터다. Public LB는 아직 확인하지 않았다.
+
+자세한 결과와 클래스별 해석은 `EXPERIMENT_SUMMARY.md`와 `TEAM_REPORT.md`를
+참고한다.
