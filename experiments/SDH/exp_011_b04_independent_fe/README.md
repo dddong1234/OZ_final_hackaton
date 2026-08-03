@@ -27,6 +27,18 @@ Enrichment의 outer-train 행도 자신의 label로 만든 가중치를 직접 �
 5-fold OOF 점수를 만든다. outer validation에는 outer fold-train 전체에서 학습한
 가중치를 적용만 한다.
 
+## 최종 결과
+
+`gene×event-type enrichment` 26개를 추가한 Case 04를 채택했다.
+
+- B04 CV: `0.47930 ± 0.00253`
+- Case 04 CV: **`0.52395 ± 0.00202`** (`+0.04465`)
+- B04 Public LB: `0.38711`
+- Case 04 Public LB: **`0.43525`** (`+0.04814`)
+
+계산식, 블록별 상세 설명, 클래스별 변화와 누수 방지 구조는
+`TEAM_REPORT.md`에 정리했다.
+
 ## 실행
 
 `experiment.ipynb`를 위에서부터 한 셀씩 실행한다. 결과 CSV는 `results/` 아래에
