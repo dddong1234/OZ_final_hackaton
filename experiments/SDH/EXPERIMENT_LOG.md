@@ -30,6 +30,9 @@ OOF Macro F1이며, 대회 제출 점수(LB)는 별도 항목으로 구분한다
 | exp_010 | A pair log1p, S, train-only contrast/exact를 순차 누적 | pair log1p **0.48248 ± 0.00098**; 이후 블록은 하락 | pair log1p 채택 |
 | exp_011 | B04를 고정하고 독립적인 row-local·class-enrichment FE를 추가 | gene×event-type enrichment **0.52395 ± 0.00202**, Public LB **0.4352596431** | 이전 챔피언 |
 | exp_012 | exp011 enrichment의 support·shrinkage·score 구성을 안정화 | **0.52824 ± 0.00187**, Public LB **0.4388787816** | 새 로컬·LB 챔피언 |
+| exp_013 | 챔피언 전처리를 독립 구현하고 고정 암종쌍·exact mutation을 제거 | 안전 LR **0.52761 ± 0.00128**, 누수·재현 감사 통과 | 안전 기준 파이프 |
+| exp_014 | balanced LGBM과 train-discovered pair specialist로 LR 오류 다양성을 보완 | LR80+LGBM20 **0.53984 ± 0.00322**, Public LB **0.4489813603** | 현재 챔피언 |
+| exp_015 | LGBM 전용 피처 공간 26종을 비교 | Top-1000 LGBM **0.48233 ± 0.00317**; LR blend **0.53738** | exp14 미달 |
 
 ## 실험별 해석
 
@@ -121,6 +124,28 @@ train에서만 만들고, test가 B04 train 설계행렬에 영향을 주지 않
 `experiments/SDH/exp_012_enrichment_stability/results/`에 저장했다. Public LB는
 0.4388787816으로 exp011의 0.4352596431보다 0.0036191385 상승했다.
 
+### exp_013~015 — 안전 기준 파이프와 모델 다양성
+
+exp013에서는 기존 챔피언 전처리를 독립 구현하고, 고정 암종쌍과 고정 exact
+mutation처럼 규정 해석상 논란이 생길 수 있는 피처를 제거했다. 모든 vocabulary,
+recurrent mutation 및 enrichment 통계는 fold-train에서만 학습하고 validation과
+test에는 적용만 하는 안전 기준을 확정했다. 안전 LR의 3-seed 평균은 0.52761이다.
+
+exp014는 이 안전 LR을 유지하면서 balanced multiclass LGBM을 학습하고, 각
+fold-train의 클래스별 유전자 변이율 cosine similarity로 유사 class pair 두 개를
+자동 발견했다. pair 전용 binary LGBM이 메인 LGBM의 pair 내 확률 비율만 교정하는
+hard routing을 적용했다. LR 80%와 이 LGBM 계열 20%의 3-seed OOF 평균은
+**0.5398447261**로 안전 LR보다 +0.0122359193 높았고 세 seed 모두 개선됐다.
+
+동일 구성으로 full-train 재학습하고 seed 확률을 평균한 제출은 Public LB
+**0.4489813603**을 기록했다. exp012의 0.4388787816보다 **+0.0101025787**
+상승했으므로, LR과 LGBM의 오류 다양성이 실제 test에도 전달됐다고 판단한다.
+
+exp015에서는 LGBM용 피처 제거, count bin 및 fold-train gain Top-K 등 26개 공간을
+비교했다. 단일 LGBM은 Top-1000이 0.48233으로 가장 안정적이었고 LR85/LGBM15
+blend는 0.53738까지 개선됐지만 exp014의 0.53984에는 미치지 못했다. 따라서
+exp014를 유지하고 exp015는 후속 LGBM 경량화 후보로 보관한다.
+
 ## OOF와 실제 LB의 차이
 
 exp_009 `case_06_plus_A_pair`의 OOF Macro F1은 **0.46360 ± 0.00109**였지만,
@@ -141,11 +166,12 @@ exp011과 거의 같아 shrinkage 10을 새 고정 기준으로 채택한다.
 
 ## 현재 결론과 후속 연구
 
-1. 현재 로컬·Public LB 챔피언은 exp012의
-   `B04 + gene×event-type enrichment(support10, shrink10)`이다.
-2. 3-seed CV는 0.52824 ± 0.00187, Public LB는 0.4388787816이다.
-3. exp012 실제 코드 permutation 감사와 seed42 Public LB 확인을 모두 통과했다.
-4. 후속 FE는 모델을 바꾸지 않고 enrichment의 양·음 evidence mass, positive share,
-   one-vs-rest nonlinear margin과 행 내부 score rank를 독립적으로 검증한다.
-5. 모델 파라미터는 LR `C=0.07`, `max_iter=2000`으로 고정하고, 외부 annotation이나
-   test 통계를 피처 설계에 사용하지 않는다.
+1. 현재 로컬·Public LB 챔피언은 exp014의 안전 LR80 + dynamic specialist
+   LGBM20 3-seed 앙상블이다.
+2. 3-seed OOF는 0.5398447261, Public LB는 0.4489813603이다.
+3. 이전 exp012 LB보다 +0.0101025787 상승했고, CV→LB gap은 -0.0908633658이다.
+4. 고정 암종명이나 외부 annotation 없이 fold-train에서 유사 class pair를 자동
+   발견하므로 안전 기준을 유지한다.
+5. exp015의 Top-1000 피처 선택은 LGBM 경량화 후보지만 현재 앙상블 교체 근거는
+   부족하다. 다음 모델 실험도 단일 점수뿐 아니라 LR 대비 disagreement, 오류 복구,
+   3-seed blend 개선을 함께 평가한다.

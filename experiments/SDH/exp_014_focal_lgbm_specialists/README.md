@@ -91,9 +91,46 @@ LGBM을 `0.476313 → 0.492332`로 `+0.016020` 개선해 specialist 승자로 �
 
 3개 seed 모두에서 개선됐다. 신규 안전 버전의 blend 평균은 레거시 고정 암종쌍
 버전 `0.538052`보다 `+0.001793` 높은 `0.539845`다. LGBM 단독 성능은 LR보다
-낮지만 오류 패턴이 달라 앙상블 보조 모델로 가치가 있다. Public LB는 확인하지
-않았다.
+낮지만 오류 패턴이 달라 앙상블 보조 모델로 가치가 있다.
+
+### Public LB 제출 결과
+
+3-seed full-train 확률 평균 제출의 Public Macro F1은 **0.4489813603**이다.
+이전 최고였던 exp012의 `0.4388787816`보다 **+0.0101025787**, exp011 최초
+enrichment 챔피언 `0.4352596431`보다 **+0.0137217172** 상승했다. 3-seed OOF
+평균 `0.5398447261`과 Public LB의 절대 gap은 `-0.0908633658`이다.
+
+따라서 exp14는 현재 **로컬 OOF 및 Public LB 챔피언**이다. 단일 LGBM 점수는
+LR보다 낮았지만, LR과 다른 오류를 내는 LGBM 및 train-discovered specialist를
+20% 혼합한 다양성 전략이 실제 test에서도 유효했다.
 
 현재 20% weight는 seed 42 OOF grid에서 선택한 탐색 결과다. 팀의 엄격한 최종
 검증 계약을 적용할 때는 outer-fold train 내부 OOF에서 weight를 고르고 outer
 validation에 적용하는 nested 검증이 추가로 필요하다.
+
+## 제출 파일 생성
+
+현재 확인된 exp14 후보를 seeds 42/52/62로 full-train 재학습하고 확률 평균한다.
+
+`experiment.ipynb`의 **10. 제출 파일 생성** 셀 두 개를 위에서부터 실행한다.
+
+출력:
+
+```text
+experiments/SDH/exp_014_focal_lgbm_specialists/results/
+  submission_exp014_safe_lr80_lgbm20_3seed.csv
+```
+
+각 seed에서 다음 순서로 학습한다.
+
+1. 전체 train으로 안전 exp13 vocabulary, recurrent mutation, enrichment를 fit
+2. test에는 고정된 변환을 적용만 수행
+3. 전체 train mutation prevalence로 유사 암종쌍 2개 자동 발견
+4. LR과 balanced multiclass LGBM 및 두 binary specialist 학습
+5. hard routing 후 `LR 80% + LGBM 20%`
+6. 세 seed 확률 평균 후 최종 클래스 선택
+
+노트북 셀은 `C__`, `D__exact` 피처 부재, train/test 비결합 audit, ID 순서,
+중복 ID, 예측 결측, 확률합을 검사한다. 현재 20% weight는 OOF 탐색값이므로
+nested weight 검증 전 제출은 비교용 후보로 취급한다. 실제 Public LB는
+**0.4489813603**으로 확인됐다.
