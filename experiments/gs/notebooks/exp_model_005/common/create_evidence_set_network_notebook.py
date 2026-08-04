@@ -21,11 +21,12 @@ def main() -> None:
     cells = [
         markdown("""# Class-conditional Evidence Set Network — seed 42 screen
 
-목적: team 3-way ensemble의 암종별 예측과 비교해, fold-train Empirical-Bayes event evidence를 후보 암종별 event set으로 유지하는 listwise network를 검증합니다.
+목적: fold-train Empirical-Bayes event evidence를 후보 암종별 event set으로 유지하는 listwise network를 검증합니다.
 
 - 데이터는 train만 읽습니다.
 - event vocabulary·support·EB weight·standardization은 fit partition에서만 생성합니다.
-- team baseline 재현이 `0.54202 ± 0.003` 범위를 벗어나면 결과를 저장하되 승격 판정은 차단합니다.
+- team baseline을 재학습하지 않습니다. row-aligned train-only team OOF CSV를 제공할 때만 paired 비교합니다.
+- `BASELINE_OOF=None`이면 공개 team 기준점 `0.54202`와 unpaired screen만 수행하며 3-seed 승격은 차단합니다.
 - seed 42 screen 통과 기준: +0.030, 4/5 fold 상승, 저마진 +0.040, 15개 이상 클래스 개선.
 """),
         code("""from pathlib import Path
@@ -38,10 +39,13 @@ RESULT = RUNNER.parent.parent / 'result'
 RUN_ID = 'exp-class-conditional-evidence-set-network-01'
 SEED = 42
 RUN_EXPERIMENT = False
+BASELINE_OOF = None  # Optional: row-aligned, train-only team OOF probability CSV
 
 {'runner': RUNNER, 'result_dir': RESULT, 'seed': SEED, 'train_only_contract': True}"""),
         code("""if RUN_EXPERIMENT:
     command = [sys.executable, str(RUNNER), '--seed', str(SEED), '--run-id', RUN_ID]
+    if BASELINE_OOF is not None:
+        command += ['--baseline-oof', str(BASELINE_OOF)]
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
     tail = []
     for line in tqdm(process.stdout, desc='evidence-set runner', unit='line'):
@@ -69,7 +73,7 @@ assert contract['train_only_vocabulary'] and not contract['test_read']
 display(summary)
 display(audit)
 display(low_margin)
-display(classes.sort_values('delta_network_vs_team'))
+display(classes.sort_values('delta_network_vs_team') if 'delta_network_vs_team' in classes else classes)
 leakage['promotion']"""),
         code("""ax = summary.set_index('variant').oof_macro_f1.plot.bar(figsize=(7, 4), ylim=(0.35, 0.65), title='Evidence Set screen: OOF Macro F1')
 ax.set_ylabel('OOF Macro F1')
@@ -78,8 +82,9 @@ plt.tight_layout(); plt.show()
 folds.pivot(index='fold', columns='variant', values='macro_f1').plot(marker='o', figsize=(8, 4), title='Fold Macro F1')
 plt.tight_layout(); plt.show()
 
-classes.sort_values('delta_network_vs_team').plot.barh(x='class', y='delta_network_vs_team', figsize=(7, 7), title='Class F1 delta: network − team')
-plt.axvline(0, color='black', linewidth=1); plt.tight_layout(); plt.show()"""),
+if 'delta_network_vs_team' in classes:
+    classes.sort_values('delta_network_vs_team').plot.barh(x='class', y='delta_network_vs_team', figsize=(7, 7), title='Class F1 delta: network − team')
+    plt.axvline(0, color='black', linewidth=1); plt.tight_layout(); plt.show()"""),
     ]
     notebook = {"cells": cells, "metadata": {"kernelspec": {"display_name": "Python (.venv)", "language": "python", "name": "python3"}, "language_info": {"name": "python", "version": "3.12"}}, "nbformat": 4, "nbformat_minor": 5}
     TARGET.parent.mkdir(parents=True, exist_ok=True)

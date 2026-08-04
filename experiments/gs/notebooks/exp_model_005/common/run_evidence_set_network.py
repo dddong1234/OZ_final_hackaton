@@ -1,15 +1,15 @@
 """Seed-42 screen for a train-only class-conditional Evidence Set Network.
 
-The runner never reads test data.  It recreates the fixed team baseline OOF
-from train rows only, then trains the new listwise candidate model inside the
-same outer folds.
+The runner never reads test data. It trains the candidate model directly.
+An already-created, row-aligned train-only team OOF artifact is optional and
+is used only for paired comparison; the runner never re-trains team models.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import time
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -19,7 +19,8 @@ from sklearn.metrics import f1_score
 from sklearn.model_selection import StratifiedKFold
 
 from evidence_set_core import EvidenceSetNetwork, build_event_evidence, listwise_loss, nested_audit, pad_evidence_sets
-from team_ensemble_baseline import EventCache, parse_train_frame, run_team_baseline_oof
+from baseline_artifact import reference_only_baseline, validate_baseline_oof
+from team_ensemble_baseline import EventCache, parse_train_frame
 
 
 SEED = 42
@@ -148,6 +149,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--run-id", default="exp-class-conditional-evidence-set-network-01")
+    parser.add_argument("--baseline-oof", type=Path, default=None, help="Optional train-only, row-aligned team OOF probability CSV.")
     args = parser.parse_args()
     if args.seed != SEED:
         raise ValueError("사전 고정된 첫 screen은 seed 42만 허용합니다.")
@@ -158,14 +160,17 @@ def main() -> None:
     if int(train[genes].isna().sum().sum()) != 0:
         raise AssertionError("train NaN 계약 위반")
     labels = train.SUBCLASS.to_numpy()
-    baseline = run_team_baseline_oof(train, genes, labels, args.seed)
+    classes = np.asarray(sorted(pd.unique(labels)), dtype=object)
+    baseline = reference_only_baseline() if args.baseline_oof is None else validate_baseline_oof(pd.read_csv(args.baseline_oof), classes, len(train))
+    print(f"[stage] baseline comparison: {baseline.comparison_mode}", flush=True)
+    print("[stage] train-only mutation parsing", flush=True)
     cache = parse_train_frame(train[genes], genes, show_progress=False)
     events_by_row = row_events(cache)
-    classes = baseline.classes
     splitter = StratifiedKFold(n_splits=5, shuffle=True, random_state=args.seed)
-    network_oof = np.zeros_like(baseline.probabilities)
+    network_oof = np.zeros((len(train), len(classes)), dtype=np.float32)
     fold_rows, audit_rows, loss_rows = [], [], []
     for fold, (outer_train, outer_valid) in enumerate(splitter.split(np.zeros(len(labels)), labels), 1):
+        print(f"[stage] outer fold {fold}/5: inner OOF evidence", flush=True)
         inner_evidence = build_inner_oof_evidence(events_by_row, cache, outer_train, labels, classes, args.seed * 1000 + fold)
         audit = nested_audit(outer_train, outer_train, outer_valid)
         if not audit["ranker_training_rows_are_inner_oof"] or audit["outer_validation_used_for_eb_fit"]:
@@ -175,35 +180,49 @@ def main() -> None:
         valid_evidence = build_fold_evidence(events_by_row, cache, outer_valid, weights, supports, len(classes))
         probability = predict_network(model, valid_evidence)
         network_oof[outer_valid] = probability
-        fold_rows.append({"fold": fold, "variant": "team_3way", "macro_f1": float(f1_score(labels[outer_valid], classes[baseline.probabilities[outer_valid].argmax(1)], average="macro")), "feature_count": int(baseline.fold_metrics.loc[baseline.fold_metrics.fold.eq(fold), "feature_count"].iloc[0])})
         fold_rows.append({"fold": fold, "variant": "evidence_set_network", "macro_f1": float(f1_score(labels[outer_valid], classes[probability.argmax(1)], average="macro")), "feature_count": 16})
+        if baseline.probabilities is not None:
+            fold_rows.append({"fold": fold, "variant": "team_3way", "macro_f1": float(f1_score(labels[outer_valid], classes[baseline.probabilities[outer_valid].argmax(1)], average="macro")), "feature_count": np.nan})
         audit_rows.append({"seed": args.seed, "fold": fold, **audit, "inner_oof_rows": len(outer_train), "outer_validation_rows": len(outer_valid), "test_read": False})
         loss_rows.extend(history)
-    probabilities = {"team_3way": baseline.probabilities, "evidence_set_network": network_oof}
+    probabilities = {"evidence_set_network": network_oof}
+    if baseline.probabilities is not None:
+        probabilities = {"team_3way": baseline.probabilities, **probabilities}
     summary_rows = []
-    base_margin = np.partition(baseline.probabilities, kth=-2, axis=1)[:, -1] - np.partition(baseline.probabilities, kth=-2, axis=1)[:, -2]
-    low_mask = base_margin < 0.05
     class_rows = []
     for name, probability in probabilities.items():
         score = float(f1_score(labels, classes[probability.argmax(1)], average="macro"))
-        summary_rows.append({"variant": name, "oof_macro_f1": score, "feature_count": 16 if name == "evidence_set_network" else int(baseline.fold_metrics.feature_count.mean()), "convergence_warning_count": int(baseline.summary["convergence_warning_count"]) if name == "team_3way" else 0, "leakage_check": True, "nan_as_mutation_count": 0, "runtime_seconds": time.time() - start, **topk_metrics(labels, probability, classes)})
+        summary_rows.append({"variant": name, "oof_macro_f1": score, "feature_count": 16 if name == "evidence_set_network" else np.nan, "convergence_warning_count": 0, "leakage_check": True, "nan_as_mutation_count": 0, "runtime_seconds": time.time() - start, **topk_metrics(labels, probability, classes)})
         for label in classes:
             class_rows.append({"variant": name, "class": label, "support": int((labels == label).sum()), "f1": float(f1_score(labels, classes[probability.argmax(1)], labels=[label], average="macro", zero_division=0))})
     summary = pd.DataFrame(summary_rows)
-    base_score = float(summary.loc[summary.variant.eq("team_3way"), "oof_macro_f1"].iloc[0])
+    base_score = baseline.reference_macro_f1 if baseline.probabilities is None else float(summary.loc[summary.variant.eq("team_3way"), "oof_macro_f1"].iloc[0])
+    summary["team_reference_macro_f1"] = base_score
     summary["delta_vs_team_3way"] = summary.oof_macro_f1 - base_score
+    summary["baseline_comparison_mode"] = baseline.comparison_mode
     candidate_score = float(summary.loc[summary.variant.eq("evidence_set_network"), "oof_macro_f1"].iloc[0])
     class_table = pd.DataFrame(class_rows).pivot(index="class", columns="variant", values="f1").reset_index()
-    class_table["delta_network_vs_team"] = class_table.evidence_set_network - class_table.team_3way
-    low_margin = pd.DataFrame({"variant": list(probabilities), "group": "team_margin_<0.05", "support": int(low_mask.sum()), "macro_f1": [float(f1_score(labels[low_mask], classes[value[low_mask].argmax(1)], average="macro", zero_division=0)) for value in probabilities.values()]})
+    if baseline.probabilities is not None:
+        class_table["delta_network_vs_team"] = class_table.evidence_set_network - class_table.team_3way
+        base_margin = np.partition(baseline.probabilities, kth=-2, axis=1)[:, -1] - np.partition(baseline.probabilities, kth=-2, axis=1)[:, -2]
+    else:
+        base_margin = np.partition(network_oof, kth=-2, axis=1)[:, -1] - np.partition(network_oof, kth=-2, axis=1)[:, -2]
+    low_mask = base_margin < 0.05
+    low_margin = pd.DataFrame({"variant": list(probabilities), "group": "baseline_margin_<0.05", "support": int(low_mask.sum()), "macro_f1": [float(f1_score(labels[low_mask], classes[value[low_mask].argmax(1)], average="macro", zero_division=0)) for value in probabilities.values()]})
     promotion = {
-        "baseline_reproduction_match": bool(baseline.summary["baseline_reproduction_match"]),
         "delta_at_least_0_03": bool(candidate_score - base_score >= 0.03),
-        "folds_improved_at_least_4": int(sum(row["variant"] == "evidence_set_network" and row["macro_f1"] > float(baseline.fold_metrics.loc[baseline.fold_metrics.fold.eq(row["fold"]), "macro_f1"].iloc[0]) for row in fold_rows)) >= 4,
-        "low_margin_delta_at_least_0_04": bool(float(low_margin.loc[low_margin.variant.eq("evidence_set_network"), "macro_f1"].iloc[0] - low_margin.loc[low_margin.variant.eq("team_3way"), "macro_f1"].iloc[0]) >= 0.04),
-        "improved_classes_at_least_15": int((class_table.delta_network_vs_team > 0).sum()) >= 15,
+        "paired_team_oof_supplied": baseline.probabilities is not None,
     }
-    promotion["decision"] = "promote_to_3seed" if all(promotion.values()) else "stop_screen"
+    if baseline.probabilities is not None:
+        fold_frame = pd.DataFrame(fold_rows)
+        team_fold_score = fold_frame.loc[fold_frame.variant.eq("team_3way")].set_index("fold").macro_f1.to_dict()
+        network_fold_score = fold_frame.loc[fold_frame.variant.eq("evidence_set_network")].set_index("fold").macro_f1.to_dict()
+        promotion["folds_improved_at_least_4"] = sum(network_fold_score[fold] > team_fold_score[fold] for fold in network_fold_score) >= 4
+        promotion["low_margin_delta_at_least_0_04"] = bool(float(low_margin.loc[low_margin.variant.eq("evidence_set_network"), "macro_f1"].iloc[0] - low_margin.loc[low_margin.variant.eq("team_3way"), "macro_f1"].iloc[0]) >= 0.04)
+        promotion["improved_classes_at_least_15"] = int((class_table.delta_network_vs_team > 0).sum()) >= 15
+        promotion["decision"] = "promote_to_3seed" if all(promotion.values()) else "stop_screen"
+    else:
+        promotion["decision"] = "reference_only_screen_requires_paired_team_oof"
     result = Path(__file__).parent.parent / "result"
     result.mkdir(exist_ok=True)
     summary.to_csv(result / f"{args.run_id}_seed{args.seed}_summary.csv", index=False)
@@ -212,9 +231,9 @@ def main() -> None:
     low_margin.to_csv(result / f"{args.run_id}_seed{args.seed}_low_margin_metrics.csv", index=False)
     pd.DataFrame(audit_rows).to_csv(result / f"{args.run_id}_seed{args.seed}_nested_audit.csv", index=False)
     pd.DataFrame(loss_rows).to_csv(result / f"{args.run_id}_seed{args.seed}_loss.csv", index=False)
-    pd.DataFrame({"true_class": labels, **{f"team_3way__{label}": baseline.probabilities[:, index] for index, label in enumerate(classes)}, **{f"evidence_set_network__{label}": network_oof[:, index] for index, label in enumerate(classes)}}).to_csv(result / f"{args.run_id}_seed{args.seed}_oof_probabilities.csv", index=False)
-    (result / f"{args.run_id}_seed{args.seed}_feature_contract.json").write_text(json.dumps({"event_features": ["eb_log_odds", "absolute_evidence", "log_support", "posterior_reliability", "positive", "negative", "burden_normalized", "exact", "recurrent", "event_type_one_hot"], "event_feature_count": 16, "train_only_vocabulary": True, "test_read": False}, ensure_ascii=False, indent=2), encoding="utf-8")
-    (result / f"{args.run_id}_seed{args.seed}_leakage_audit.json").write_text(json.dumps({"leakage_check": True, "nan_as_mutation_count": 0, "outer_validation_used_for_eb_fit": False, "baseline": baseline.summary, "promotion": promotion}, ensure_ascii=False, indent=2), encoding="utf-8")
+    pd.DataFrame({"true_class": labels, **{f"{name}__{label}": value[:, index] for name, value in probabilities.items() for index, label in enumerate(classes)}}).to_csv(result / f"{args.run_id}_seed{args.seed}_oof_probabilities.csv", index=False)
+    (result / f"{args.run_id}_seed{args.seed}_feature_contract.json").write_text(json.dumps({"event_features": ["eb_log_odds", "absolute_evidence", "log_support", "posterior_reliability", "positive", "negative", "burden_normalized", "exact", "recurrent", "event_type_one_hot"], "event_feature_count": 16, "train_only_vocabulary": True, "test_read": False, "baseline_comparison_mode": baseline.comparison_mode}, ensure_ascii=False, indent=2), encoding="utf-8")
+    (result / f"{args.run_id}_seed{args.seed}_leakage_audit.json").write_text(json.dumps({"leakage_check": True, "nan_as_mutation_count": 0, "outer_validation_used_for_eb_fit": False, "baseline_comparison_mode": baseline.comparison_mode, "promotion": promotion}, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 if __name__ == "__main__":

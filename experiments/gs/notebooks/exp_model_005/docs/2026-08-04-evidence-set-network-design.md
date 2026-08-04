@@ -14,12 +14,12 @@
 
 ## 비교 기준 재현 계약
 
-현재 저장소에는 Public LB `0.45348`을 만든 최종 3-way ensemble의 행 정렬된 OOF 확률이 보관되어 있지 않다. 따라서 Evidence Set screen은 과거 요약 점수만 읽어 비교하지 않는다. `exp_model_005/common` 안에 팀이 제공한 최종 파이프라인의 train-only 등가 구현을 둬 같은 train 행 순서·class order·seed42 outer fold에서 OOF 확률을 다시 만든다.
+현재 저장소에는 Public LB `0.45348`을 만든 최종 3-way ensemble의 행 정렬된 OOF 확률이 보관되어 있지 않다. Evidence Set 실행기는 baseline을 매번 재학습하지 않는다. 대신 (a) artifact가 없을 때는 고정된 team OOF 기준점 `0.54202`와의 **unpaired screen**만 수행하고, (b) 팀이 만든 train-only OOF artifact를 제공할 때만 행 순서·class probability 열 순서·행별 확률합을 검증한 후 **paired 비교**를 수행한다.
 
-- vocabulary는 train fold에서만 생성하고 validation에는 projection만 적용한다. train/validation cache를 결합해 factorize하지 않는다.
-- multinomial LR / OVR LR / LightGBM의 고정 비율은 `0.55 / 0.30 / 0.15`이며, 이 screen에서 비율이나 각 모델 파라미터를 탐색하지 않는다.
-- 재현 OOF가 팀 기준 `0.54202`에서 ±`0.003`를 벗어나면 Evidence Set의 점수는 참고용으로만 저장하고 승격 판정을 내리지 않는다.
-- 이 baseline 재현은 새로운 제출 파일을 만들지 않으며, test 파일도 읽지 않는다.
+- artifact는 동일 train 행 순서의 6,201행, `prob__{class}` 26열, train-only outer OOF여야 한다. 조건이 하나라도 맞지 않으면 비교를 거부한다.
+- artifact 없이 수행한 unpaired screen은 `+0.030` 기준을 참고로 기록하지만 paired fold·class·low-margin 승격 판정은 절대 내리지 않는다.
+- team OOF를 만들 때도 vocabulary는 train fold에서만 생성하고 validation에는 projection만 적용해야 하며, train/validation cache를 결합해 factorize하지 않는다.
+- 이 screen은 새로운 제출 파일을 만들지 않으며, test 파일도 읽지 않는다.
 
 ## 입력 계약
 
@@ -45,7 +45,7 @@ event identity를 별도 외부 embedding으로 학습하지 않는다. gene×ev
 ## 검증과 산출물
 
 - seed 42 outer/inner Stratified 5-fold
-- team 3-way ensemble은 동일 fold·동일 class order 기준으로 재현하거나, 재현 검증된 OOF artifact만 같은 행 순서에서 사용한다.
+- team 3-way ensemble의 paired 비교는 재현 검증된 OOF artifact를 같은 행 순서·class order에서 제공할 때만 수행한다.
 - 저장: summary, fold/class/low-margin metrics, profile purity audit, OOF probabilities, feature contract, runtime, leakage audit JSON.
 - 감사: test read false, train-only vocabulary, inner OOF EB for outer-train, outer validation label not used for EB/model fit, NaN-as-mutation 0, finite loss, class order equality.
 

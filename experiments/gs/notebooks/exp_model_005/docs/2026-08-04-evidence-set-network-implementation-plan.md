@@ -190,7 +190,7 @@ Expected: FAIL because `nested_audit` is missing.
 
 - [ ] **Step 3: Implement runner**
 
-For every outer fold: generate inner OOF EB weights for outer train, generate outer-train EB weights for outer validation, train fixed network, align class order, save probabilities. The runner must call `run_team_baseline_oof` first. It records `baseline_reproduction_match`; if false, it writes ESN metrics but sets `promotion_decision="blocked_baseline_mismatch"`.
+For every outer fold: generate inner OOF EB weights for outer train, generate outer-train EB weights for outer validation, train fixed network, align class order, save probabilities. The runner must not rebuild the costly team baseline. It accepts an optional row-aligned, train-only team OOF artifact and validates its class columns and probability contract before paired comparison. Without that artifact it records only an unpaired comparison against the fixed `0.54202` reference and blocks 3-seed promotion.
 
 - [ ] **Step 4: Generate notebook**
 
@@ -205,6 +205,6 @@ Expected: all tests pass. Do not execute OOF during verification.
 ## Plan Self-Review
 
 - Raw formatting audit and event-set model are separable and have independent tests.
-- The team baseline is rebuilt with train-only vocabulary; it is not imported and it never combines train/validation caches before token encoding.
+- The Evidence Set runner does not read test data or rebuild the team baseline. Any optional team OOF artifact must already have been created train-only and passes strict row/class/probability validation before use.
 - Every supervised EB transformation is explicitly nested within outer training rows.
 - The plan excludes test usage, hyperparameter search, threshold/blend search, and submission creation.
