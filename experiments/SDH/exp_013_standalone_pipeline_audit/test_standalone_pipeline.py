@@ -63,3 +63,34 @@ def test_normalisation_and_type_classification() -> None:
     assert pipe.classify_event("V600E") == "MISSENSE"
     assert pipe.classify_event("R100*") == "NONSENSE"
     assert pipe.classify_event("Q10FS") == "FRAMESHIFT"
+
+
+def test_shared_baseline_has_no_fixed_domain_columns() -> None:
+    train = pd.concat([_train_frame()] * 5, ignore_index=True)
+    labels = np.tile(np.array(["A", "B", "A", "B"]), 5)
+    x_train, x_apply, names, audit = pipe.build_design_matrices(
+        train, train.iloc[:2].copy(), labels, GENES, seed=42
+    )
+    assert x_train.shape[1] == len(names)
+    assert x_apply.shape[1] == len(names)
+    assert not any(name.startswith(("C__", "D__exact_")) for name in names)
+    assert audit["fixed_contrast_enabled"] is False
+    assert audit["fixed_exact_event_enabled"] is False
+
+
+def test_fixed_contrast_cannot_be_reenabled() -> None:
+    train = pd.concat([_train_frame()] * 5, ignore_index=True)
+    labels = np.tile(np.array(["A", "B", "A", "B"]), 5)
+    try:
+        pipe.build_design_matrices(
+            train,
+            train.iloc[:2].copy(),
+            labels,
+            GENES,
+            seed=42,
+            use_fixed_contrast=True,
+        )
+    except ValueError as error:
+        assert "removed" in str(error)
+    else:
+        raise AssertionError("fixed contrast must not be available")

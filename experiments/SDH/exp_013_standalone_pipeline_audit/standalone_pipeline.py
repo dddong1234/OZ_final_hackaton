@@ -36,14 +36,6 @@ SUB_RE = re.compile(r"^([A-Z*])(-?\d+)([A-Z*])$")
 SPLICE_RE = re.compile(r"SPLICE|IVS|[+-]\d+")
 INDEL_RE = re.compile(r"DEL|INS|DUP")
 
-EXACT_EVENTS = (
-    ("BRAF", "V600E"),
-    ("IDH1", "R132H"),
-    ("PIK3CA", "H1047R"),
-    ("PIK3CA", "E545K"),
-)
-FIXED_CONTRAST_PAIRS = (("KIRC", "KIPAN", 5), ("LGG", "GBMLGG", 5))
-
 RECURRENT_MIN_COUNT = 5
 ENRICHMENT_MIN_SUPPORT = 10
 ENRICHMENT_SHRINKAGE = 10.0
@@ -317,7 +309,7 @@ def build_b04_matrices(
     vocabulary: Vocabulary,
     labels: np.ndarray,
     *,
-    use_fixed_contrast: bool = True,
+    use_fixed_contrast: bool = False,
 ) -> tuple[sparse.csr_matrix, sparse.csr_matrix, list[str]]:
     """Fit B04 column selection on train and apply it to another split."""
 
@@ -370,63 +362,11 @@ def build_b04_matrices(
     apply_parts.append(sparse.csr_matrix(apply.topology))
     names.extend(f"S__{index}" for index in range(8))
 
-    exact_lookup = {name: index for index, name in enumerate(vocabulary.exact_events)}
-    for gene, event in EXACT_EVENTS:
-        column = exact_lookup.get(f"{gene}__{event}")
-        if column is None:
-            train_column = sparse.csr_matrix((train.n_rows, 1), dtype=np.float32)
-            apply_column = sparse.csr_matrix((apply.n_rows, 1), dtype=np.float32)
-        else:
-            train_column = train.exact[:, column]
-            apply_column = apply.exact[:, column]
-        train_parts.append(train_column)
-        apply_parts.append(apply_column)
-        names.append(f"D__exact_{gene}_{event}")
-
     if use_fixed_contrast:
-        for left, right, top_k in FIXED_CONTRAST_PAIRS:
-            left_mask = labels == left
-            right_mask = labels == right
-            if not left_mask.any() or not right_mask.any():
-                continue
-            left_counts = np.asarray(
-                train.mutation[left_mask].getnnz(axis=0)
-            ).ravel()
-            right_counts = np.asarray(
-                train.mutation[right_mask].getnnz(axis=0)
-            ).ravel()
-            support = left_counts + right_counts
-            contrast = left_counts / left_mask.sum() - right_counts / right_mask.sum()
-            eligible = np.flatnonzero(support >= 10)
-            selected = sorted(
-                eligible,
-                key=lambda index: (
-                    -abs(contrast[index]),
-                    -support[index],
-                    genes[index],
-                ),
-            )[:top_k]
-            if not selected:
-                continue
-            signs = np.sign(contrast[selected]).astype(np.float32)
-            train_parts.extend(
-                [
-                    sparse.csr_matrix(train.mutation[:, selected].sum(axis=1)),
-                    train.mutation[:, selected].dot(sparse.csr_matrix(signs).T),
-                ]
-            )
-            apply_parts.extend(
-                [
-                    sparse.csr_matrix(apply.mutation[:, selected].sum(axis=1)),
-                    apply.mutation[:, selected].dot(sparse.csr_matrix(signs).T),
-                ]
-            )
-            names.extend(
-                [
-                    f"C__{left}_vs_{right}_count",
-                    f"C__{left}_vs_{right}_contrast",
-                ]
-            )
+        raise ValueError(
+            "Fixed cancer-pair contrast was removed from the shared baseline. "
+            "Use train-discovered, outer-fold-local alternatives instead."
+        )
 
     train_matrix = sparse.hstack(train_parts, format="csr")
     apply_matrix = sparse.hstack(apply_parts, format="csr")
@@ -540,7 +480,7 @@ def build_design_matrices(
     genes: list[str],
     *,
     seed: int = 42,
-    use_fixed_contrast: bool = True,
+    use_fixed_contrast: bool = False,
 ) -> tuple[sparse.csr_matrix, sparse.csr_matrix, list[str], dict]:
     label_array = np.asarray(labels)
     train, apply, vocabulary = fit_transform_pair(train_frame, apply_frame, genes)
@@ -570,7 +510,8 @@ def build_design_matrices(
         "base_feature_count": base_feature_count,
         "enrichment_feature_count": len(enrichment_names),
         "total_feature_count": len(names),
-        "fixed_contrast_enabled": use_fixed_contrast,
+        "fixed_contrast_enabled": False,
+        "fixed_exact_event_enabled": False,
     }
     return x_train, x_apply, names, audit
 
@@ -590,7 +531,7 @@ def evaluate_seed(
     genes: list[str],
     *,
     seed: int = 42,
-    use_fixed_contrast: bool = True,
+    use_fixed_contrast: bool = False,
 ) -> dict:
     labels = train["SUBCLASS"].reset_index(drop=True)
     splitter = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)

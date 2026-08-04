@@ -2,6 +2,32 @@
 
 프로젝트 전체에 영향을 주는 결정과 검증 결과를 기록합니다. 개인 실험의 세부 과정은 각 팀원의 노트북이나 실험 폴더에 기록하고, 이 문서에는 모두가 알아야 하는 내용만 남깁니다.
 
+## 2026-08-04 — exp13 공용 baseline 규정 안전화
+
+### 결정
+
+- 공용 exp13 standalone baseline에서 사전 지정 exact mutation 4개와 고정
+  암종쌍 contrast 2개를 제거한다.
+- exact 위치 신호는 각 outer-fold train support로 자동 선택되는 recurrent
+  missense만 사용한다.
+- `use_fixed_contrast=True` 호출은 고정 피처를 다시 만들지 않고 오류로 중단한다.
+- 후속 모델과 FE 실험의 LR 비교 기준은 안전 baseline 3-seed 평균
+  Macro F1 `0.5276088068`로 변경한다.
+
+### 영향
+
+- 기존 exp13 평균 `0.5282357120`과 제출 예측 parity는 legacy 결과로만 본다.
+- exp13 파생 코드는 고정 `C__`, `D__exact` 열을 기대하면 안 된다.
+- 팀원은 최신 exp13 baseline에서 동일한 5-fold × seeds 42/52/62 계약을 사용한다.
+
+### 검증
+
+- exp14에서 안전 피처를 사용한 LR 80% + train-discovered specialist LGBM 20%
+  앙상블이 3개 seed 모두 LR을 개선했다.
+- 안전 앙상블 평균 `0.5398447261`은 레거시 고정 암종쌍 평균
+  `0.5380523800`보다 `0.0017923461` 높았다.
+- 고정 도메인 열 부재, test-only token 불변성, 위험 옵션 차단을 합성 검사한다.
+
 ## 2026-07-31 — SDH 개인 폴더명 통일
 
 ### 결정
