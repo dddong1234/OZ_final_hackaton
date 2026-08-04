@@ -1,0 +1,6 @@
+seed,fold,offset_train_rows_are_inner_oof,outer_validation_used_for_residual_fit,inner_oof_rows,outer_validation_rows,residual_feature_count
+42,1,True,False,4960,1241,20768
+42,2,True,False,4961,1240,20768
+42,3,True,False,4961,1240,20768
+42,4,True,False,4961,1240,20768
+42,5,True,False,4961,1240,20768

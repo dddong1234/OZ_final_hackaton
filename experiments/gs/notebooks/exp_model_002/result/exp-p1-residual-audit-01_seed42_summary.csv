@@ -1,0 +1,2 @@
+variant,oof_macro_f1,feature_count,convergence_warning_count,leakage_check,nan_as_mutation_count,runtime_seconds
+P1 residual audit,0.527549997670646,8201.2,0,True,0,52.4304461479187

@@ -1,0 +1,2 @@
+macro_recall_at_1,oracle_macro_f1_at_1,macro_recall_at_2,oracle_macro_f1_at_2,macro_recall_at_3,oracle_macro_f1_at_3,seed,oof_macro_f1,convergence_warning_count,leakage_check,nan_as_mutation_count
+0.5559512574967629,0.5333852700056534,0.6889175755588605,0.6718535975758956,0.7676229031987708,0.7521005814848277,42,0.5333852700056534,0,True,0

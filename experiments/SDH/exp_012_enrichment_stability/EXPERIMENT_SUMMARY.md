@@ -87,6 +87,8 @@ exp011 winner의 자기 class score는 정답·오답 샘플을 분리하는 방
 
 - LR은 기존과 동일하게 `lbfgs`, `C=0.07`, `max_iter=2000`을 유지한다.
 - exp012의 `shrinkage=10`은 모델 규제가 아니라 enrichment FE weight 규제다.
-- Public LB는 아직 미확인이다. 현재 제출 확인이 끝난 챔피언은 exp011
-  (`CV 0.52395`, Public LB `0.43525`)이다.
-- 다음 단계는 exp012 후보의 permutation-label sanity check와 Public LB 확인이다.
+- Public LB는 **`0.4388787816`**으로 exp011 `0.4352596431`보다
+  **`+0.0036191385`** 높다.
+- CV 개선폭 `+0.00428488`의 약 84.5%가 LB에도 전달됐다.
+- exp012 실제 코드 permutation-label sanity check도 PASS했다.
+- 따라서 exp012를 새 로컬·Public LB 챔피언으로 채택한다.

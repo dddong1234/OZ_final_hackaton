@@ -1,0 +1,18 @@
+{
+  "test_read": false,
+  "submission_created": false,
+  "seed": 42,
+  "outer_folds": 5,
+  "inner_folds": 5,
+  "offset_train_inner_oof_only": true,
+  "offset_zero_initialized": true,
+  "hash_dimension": 16384,
+  "epochs": 40,
+  "learning_rate": 0.05,
+  "l2": 0.001,
+  "batch_size": 256,
+  "threshold_retuned": false,
+  "selective_gate_threshold": 0.05,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0
+}

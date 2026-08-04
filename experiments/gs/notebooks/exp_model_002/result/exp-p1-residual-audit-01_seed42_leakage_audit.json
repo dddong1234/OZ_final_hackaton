@@ -1,0 +1,7 @@
+{
+  "train_only": true,
+  "test_read": false,
+  "fold_train_supervised_statistics": true,
+  "nan_as_mutation_count": 0,
+  "axis": "residual"
+}

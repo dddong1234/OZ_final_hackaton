@@ -1,0 +1,4 @@
+variant,oof_macro_f1,feature_count,convergence_warning_count,leakage_check,nan_as_mutation_count,delta_vs_e0
+E0_P1_EB,0.5337855174326824,8201.2,0,True,0,0.0
+E1_frozen_encoder,0.31103368571017137,1537.0,0,True,0,-0.22275183172251106
+E2_fixed_blend,0.5082183760504919,1537.0,0,True,0,-0.025567141382190517

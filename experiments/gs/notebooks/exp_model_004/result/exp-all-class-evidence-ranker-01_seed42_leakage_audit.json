@@ -1,0 +1,14 @@
+{
+  "test_read": false,
+  "submission_created": false,
+  "seed": 42,
+  "outer_folds": 5,
+  "inner_folds": 5,
+  "ranker_training_inner_oof_only": true,
+  "ranker_feature_fit_partition": "outer_train_inner_oof",
+  "threshold_retuned": false,
+  "selective_gate_threshold": 0.05,
+  "rare_support_cutoff": 10,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0
+}
