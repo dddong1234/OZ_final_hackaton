@@ -1,0 +1,19 @@
+{
+  "test_read": false,
+  "submission_created": false,
+  "threshold": 0.05,
+  "threshold_selection_seeds": [
+    42,
+    777,
+    2024
+  ],
+  "validation_seeds": [
+    31415,
+    52,
+    62
+  ],
+  "threshold_retuned": false,
+  "fold_train_only_supervised_statistics": true,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0
+}

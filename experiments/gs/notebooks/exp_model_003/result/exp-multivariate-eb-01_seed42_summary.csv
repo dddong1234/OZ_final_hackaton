@@ -1,0 +1,4 @@
+variant,oof_macro_f1,feature_count,convergence_warning_count,leakage_check,nan_as_mutation_count,delta_vs_eb
+P1+EB LR,0.5344443574801144,8201.2,0,True,0,0.0
+multieb_rank4,0.48319416293636913,8201.2,0,True,0,-0.0512501945437453
+multieb_rank8,0.4962960900908136,8201.2,0,True,0,-0.03814826738930083

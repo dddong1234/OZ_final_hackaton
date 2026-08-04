@@ -1,0 +1,3 @@
+variant,oof_macro_f1,feature_count,convergence_warning_count,leakage_check,nan_as_mutation_count,runtime_seconds
+P1 multinomial LR,0.5251107873533594,8201.0,0,True,0,78.13018012046814
+eb,0.531974798644617,8201.0,0,True,0,78.13790798187256

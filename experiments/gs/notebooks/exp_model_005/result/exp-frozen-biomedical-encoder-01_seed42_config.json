@@ -1,0 +1,11 @@
+{
+  "model_id": "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext",
+  "revision": "2839b4fc440a3c41dc2b716fb14d530c33c8c1ff",
+  "tokenizer_hash": "78b67e809947d48f1460996f15d6bfc23838dcea3c9c72d5029def09d19a3957",
+  "frozen": true,
+  "pooling": "mean_max_log1p_count",
+  "max_length": 32,
+  "scaler_fit": "outer_train_only",
+  "test_read": false,
+  "nan_as_mutation_count": 0
+}

@@ -1,0 +1,4 @@
+variant,group,support,macro_f1
+P1_EB,low_margin_<0.05,1559,0.2270593763352277
+selective_EB_gate,low_margin_<0.05,1559,0.23803630570986828
+all_class_ranker,low_margin_<0.05,1559,0.22492625634067387

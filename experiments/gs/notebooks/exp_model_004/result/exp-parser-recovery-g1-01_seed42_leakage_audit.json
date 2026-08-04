@@ -1,0 +1,16 @@
+{
+  "train_only": true,
+  "test_read": false,
+  "fold_train_supervised_statistics": true,
+  "nan_as_mutation_count": 0,
+  "parser_audit": {
+    "raw_segment_count": 247778,
+    "parsed_event_count": 247778,
+    "unknown_event_count": 0,
+    "wt_cell_count": 26966291,
+    "nan_cell_count": 0,
+    "multi_event_cell_count": 19016,
+    "delimiter_counts": {},
+    "segment_conservation": true
+  }
+}
