@@ -1,0 +1,62 @@
+{
+  "seed": 42,
+  "permutation_seed": 20260804,
+  "case": "case_04_shrink10",
+  "fixed_weights": {
+    "champion": 0.55,
+    "ovr": 0.3,
+    "lgbm": 0.15
+  },
+  "source": "experiments/SDH/exp_012_enrichment_stability/preprocessing.py",
+  "n_classes": 26,
+  "chance_level": 0.038461538461538464,
+  "real": {
+    "tag": "real",
+    "singles": {
+      "champion": 0.531001480510099,
+      "ovr": 0.5275465507442157,
+      "lgbm": 0.485210295766929
+    },
+    "champion_solo": 0.531001480510099,
+    "fixed_blend": 0.5402364431432428,
+    "fixed_gain": 0.009234962633143828,
+    "searched_blend": 0.5459893713051412,
+    "searched_gain": 0.014987890795042258,
+    "searched_weights": {
+      "champion": 0.25,
+      "ovr": 0.65,
+      "lgbm": 0.1
+    },
+    "search_grid_size": 231,
+    "feature_count_mean": 8201.2,
+    "convergence_warning_count": 0
+  },
+  "permuted": {
+    "tag": "permuted",
+    "singles": {
+      "champion": 0.03369993082535308,
+      "ovr": 0.03446659238480966,
+      "lgbm": 0.03624191632112395
+    },
+    "champion_solo": 0.03369993082535308,
+    "fixed_blend": 0.03608559377420935,
+    "fixed_gain": 0.002385662948856268,
+    "searched_blend": 0.04054450723828772,
+    "searched_gain": 0.006844576412934643,
+    "searched_weights": {
+      "champion": 0.75,
+      "ovr": 0.0,
+      "lgbm": 0.25
+    },
+    "search_grid_size": 231,
+    "feature_count_mean": 8195.4,
+    "convergence_warning_count": 0
+  },
+  "selection_bias_ceiling": 0.006844576412934643,
+  "reference": {
+    "ENS-011a_seed42_cv": 0.54202,
+    "ENS-011a_clean_seed_gain": 0.01608,
+    "exp012_champion_seed42": 0.52918
+  },
+  "verdict": "PASS"
+}
