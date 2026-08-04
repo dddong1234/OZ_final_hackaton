@@ -1,0 +1,238 @@
+{
+  "contract_grid": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.3
+  ],
+  "base": "anchor",
+  "anchor": "champion LR (auto contrast, exact 제거)",
+  "note": "경수님 OOF 는 우리 outer fold 에 중첩되어 있지 않다. 경수님 모델을 다시 학습할 수 없으므로 이 추정치도 완전히 편향이 없지는 않고, 전체 OOF 선택보다 나을 뿐이다.",
+  "runs": {
+    "gate__": {
+      "42": {
+        "anchor_macro_f1": 0.5323616870127517,
+        "partner_solo_macro_f1": 0.5360088197819727,
+        "foldlocal_macro_f1": 0.5383323826469171,
+        "foldlocal_accuracy": 0.5403967102080309,
+        "foldlocal_gain": 0.005970695634165413,
+        "foldlocal_weights": {
+          "1": 0.2,
+          "2": 0.2,
+          "3": 0.2,
+          "4": 0.2,
+          "5": 0.2
+        },
+        "whole_oof_weight": 0.2,
+        "whole_oof_macro_f1": 0.5383323826469171,
+        "whole_oof_gain": 0.005970695634165413,
+        "selection_bias": 0.0,
+        "diversity": {
+          "disagreement": 0.15626511852926947,
+          "recovery_rate": 0.0877253814147018,
+          "reverse_loss_rate": 0.0696412420862225,
+          "double_fault": 0.4242864054184809,
+          "oracle_macro_f1": 0.5764451208311875,
+          "probability_correlation": 0.9559064835928536
+        }
+      },
+      "52": {
+        "anchor_macro_f1": 0.5249066221773564,
+        "partner_solo_macro_f1": 0.5355507479985392,
+        "foldlocal_macro_f1": 0.5406520271176569,
+        "foldlocal_accuracy": 0.5403967102080309,
+        "foldlocal_gain": 0.015745404940300523,
+        "foldlocal_weights": {
+          "1": 0.3,
+          "2": 0.3,
+          "3": 0.3,
+          "4": 0.3,
+          "5": 0.3
+        },
+        "whole_oof_weight": 0.3,
+        "whole_oof_macro_f1": 0.5406520271176569,
+        "whole_oof_gain": 0.015745404940300523,
+        "selection_bias": 0.0,
+        "diversity": {
+          "disagreement": 0.1625544267053701,
+          "recovery_rate": 0.09592326139088729,
+          "reverse_loss_rate": 0.0712979890310786,
+          "double_fault": 0.42557651991614254,
+          "oracle_macro_f1": 0.5769181674483905,
+          "probability_correlation": 0.9567810872918857
+        }
+      },
+      "62": {
+        "anchor_macro_f1": 0.5233080976708718,
+        "partner_solo_macro_f1": 0.533521739439735,
+        "foldlocal_macro_f1": 0.5318396111440087,
+        "foldlocal_accuracy": 0.5349137235929688,
+        "foldlocal_gain": 0.008531513473136854,
+        "foldlocal_weights": {
+          "1": 0.3,
+          "2": 0.3,
+          "3": 0.3,
+          "4": 0.3,
+          "5": 0.3
+        },
+        "whole_oof_weight": 0.3,
+        "whole_oof_macro_f1": 0.5318396111440087,
+        "whole_oof_gain": 0.008531513473136854,
+        "selection_bias": 0.0,
+        "diversity": {
+          "disagreement": 0.16465086276407032,
+          "recovery_rate": 0.09422283356258597,
+          "reverse_loss_rate": 0.07288187063467963,
+          "double_fault": 0.424770198355104,
+          "oracle_macro_f1": 0.5748939911317112,
+          "probability_correlation": 0.9564684412993945
+        }
+      }
+    },
+    "p1_eb__": {
+      "42": {
+        "anchor_macro_f1": 0.5323616870127517,
+        "partner_solo_macro_f1": 0.5346421601035954,
+        "foldlocal_macro_f1": 0.5384431336047236,
+        "foldlocal_accuracy": 0.5405579745202387,
+        "foldlocal_gain": 0.006081446591971962,
+        "foldlocal_weights": {
+          "1": 0.3,
+          "2": 0.2,
+          "3": 0.3,
+          "4": 0.2,
+          "5": 0.2
+        },
+        "whole_oof_weight": 0.2,
+        "whole_oof_macro_f1": 0.5393003744857883,
+        "whole_oof_gain": 0.006938687473036609,
+        "selection_bias": 0.000857240881064647,
+        "diversity": {
+          "disagreement": 0.22802773746169971,
+          "recovery_rate": 0.12864077669902912,
+          "reverse_loss_rate": 0.10189930660235152,
+          "double_fault": 0.4052572165779713,
+          "oracle_macro_f1": 0.594562453144688,
+          "probability_correlation": 0.9497043589779404
+        }
+      },
+      "52": {
+        "anchor_macro_f1": 0.5249066221773564,
+        "partner_solo_macro_f1": 0.5265644700526922,
+        "foldlocal_macro_f1": 0.5403602663444608,
+        "foldlocal_accuracy": 0.5402354458958233,
+        "foldlocal_gain": 0.015453644167104374,
+        "foldlocal_weights": {
+          "1": 0.3,
+          "2": 0.3,
+          "3": 0.3,
+          "4": 0.3,
+          "5": 0.3
+        },
+        "whole_oof_weight": 0.3,
+        "whole_oof_macro_f1": 0.5403602663444608,
+        "whole_oof_gain": 0.015453644167104374,
+        "selection_bias": 0.0,
+        "diversity": {
+          "disagreement": 0.24125141106273182,
+          "recovery_rate": 0.12470023980815348,
+          "reverse_loss_rate": 0.10786106032906764,
+          "double_fault": 0.41203031769069504,
+          "oracle_macro_f1": 0.5901772601926623,
+          "probability_correlation": 0.9505052265309529
+        }
+      },
+      "62": {
+        "anchor_macro_f1": 0.5233080976708718,
+        "partner_solo_macro_f1": 0.5297420892224308,
+        "foldlocal_macro_f1": 0.5337699485988463,
+        "foldlocal_accuracy": 0.5370101596516691,
+        "foldlocal_gain": 0.01046185092797447,
+        "foldlocal_weights": {
+          "1": 0.3,
+          "2": 0.3,
+          "3": 0.3,
+          "4": 0.3,
+          "5": 0.3
+        },
+        "whole_oof_weight": 0.3,
+        "whole_oof_macro_f1": 0.5337699485988463,
+        "whole_oof_gain": 0.01046185092797447,
+        "selection_bias": 0.0,
+        "diversity": {
+          "disagreement": 0.23931623931623933,
+          "recovery_rate": 0.13239339752407153,
+          "reverse_loss_rate": 0.10750075918615244,
+          "double_fault": 0.40686985970004835,
+          "oracle_macro_f1": 0.5906051675373823,
+          "probability_correlation": 0.9499691850197332
+        }
+      }
+    },
+    "ranker__": {
+      "42": {
+        "anchor_macro_f1": 0.5323616870127517,
+        "partner_solo_macro_f1": 0.5517921241013167,
+        "foldlocal_macro_f1": 0.5446486024697239,
+        "foldlocal_accuracy": 0.5531365908724399,
+        "foldlocal_gain": 0.012286915456972247,
+        "foldlocal_weights": {
+          "1": 0.3,
+          "2": 0.3,
+          "3": 0.3,
+          "4": 0.3,
+          "5": 0.3
+        },
+        "whole_oof_weight": 0.3,
+        "whole_oof_macro_f1": 0.5446486024697239,
+        "whole_oof_gain": 0.012286915456972247,
+        "selection_bias": 0.0,
+        "diversity": {
+          "disagreement": 0.21335268505079827,
+          "recovery_rate": 0.14008321775312066,
+          "reverse_loss_rate": 0.07778112752487187,
+          "double_fault": 0.39993549427511693,
+          "oracle_macro_f1": 0.587592327908741,
+          "probability_correlation": 0.9015079876654921
+        }
+      }
+    }
+  },
+  "summary": {
+    "gate__": {
+      "seeds": [
+        42,
+        52,
+        62
+      ],
+      "foldlocal_macro_f1_mean": 0.5369413403028609,
+      "foldlocal_gain_mean": 0.010082538015867596,
+      "foldlocal_gain_std": 0.005068579027101769,
+      "positive_seeds": "3/3",
+      "selection_bias_mean": 0.0
+    },
+    "p1_eb__": {
+      "seeds": [
+        42,
+        52,
+        62
+      ],
+      "foldlocal_macro_f1_mean": 0.5375244495160102,
+      "foldlocal_gain_mean": 0.010665647229016936,
+      "foldlocal_gain_std": 0.00468942123785744,
+      "positive_seeds": "3/3",
+      "selection_bias_mean": 0.00028574696035488234
+    },
+    "ranker__": {
+      "seeds": [
+        42
+      ],
+      "foldlocal_macro_f1_mean": 0.5446486024697239,
+      "foldlocal_gain_mean": 0.012286915456972247,
+      "foldlocal_gain_std": 0.0,
+      "positive_seeds": "1/1",
+      "selection_bias_mean": 0.0
+    }
+  }
+}
