@@ -1,0 +1,144 @@
+{
+  "seed": 42,
+  "partner_file": "/Users/iljun/Claude/OZ_final_hackaton/experiments/iljun/results/gs_oof/gs_ranker_seed42.csv",
+  "our_weights": {
+    "champion": 0.55,
+    "ovr": 0.3,
+    "lgbm": 0.15
+  },
+  "ours": {
+    "macro_f1": 0.5402364431432428,
+    "accuracy": 0.5470085470085471
+  },
+  "partners": {
+    "gate__": {
+      "solo": {
+        "macro_f1": 0.5360088197819727,
+        "accuracy": 0.5384615384615384
+      },
+      "disagreement_rate": 0.18626028059990324,
+      "oracle_either_correct": 0.59184002580229,
+      "rescue_rate": 0.09896760412958348,
+      "blend_sweep": [
+        {
+          "weight_partner": 0.1,
+          "macro_f1": 0.5436202618076442,
+          "accuracy": 0.5489437187550396
+        },
+        {
+          "weight_partner": 0.2,
+          "macro_f1": 0.5456783597165586,
+          "accuracy": 0.5513626834381551
+        },
+        {
+          "weight_partner": 0.3,
+          "macro_f1": 0.5493953645420088,
+          "accuracy": 0.5534591194968553
+        },
+        {
+          "weight_partner": 0.4,
+          "macro_f1": 0.5514086438174636,
+          "accuracy": 0.5545879696823093
+        },
+        {
+          "weight_partner": 0.5,
+          "macro_f1": 0.5472057915215026,
+          "accuracy": 0.5500725689404935
+        }
+      ],
+      "best_blend": {
+        "weight_partner": 0.4,
+        "macro_f1": 0.5514086438174636,
+        "accuracy": 0.5545879696823093
+      },
+      "best_gain": 0.011172200674220756,
+      "positive_weights": 5
+    },
+    "p1_eb__": {
+      "solo": {
+        "macro_f1": 0.5346421601035954,
+        "accuracy": 0.5402354458958233
+      },
+      "disagreement_rate": 0.2370585389453314,
+      "oracle_either_correct": 0.6053862280277374,
+      "rescue_rate": 0.12887148451406194,
+      "blend_sweep": [
+        {
+          "weight_partner": 0.1,
+          "macro_f1": 0.5435781824191956,
+          "accuracy": 0.5487824544428318
+        },
+        {
+          "weight_partner": 0.2,
+          "macro_f1": 0.5457665602632213,
+          "accuracy": 0.5512014191259474
+        },
+        {
+          "weight_partner": 0.3,
+          "macro_f1": 0.5498884240288797,
+          "accuracy": 0.5534591194968553
+        },
+        {
+          "weight_partner": 0.4,
+          "macro_f1": 0.5520516256361808,
+          "accuracy": 0.554749233994517
+        },
+        {
+          "weight_partner": 0.5,
+          "macro_f1": 0.550248718839385,
+          "accuracy": 0.5529753265602322
+        }
+      ],
+      "best_blend": {
+        "weight_partner": 0.4,
+        "macro_f1": 0.5520516256361808,
+        "accuracy": 0.554749233994517
+      },
+      "best_gain": 0.011815182492938003,
+      "positive_weights": 5
+    },
+    "ranker__": {
+      "solo": {
+        "macro_f1": 0.5517921241013167,
+        "accuracy": 0.5584583131752943
+      },
+      "disagreement_rate": 0.1875503950975649,
+      "oracle_either_correct": 0.6018384131591679,
+      "rescue_rate": 0.12103951584193663,
+      "blend_sweep": [
+        {
+          "weight_partner": 0.1,
+          "macro_f1": 0.5468534374357763,
+          "accuracy": 0.5545879696823093
+        },
+        {
+          "weight_partner": 0.2,
+          "macro_f1": 0.5513020873119168,
+          "accuracy": 0.5592646347363328
+        },
+        {
+          "weight_partner": 0.3,
+          "macro_f1": 0.5513508574463886,
+          "accuracy": 0.5581357845508789
+        },
+        {
+          "weight_partner": 0.4,
+          "macro_f1": 0.5502557276191241,
+          "accuracy": 0.5576519916142557
+        },
+        {
+          "weight_partner": 0.5,
+          "macro_f1": 0.5504609733704119,
+          "accuracy": 0.5570069343654249
+        }
+      ],
+      "best_blend": {
+        "weight_partner": 0.3,
+        "macro_f1": 0.5513508574463886,
+        "accuracy": 0.5581357845508789
+      },
+      "best_gain": 0.011114414303145748,
+      "positive_weights": 5
+    }
+  }
+}

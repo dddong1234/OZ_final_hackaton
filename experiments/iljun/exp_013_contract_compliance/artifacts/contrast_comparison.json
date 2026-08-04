@@ -1,0 +1,390 @@
+{
+  "case": "case_04_shrink10",
+  "weights": {
+    "champion": 0.55,
+    "ovr": 0.3,
+    "lgbm": 0.15
+  },
+  "seeds": [
+    42,
+    52,
+    62
+  ],
+  "fixed_pairs": [
+    [
+      "KIRC",
+      "KIPAN",
+      5
+    ],
+    [
+      "LGG",
+      "GBMLGG",
+      5
+    ]
+  ],
+  "auto_pair_count": 8,
+  "auto_genes_per_pair": 5,
+  "runs": {
+    "fixed": [
+      {
+        "contrast": "fixed",
+        "seed": 42,
+        "champion": {
+          "macro_f1": 0.531001480510099,
+          "accuracy": 0.5334623447830995
+        },
+        "ovr": {
+          "macro_f1": 0.5275465507442157,
+          "accuracy": 0.5383002741493308
+        },
+        "lgbm": {
+          "macro_f1": 0.485210295766929,
+          "accuracy": 0.5104015481373972
+        },
+        "blend": {
+          "macro_f1": 0.5402364431432428,
+          "accuracy": 0.5470085470085471
+        },
+        "feature_count_mean": 8201.2,
+        "convergence_warning_count": 0,
+        "runtime_minutes": 5.816444313180788
+      },
+      {
+        "contrast": "fixed",
+        "seed": 52,
+        "champion": {
+          "macro_f1": 0.5261574109747664,
+          "accuracy": 0.5297532656023222
+        },
+        "ovr": {
+          "macro_f1": 0.5251532424771731,
+          "accuracy": 0.5376552169004999
+        },
+        "lgbm": {
+          "macro_f1": 0.47726931882154516,
+          "accuracy": 0.511046605386228
+        },
+        "blend": {
+          "macro_f1": 0.5401283165574875,
+          "accuracy": 0.5479761328817933
+        },
+        "feature_count_mean": 8196.6,
+        "convergence_warning_count": 0,
+        "runtime_minutes": 5.851808804863443
+      },
+      {
+        "contrast": "fixed",
+        "seed": 62,
+        "champion": {
+          "macro_f1": 0.525127359146291,
+          "accuracy": 0.5313659087243993
+        },
+        "ovr": {
+          "macro_f1": 0.5283406728237091,
+          "accuracy": 0.5373326882760845
+        },
+        "lgbm": {
+          "macro_f1": 0.48434039090991826,
+          "accuracy": 0.5133043057571359
+        },
+        "blend": {
+          "macro_f1": 0.5362856172667505,
+          "accuracy": 0.5452346395742622
+        },
+        "feature_count_mean": 8196.8,
+        "convergence_warning_count": 0,
+        "runtime_minutes": 5.166960424297334
+      }
+    ],
+    "auto": [
+      {
+        "contrast": "auto",
+        "seed": 42,
+        "champion": {
+          "macro_f1": 0.5335327264669314,
+          "accuracy": 0.5350749879051766
+        },
+        "ovr": {
+          "macro_f1": 0.5292923913318537,
+          "accuracy": 0.5405579745202387
+        },
+        "lgbm": {
+          "macro_f1": 0.4862964267181921,
+          "accuracy": 0.5099177552007741
+        },
+        "blend": {
+          "macro_f1": 0.5415489396398268,
+          "accuracy": 0.5482986615062087
+        },
+        "feature_count_mean": 8213.2,
+        "convergence_warning_count": 0,
+        "runtime_minutes": 5.931688934032961,
+        "discovered_pairs_per_fold": [
+          [
+            "GBMLGG↔LGG",
+            "KIPAN↔KIRC",
+            "PCPG↔THYM",
+            "PRAD↔THYM",
+            "THCA↔THYM",
+            "PCPG↔PRAD",
+            "LAML↔THYM",
+            "BRCA↔OV"
+          ],
+          [
+            "PCPG↔THYM",
+            "KIPAN↔KIRC",
+            "PRAD↔THYM",
+            "GBMLGG↔LGG",
+            "LAML↔THYM",
+            "THCA↔THYM",
+            "SARC↔THYM",
+            "BRCA↔THYM"
+          ],
+          [
+            "PCPG↔THYM",
+            "KIPAN↔KIRC",
+            "GBMLGG↔LGG",
+            "PRAD↔THYM",
+            "OV↔PAAD",
+            "PCPG↔PRAD",
+            "THCA↔THYM",
+            "BRCA↔OV"
+          ],
+          [
+            "KIPAN↔KIRC",
+            "GBMLGG↔LGG",
+            "PCPG↔THYM",
+            "PRAD↔THYM",
+            "THCA↔THYM",
+            "LAML↔THYM",
+            "OV↔PAAD",
+            "SARC↔THYM"
+          ],
+          [
+            "KIPAN↔KIRC",
+            "PCPG↔THYM",
+            "GBMLGG↔LGG",
+            "PRAD↔THYM",
+            "LAML↔THYM",
+            "OV↔PAAD",
+            "THCA↔THYM",
+            "BRCA↔OV"
+          ]
+        ]
+      },
+      {
+        "contrast": "auto",
+        "seed": 52,
+        "champion": {
+          "macro_f1": 0.5245585120380928,
+          "accuracy": 0.5291082083534914
+        },
+        "ovr": {
+          "macro_f1": 0.5252356637282882,
+          "accuracy": 0.5376552169004999
+        },
+        "lgbm": {
+          "macro_f1": 0.47812584798923174,
+          "accuracy": 0.5107240767618126
+        },
+        "blend": {
+          "macro_f1": 0.542816533164016,
+          "accuracy": 0.5476536042573779
+        },
+        "feature_count_mean": 8208.6,
+        "convergence_warning_count": 0,
+        "runtime_minutes": 5.9328210992971435,
+        "discovered_pairs_per_fold": [
+          [
+            "KIPAN↔KIRC",
+            "GBMLGG↔LGG",
+            "PCPG↔THYM",
+            "PRAD↔THYM",
+            "LAML↔THYM",
+            "OV↔PAAD",
+            "THCA↔THYM",
+            "PCPG↔PRAD"
+          ],
+          [
+            "KIPAN↔KIRC",
+            "PCPG↔THYM",
+            "GBMLGG↔LGG",
+            "PRAD↔THYM",
+            "THCA↔THYM",
+            "LAML↔THYM",
+            "OV↔PAAD",
+            "BRCA↔OV"
+          ],
+          [
+            "PCPG↔THYM",
+            "KIPAN↔KIRC",
+            "GBMLGG↔LGG",
+            "THCA↔THYM",
+            "PRAD↔THYM",
+            "LAML↔THYM",
+            "OV↔PAAD",
+            "BRCA↔OV"
+          ],
+          [
+            "KIPAN↔KIRC",
+            "PCPG↔THYM",
+            "GBMLGG↔LGG",
+            "PRAD↔THYM",
+            "THCA↔THYM",
+            "LAML↔THYM",
+            "OV↔PAAD",
+            "SARC↔THYM"
+          ],
+          [
+            "PCPG↔THYM",
+            "KIPAN↔KIRC",
+            "GBMLGG↔LGG",
+            "PRAD↔THYM",
+            "OV↔PAAD",
+            "PCPG↔PRAD",
+            "LAML↔THYM",
+            "BRCA↔OV"
+          ]
+        ]
+      },
+      {
+        "contrast": "auto",
+        "seed": 62,
+        "champion": {
+          "macro_f1": 0.5228751527017027,
+          "accuracy": 0.5308821157877761
+        },
+        "ovr": {
+          "macro_f1": 0.5226872086260418,
+          "accuracy": 0.5345911949685535
+        },
+        "lgbm": {
+          "macro_f1": 0.49016115068290744,
+          "accuracy": 0.5165295920012901
+        },
+        "blend": {
+          "macro_f1": 0.5386912166974254,
+          "accuracy": 0.548621190130624
+        },
+        "feature_count_mean": 8208.8,
+        "convergence_warning_count": 0,
+        "runtime_minutes": 6.036375748602828,
+        "discovered_pairs_per_fold": [
+          [
+            "KIPAN↔KIRC",
+            "PCPG↔THYM",
+            "GBMLGG↔LGG",
+            "PRAD↔THYM",
+            "THCA↔THYM",
+            "LAML↔THYM",
+            "OV↔PAAD",
+            "LUAD↔LUSC"
+          ],
+          [
+            "KIPAN↔KIRC",
+            "PCPG↔THYM",
+            "GBMLGG↔LGG",
+            "PRAD↔THYM",
+            "LAML↔THYM",
+            "THCA↔THYM",
+            "PCPG↔PRAD",
+            "BRCA↔OV"
+          ],
+          [
+            "KIPAN↔KIRC",
+            "GBMLGG↔LGG",
+            "PCPG↔THYM",
+            "PRAD↔THYM",
+            "THCA↔THYM",
+            "LAML↔THYM",
+            "OV↔PAAD",
+            "SARC↔THYM"
+          ],
+          [
+            "PCPG↔THYM",
+            "KIPAN↔KIRC",
+            "GBMLGG↔LGG",
+            "PRAD↔THYM",
+            "THCA↔THYM",
+            "LAML↔THYM",
+            "SARC↔THYM",
+            "OV↔PAAD"
+          ],
+          [
+            "KIPAN↔KIRC",
+            "PCPG↔THYM",
+            "GBMLGG↔LGG",
+            "PRAD↔THYM",
+            "LAML↔THYM",
+            "THCA↔THYM",
+            "SARC↔THYM",
+            "OV↔PAAD"
+          ]
+        ]
+      }
+    ]
+  },
+  "fixed_summary": {
+    "champion": {
+      "mean": 0.5274287502103855,
+      "std": 0.0031366467825058903,
+      "per_seed": {
+        "42": 0.531001480510099,
+        "52": 0.5261574109747664,
+        "62": 0.525127359146291
+      }
+    },
+    "blend": {
+      "mean": 0.5388834589891602,
+      "std": 0.0022504464114162983,
+      "per_seed": {
+        "42": 0.5402364431432428,
+        "52": 0.5401283165574875,
+        "62": 0.5362856172667505
+      }
+    }
+  },
+  "auto_summary": {
+    "champion": {
+      "mean": 0.526988797068909,
+      "std": 0.005729370265446247,
+      "per_seed": {
+        "42": 0.5335327264669314,
+        "52": 0.5245585120380928,
+        "62": 0.5228751527017027
+      }
+    },
+    "blend": {
+      "mean": 0.5410188965004227,
+      "std": 0.0021131181426041826,
+      "per_seed": {
+        "42": 0.5415489396398268,
+        "52": 0.542816533164016,
+        "62": 0.5386912166974254
+      }
+    }
+  },
+  "auto_minus_fixed": {
+    "champion": {
+      "per_seed": {
+        "42": 0.0025312459568324064,
+        "52": -0.0015988989366736428,
+        "62": -0.002252206444588345
+      },
+      "mean": -0.00043995314147652714,
+      "std": 0.002593785021222517,
+      "positive_seeds": "1/3"
+    },
+    "blend": {
+      "per_seed": {
+        "42": 0.001312496496583937,
+        "52": 0.002688216606528515,
+        "62": 0.002405599430674865
+      },
+      "mean": 0.002135437511262439,
+      "std": 0.0007265618020870181,
+      "positive_seeds": "3/3"
+    }
+  },
+  "note": "자동 발견은 fold-train 안에서만 쌍을 정하므로 계약의 외부 지식 금지·fold-only 조항을 만족한다. 비용이 작으면 규칙 리스크를 없애는 쪽이 기대값이 크다."
+}
