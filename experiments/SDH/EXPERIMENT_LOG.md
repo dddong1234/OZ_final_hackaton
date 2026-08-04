@@ -28,6 +28,8 @@ OOF Macro F1이며, 대회 제출 점수(LB)는 별도 항목으로 구분한다
 | exp_008 | functional full의 중복 피처를 상관/중복 제거 | pruning **0.43174 ± 0.00318**, 원본보다 -0.00015 | 성능 목적 채택 안 함 |
 | exp_009 | 단백질 표기 구조 A(ref/alt/pair/position)와 행 내부 분포 S를 추가 | A pair **0.46360 ± 0.00109**, 기준 대비 +0.03171 | OOF 1위, LB 재검증 필요 |
 | exp_010 | A pair log1p, S, train-only contrast/exact를 순차 누적 | pair log1p **0.48248 ± 0.00098**; 이후 블록은 하락 | pair log1p 채택 |
+| exp_011 | B04를 고정하고 독립적인 row-local·class-enrichment FE를 추가 | gene×event-type enrichment **0.52395 ± 0.00202**, Public LB **0.4352596431** | 이전 챔피언 |
+| exp_012 | exp011 enrichment의 support·shrinkage·score 구성을 안정화 | **0.52824 ± 0.00187**, Public LB **0.4388787816** | 새 로컬·LB 챔피언 |
 
 ## 실험별 해석
 
@@ -69,6 +71,56 @@ train-only confusion contrast와 train-only exact top-4를 순차 추가하면 �
 점수가 하락했다. 다만 exp010 기준 파이프는 정확한 GS B04가 아니므로 B04 갱신을
 확정하지 않고, 후속 실험에서 B04 고정 독립 ablation으로 재검증한다.
 
+### exp_011 — B04 고정 class-enrichment
+
+GS B04 원본 파이프라인과 LR을 그대로 고정하고 burden bin, row profile, gene,
+gene×event-type, exact-event class-enrichment를 각각 독립적으로 추가했다. 가장
+높았던 피처는 fold-train의 `gene__event_type` log-odds를 26개 암종별 score로
+압축한 표현이었다. B04 3-seed 0.47930 ± 0.00253에서 0.52395 ± 0.00202로
+0.04465 상승했고, Public LB도 0.38711에서 0.43525로 0.04814 상승했다.
+
+gene enrichment를 함께 넣은 52개 조합은 평균 이득이 +0.00003뿐이고 표준편차가
+증가해 채택하지 않았다. 성능 상승은 특히 KIRC/KIPAN과 LGG/GBMLGG 혼동 완화에서
+컸다. supervised FE는 outer fold-train 안에서 내부 5-fold OOF cross-fit하여,
+학습 행도 자신의 label이 포함된 weight를 직접 받지 않게 했다.
+
+### exp_012 — enrichment 안정화와 하락 클래스 분석
+
+exp011 winner의 최소 support 10, shrinkage 20을 기준으로 support 5/20,
+shrinkage 10/50과 LIHC·DLBC·HNSC·LUSC score 제외를 독립 비교했다. seed 42에서
+shrinkage 10이 0.52918로 가장 높았고, 3-seed에서도 0.52824 ± 0.00187로
+exp011보다 0.00428 높았다. support 5는 0.52667 ± 0.00229로 차선이었다.
+
+support 20과 shrinkage 50은 각각 0.51167, 0.51888로 하락했다. 이미 support 10
+필터를 통과한 중빈도 token을 더 강하게 제거하거나 축소하면 유효한 암종 signature도
+사라지는 것으로 해석했다. 하락 클래스 score를 개별·동시 제거하는 방식도 해당
+클래스 F1을 안정적으로 회복하지 못해 26개 score 전체를 유지했다.
+
+오류는 HNSC→LUSC/STES/CESC, LUSC→LUAD/HNSC/STES, LIHC→LUSC/SARC/STES,
+DLBC→STES 등에 집중됐다. 자기 class score는 정답 샘플에서 미탐보다 높았지만,
+HNSC와 LUSC는 false positive score 분포가 정답과 많이 겹쳤다. 따라서 단일 score
+삭제나 임계값보다 양·음 evidence의 분리 또는 행 내부 상대 score 구조가 다음
+후보가 된다.
+
+최신 main에서 exp012 실제 `preprocessing.py`를 직접 불러 permutation-label
+sanity check도 수행됐다. 실제 label의 enrichment 이득은 +0.05286, 섞인 label의
+이득은 +0.00174로 우연 수준에 머물러 PASS 판정을 받았다.
+
+### exp_012 제출 경로
+
+`experiment.ipynb`의 6번 섹션에 `case_04_shrink10` seed 42 제출 코드를 추가했다.
+새 커널에서 해당 섹션만 순서대로 실행할 수 있으며, 전체 train의 enrichment 입력은
+내부 5-fold OOF로 만들고 test에는 전체 train에서 학습한 weight를 적용만 한다.
+
+raw train/test는 합치지 않는다. exact-event와 gene×event-type vocabulary는
+train에서만 만들고, test가 B04 train 설계행렬에 영향을 주지 않는지 train-only
+재구성 행렬과 완전 일치 검사한다. test 결측 개수는 참고용 출력으로만 남기고
+고정값 assertion에는 사용하지 않는다. 실행 결과 B04 누수 동치 검사는 PASS,
+수렴 경고는 0회였고 B04 8,399개와 enrichment 26개를 합친 총 8,425개 피처로
+2,546개 test 예측을 생성했다. 제출 CSV와 metadata JSON은
+`experiments/SDH/exp_012_enrichment_stability/results/`에 저장했다. Public LB는
+0.4388787816으로 exp011의 0.4352596431보다 0.0036191385 상승했다.
+
 ## OOF와 실제 LB의 차이
 
 exp_009 `case_06_plus_A_pair`의 OOF Macro F1은 **0.46360 ± 0.00109**였지만,
@@ -80,11 +132,20 @@ fold 내부 반복 pair의 분포와 실제 test 분포의 차이, 고차원 pai
 train/test 표기 형식 차이다. LB 점수는 피처 선택에 사후 사용하지 않고, 다음
 실험의 검증 가설을 정하는 참고 기록으로만 사용한다.
 
+반면 exp011은 3-seed CV **0.52395**에서 Public LB **0.4352596431**로 이동해 gap은
+약 -0.08870이었지만, B04 대비 개선폭은 CV +0.04465와 LB +0.04814로 거의 그대로
+전달됐다. 따라서 gene×event-type enrichment는 exact token보다 test 전이성이 높은
+표현으로 판단한다. exp012는 CV에서 추가 +0.00428, Public LB에서 +0.0036191385를
+확보했다. CV 개선폭의 약 84.5%가 LB에 전달됐고 CV→LB gap도 약 -0.08936으로
+exp011과 거의 같아 shrinkage 10을 새 고정 기준으로 채택한다.
+
 ## 현재 결론과 후속 연구
 
-1. SDH 계열 로컬 검증 최고 FE는 `functional full + A pair log1p`다.
-2. 실제 제출에서는 OOF-LB gap이 커서 pair 블록 단독 채택을 확정하지 않는다.
-3. 다음에는 정확한 B04 챔피언을 기준으로 고정하고, 행 내부 profile과 fold-train
-   class enrichment 표현을 각각 독립적으로 추가한다.
-4. 그 전까지 모델 파라미터는 LR `C=0.07`, `max_iter=2000`으로 고정하고, 새
-   외부 annotation이나 test 통계를 피처 설계에 사용하지 않는다.
+1. 현재 로컬·Public LB 챔피언은 exp012의
+   `B04 + gene×event-type enrichment(support10, shrink10)`이다.
+2. 3-seed CV는 0.52824 ± 0.00187, Public LB는 0.4388787816이다.
+3. exp012 실제 코드 permutation 감사와 seed42 Public LB 확인을 모두 통과했다.
+4. 후속 FE는 모델을 바꾸지 않고 enrichment의 양·음 evidence mass, positive share,
+   one-vs-rest nonlinear margin과 행 내부 score rank를 독립적으로 검증한다.
+5. 모델 파라미터는 LR `C=0.07`, `max_iter=2000`으로 고정하고, 외부 annotation이나
+   test 통계를 피처 설계에 사용하지 않는다.
