@@ -1,0 +1,18 @@
+{
+  "seed": 42,
+  "outer_splits": 5,
+  "inner_splits": 3,
+  "group_count": 6,
+  "test_read": false,
+  "train_test_concat": false,
+  "fixed_class_gene_mutation_rules": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "runtime_seconds": 3093.3264231249923,
+  "h0_reference": 0.544744,
+  "h0_reference_delta": -1.4001810832997563e-07,
+  "delta_vs_h0": -0.03565912619198741,
+  "positive_fold_count": 0,
+  "low_margin_delta": -0.026210373440097745,
+  "decision": "rejected"
+}
