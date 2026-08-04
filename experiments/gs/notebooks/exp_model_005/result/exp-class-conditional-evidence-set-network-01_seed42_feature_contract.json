@@ -1,0 +1,18 @@
+{
+  "event_features": [
+    "eb_log_odds",
+    "absolute_evidence",
+    "log_support",
+    "posterior_reliability",
+    "positive",
+    "negative",
+    "burden_normalized",
+    "exact",
+    "recurrent",
+    "event_type_one_hot"
+  ],
+  "event_feature_count": 16,
+  "train_only_vocabulary": true,
+  "test_read": false,
+  "baseline_comparison_mode": "unpaired_reference"
+}

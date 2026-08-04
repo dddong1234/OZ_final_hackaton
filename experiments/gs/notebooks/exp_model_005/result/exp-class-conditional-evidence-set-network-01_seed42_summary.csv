@@ -1,0 +1,2 @@
+variant,oof_macro_f1,feature_count,convergence_warning_count,leakage_check,nan_as_mutation_count,runtime_seconds,top1_recall,top2_recall,top3_recall,team_reference_macro_f1,delta_vs_team_3way,baseline_comparison_mode
+evidence_set_network,0.2976576454037786,16,0,True,0,13792.556632757187,0.34929850024189646,0.4666989195291082,0.5258829221093372,0.54202,-0.24436235459622135,unpaired_reference

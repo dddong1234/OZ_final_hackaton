@@ -1,0 +1,11 @@
+{
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "outer_validation_used_for_eb_fit": false,
+  "baseline_comparison_mode": "unpaired_reference",
+  "promotion": {
+    "delta_at_least_0_03": false,
+    "paired_team_oof_supplied": false,
+    "decision": "reference_only_screen_requires_paired_team_oof"
+  }
+}
