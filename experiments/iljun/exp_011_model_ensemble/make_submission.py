@@ -16,10 +16,15 @@
   그것이 최종 제출이 된다. 분리는 exp_012 단독을 다음 슬롯에 올려서 한다.
 
 경로에 대하여
-  SDH exp_012 `preprocessing.py` 의 make_context / build_case_matrices 를 그대로
-  쓴다.  **LB 확인 실험이므로 검증된 코드 경로를 그대로 타는 것이 맞다** — 여기에
-  exp_009 하드닝(어휘 분리)을 같이 넣으면 LB 숫자가 어느 변경 때문인지 갈리지
-  않는다.  하드닝은 최종 제출 스크립트를 만들 때 별도로 적용한다.
+  SDH exp_012 `preprocessing.py` 의 build_case_matrices 를 그대로 쓴다.
+  컨텍스트만 `make_submission_context` 로 만든다 — train 과 test 를 **따로 파싱**해
+  train 이 어휘를 정의하고 test 는 거기에 투영된다.  처음 판본은 두 프레임을
+  concat 한 뒤 `make_context` 를 불렀는데(어휘 = train ∪ test), PR #33 이 안전한
+  경로를 SDH 모듈에 넣었고 PR #34(exp_013)가 "원본을 결합하지 않는다"를 팀 기준으로
+  문서화했으므로 제출 경로에 결합을 남겨 둘 이유가 없어졌다.
+
+  예측은 바뀌지 않아야 한다 — train 에 없는 test 전용 토큰은 support>=10 필터에서
+  어차피 탈락하므로 설계행렬이 같다.  `--compare` 로 두 경로를 직접 대조한다.
 
   참고: gs 의 `assert test NaN == 237` 은 gs `main()` 에 있고 이 경로는 그것을
   호출하지 않으므로 여기서는 걸리지 않는다.
@@ -75,10 +80,27 @@ def make_models(seed: int) -> dict:
     }
 
 
+def legacy_matrices(sdh, train, test, genes, labels, case, seed):
+    """폐기된 결합 경로(어휘 = train ∪ test)를 대조용으로만 재현한다."""
+
+    combined = pd.concat([train[genes], test[genes]], axis=0, ignore_index=True)
+    context = sdh.make_context(combined, genes, show_progress=True)
+    train_matrix, test_matrix, _, _ = sdh.build_case_matrices(
+        context, np.arange(len(train)), np.arange(len(train), len(combined)),
+        labels, case, inner_seed=seed)
+    return train_matrix, test_matrix
+
+
+def identical(left, right) -> bool:
+    return left.shape == right.shape and (left != right).nnz == 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--outdir", type=Path, default=None)
+    parser.add_argument("--compare", action="store_true",
+                        help="폐기된 결합 경로와 설계행렬을 대조한다(파싱 1회 추가)")
     args = parser.parse_args(argv)
 
     root = find_root(Path(__file__).resolve())
@@ -94,18 +116,38 @@ def main(argv: list[str] | None = None) -> int:
     labels = train["SUBCLASS"]
     print(f"train {train.shape} · test {test.shape} · 유전자 {len(genes):,}", flush=True)
 
-    combined = pd.concat([train[genes], test[genes]], axis=0, ignore_index=True)
-    context = sdh.make_context(combined, genes, show_progress=True)
+    # train 이 어휘를 정의하고 test 는 그 어휘에 투영된다 — 원본을 결합하지 않는다.
+    context, _, audit = sdh.make_submission_context(
+        train[genes], test[genes], genes, show_progress=True)
+    assert audit["raw_train_test_concat_used"] is False
+    assert audit["vocabulary_source"] == "train"
+    print(f"어휘 train 전용 · exact {audit['exact_vocabulary_size']:,} "
+          f"· gene×type {audit['gene_type_vocabulary_size']:,} "
+          f"(test 전용 토큰 제외 exact {audit['test_only_exact_tokens_dropped']:,} "
+          f"· gene×type {audit['test_only_gene_type_tokens_dropped']:,})", flush=True)
     train_index = np.arange(len(train))
-    test_index = np.arange(len(train), len(combined))
+    test_index = np.arange(len(train), len(train) + len(test))
 
+    case = sdh.make_cases()[CASE]
     started = perf_counter()
     train_matrix, test_matrix, names, meta = sdh.build_case_matrices(
-        context, train_index, test_index, labels, sdh.make_cases()[CASE],
+        context, train_index, test_index, labels, case,
         inner_seed=args.seed)
     print(f"피처 {meta['total_feature_count']:,} "
           f"(base {meta['base_feature_count']:,} + enrich {meta['extra_feature_count']}) "
           f"· {(perf_counter()-started)/60:.1f}분", flush=True)
+
+    matrices_match = None
+    if args.compare:
+        started = perf_counter()
+        legacy_train, legacy_test = legacy_matrices(
+            sdh, train, test, genes, labels, case, args.seed)
+        matrices_match = (identical(train_matrix, legacy_train)
+                          and identical(test_matrix, legacy_test))
+        print(f"결합 경로 대조: {'완전 일치' if matrices_match else '❌ 불일치'} "
+              f"· {(perf_counter()-started)/60:.1f}분", flush=True)
+        assert matrices_match, (
+            "어휘 분리로 설계행렬이 달라졌다 — 예측이 바뀌므로 LB 슬롯을 따로 써야 한다")
 
     proba, warnings_seen = {}, 0
     for name, model in make_models(args.seed).items():
@@ -158,6 +200,11 @@ def main(argv: list[str] | None = None) -> int:
         "rows": len(submission),
         "distinct_classes": int(submission["SUBCLASS"].nunique()),
         "rows_changed_vs_champion_only": changed,
+        "vocabulary_source": audit["vocabulary_source"],
+        "raw_train_test_concat_used": audit["raw_train_test_concat_used"],
+        "test_only_exact_tokens_dropped": audit["test_only_exact_tokens_dropped"],
+        "test_only_gene_type_tokens_dropped": audit["test_only_gene_type_tokens_dropped"],
+        "design_matrix_matches_combined_path": matrices_match,
     }
     (outdir / f"{path.stem}_metadata.json").write_text(
         json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")

@@ -164,10 +164,14 @@ def main(argv: list[str] | None = None) -> int:
     # ── 2. 제출본 — train 100% × seed 3개, test 확률 평균
     if not args.skip_submission:
         print("\n[2] 제출본 — train 100% 로 seed 별 학습 후 test 확률 평균", flush=True)
-        combined = pd.concat([train[genes], test[genes]], axis=0, ignore_index=True)
-        sub_context = sdh.make_context(combined, genes, show_progress=True)
+        # 어휘는 train 만 정의한다 — 원본 프레임을 결합하지 않는다.
+        sub_context, _, audit = sdh.make_submission_context(
+            train[genes], test[genes], genes, show_progress=True)
+        assert audit["raw_train_test_concat_used"] is False
+        assert audit["vocabulary_source"] == "train"
+        report["vocabulary_audit"] = audit
         train_index = np.arange(len(train))
-        test_index = np.arange(len(train), len(combined))
+        test_index = np.arange(len(train), len(train) + len(test))
         case = sdh.make_cases()[CASE]
 
         test_proba, total_warnings = [], 0
