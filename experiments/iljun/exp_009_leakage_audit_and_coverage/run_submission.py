@@ -456,7 +456,7 @@ def main() -> None:
     # NaN 은 어떤 경우에도 mutation event 로 해석되지 않아야 한다 (파서 계약).
     assert nan_as_mutation_count(train, genes) == 0
     assert nan_as_mutation_count(test, genes) == 0
-    output = root / "outputs"
+    output = root / "experiments" / "iljun" / "results"
     output.mkdir(parents=True, exist_ok=True)
     submission, metadata = make_submission(train, test, genes)
     assert metadata["convergence_warning_count"] == 0, "최종 전체 train 학습에서 수렴 경고가 발생했습니다."

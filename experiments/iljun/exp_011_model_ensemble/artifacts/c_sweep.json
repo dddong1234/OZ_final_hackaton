@@ -1,0 +1,83 @@
+{
+  "case": "case_04_shrink10",
+  "seeds": [
+    42
+  ],
+  "grid": [
+    0.03,
+    0.07,
+    0.15,
+    0.3,
+    1.0
+  ],
+  "team_standard_C": 0.07,
+  "feature_count_mean": 8201.2,
+  "by_C": {
+    "0.03": {
+      "macro_f1_mean": 0.5097592466738065,
+      "accuracy_mean": 0.5120141912594742,
+      "convergence_warning_count": 0,
+      "delta_vs_team_standard": -0.021242233836292534
+    },
+    "0.07": {
+      "macro_f1_mean": 0.531001480510099,
+      "accuracy_mean": 0.5334623447830995,
+      "convergence_warning_count": 0,
+      "delta_vs_team_standard": 0.0
+    },
+    "0.15": {
+      "macro_f1_mean": 0.5336641879658863,
+      "accuracy_mean": 0.5394291243347847,
+      "convergence_warning_count": 0,
+      "delta_vs_team_standard": 0.0026627074557873387
+    },
+    "0.3": {
+      "macro_f1_mean": 0.5312180015706034,
+      "accuracy_mean": 0.5379777455249153,
+      "convergence_warning_count": 0,
+      "delta_vs_team_standard": 0.00021652106050440434
+    },
+    "1.0": {
+      "macro_f1_mean": 0.5152874788674257,
+      "accuracy_mean": 0.5239477503628447,
+      "convergence_warning_count": 2,
+      "delta_vs_team_standard": -0.015714001642673336
+    }
+  },
+  "per_seed": [
+    {
+      "seed": 42,
+      "feature_count_mean": 8201.2,
+      "by_C": {
+        "0.03": {
+          "macro_f1": 0.5097592466738065,
+          "accuracy": 0.5120141912594742,
+          "convergence_warning_count": 0
+        },
+        "0.07": {
+          "macro_f1": 0.531001480510099,
+          "accuracy": 0.5334623447830995,
+          "convergence_warning_count": 0
+        },
+        "0.15": {
+          "macro_f1": 0.5336641879658863,
+          "accuracy": 0.5394291243347847,
+          "convergence_warning_count": 0
+        },
+        "0.3": {
+          "macro_f1": 0.5312180015706034,
+          "accuracy": 0.5379777455249153,
+          "convergence_warning_count": 0
+        },
+        "1.0": {
+          "macro_f1": 0.5152874788674257,
+          "accuracy": 0.5239477503628447,
+          "convergence_warning_count": 2
+        }
+      }
+    }
+  ],
+  "note": "C=0.07 은 GBV 4,235차원에서 튜닝된 값이다(LR-002q). 챔피언은 8,425차원이고 그중 26개가 dense enrichment 점수라 최적점이 옮겨갔을 수 있다.",
+  "best_C": 0.15,
+  "best_gain_vs_team_standard": 0.0026627074557873387
+}
