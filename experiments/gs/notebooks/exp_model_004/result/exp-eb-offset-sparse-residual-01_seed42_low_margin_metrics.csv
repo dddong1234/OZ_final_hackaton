@@ -1,0 +1,4 @@
+variant,group,support,macro_f1
+P1_EB,low_margin_<0.05,1564,0.22242335266317395
+selective_EB_gate,low_margin_<0.05,1564,0.23640368406979842
+eb_offset_residual,low_margin_<0.05,1564,0.2149313778768141
