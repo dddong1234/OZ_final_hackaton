@@ -1,0 +1,6 @@
+fold,feature_count,burden,variant,amino_pair,topology,enrichment,exact_vocabulary_size,gene_type_vocabulary_size
+1,8152,3,7,380,8,26,183895,13967
+2,8195,3,7,380,8,26,180349,13937
+3,8161,3,7,380,8,26,180745,13884
+4,8241,3,7,380,8,26,190931,14087
+5,8217,3,7,380,8,26,184441,13967

@@ -1,0 +1,20 @@
+{
+  "seed": 42,
+  "outer_splits": 5,
+  "enrichment_inner_splits": 5,
+  "blend": {
+    "lr": 0.8,
+    "lgbm_hard_specialist": 0.2
+  },
+  "reference": 0.543679,
+  "runtime_seconds": 859.9187059160031,
+  "test_read": false,
+  "fixed_class_gene_mutation_rules": false,
+  "reference_oof_macro_f1": 0.543679,
+  "tolerance": 0.001,
+  "observed_oof_macro_f1": 0.5447438599818917,
+  "reference_delta": 0.0010648599818916527,
+  "baseline_reproduced": false,
+  "block_downstream_experiments": true,
+  "decision": "baseline_not_reproduced"
+}

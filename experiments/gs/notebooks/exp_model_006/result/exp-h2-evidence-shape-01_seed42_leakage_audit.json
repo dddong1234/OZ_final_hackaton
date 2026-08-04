@@ -1,0 +1,27 @@
+{
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "test_read": false,
+  "outer_validation_used_for_eb_fit": false,
+  "outer_validation_used_for_pairwise_fit": false,
+  "fixed_class_gene_mutation_rules": false,
+  "selection": {
+    "h0": 0.5237165047556878,
+    "h2": 0.5255605612732557,
+    "delta": 0.0018440565175679158,
+    "h0_reference_macro_f1": 0.543679,
+    "h0_reference_delta": -0.01996249524431226,
+    "h0_reference_match": false,
+    "low_margin_delta": 0.028991835072676386,
+    "delta_at_least_0015": false,
+    "four_positive_folds": true,
+    "low_margin_not_below_minus_0003": true,
+    "no_single_fold_dominates": true,
+    "no_single_class_dominates": true,
+    "decision": "baseline_not_reproduced",
+    "new_top3_recovered_rows": 28,
+    "h0_correct_h2_broken_rows": 35,
+    "pairwise_coefficient_norm_mean": 2.1469196557998655,
+    "pairwise_coefficient_norm_max": 2.48264217376709
+  }
+}
