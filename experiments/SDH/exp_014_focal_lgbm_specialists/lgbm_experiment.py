@@ -31,8 +31,6 @@ def _load_exp13():
 
 
 EXP13 = _load_exp13()
-PAIR_K = ("KIRC", "KIPAN")
-PAIR_L = ("LGG", "GBMLGG")
 BLEND_MODEL_WEIGHTS = (0.05, 0.10, 0.15, 0.20, 0.30)
 
 
@@ -49,7 +47,7 @@ class MainCase:
 @dataclass(frozen=True)
 class SpecialistCase:
     name: str
-    pairs: tuple[tuple[str, str], ...]
+    pair_ranks: tuple[int, ...]
     mode: str
     alpha: float = 0.30
     description: str = ""
@@ -66,6 +64,14 @@ class PreparedFold:
     y_valid: np.ndarray
     feature_count: int
     audit: dict
+
+
+@dataclass
+class DynamicSpecialistFold:
+    fold: int
+    valid_index: np.ndarray
+    pairs: tuple[tuple[str, str], ...]
+    probabilities: tuple[np.ndarray, ...]
 
 
 @dataclass
@@ -122,47 +128,47 @@ def main_cases() -> dict[str, MainCase]:
 def specialist_cases() -> dict[str, SpecialistCase]:
     cases = (
         SpecialistCase(
-            "spec_01_k_soft_mass_030",
-            (PAIR_K,),
+            "spec_01_rank1_soft_mass_030",
+            (0,),
             "soft_mass",
             0.30,
-            "KIRC/KIPAN only",
+            "outer-fold train에서 자동 발견한 최상위 유사 암종쌍",
         ),
         SpecialistCase(
-            "spec_02_l_soft_mass_030",
-            (PAIR_L,),
+            "spec_02_rank2_soft_mass_030",
+            (1,),
             "soft_mass",
             0.30,
-            "LGG/GBMLGG only",
+            "outer-fold train에서 자동 발견한 두 번째 유사 암종쌍",
         ),
         SpecialistCase(
             "spec_03_both_soft_mass_015",
-            (PAIR_K, PAIR_L),
+            (0, 1),
             "soft_mass",
             0.15,
         ),
         SpecialistCase(
             "spec_04_both_soft_mass_030",
-            (PAIR_K, PAIR_L),
+            (0, 1),
             "soft_mass",
             0.30,
         ),
         SpecialistCase(
             "spec_05_both_soft_mass_050",
-            (PAIR_K, PAIR_L),
+            (0, 1),
             "soft_mass",
             0.50,
         ),
         SpecialistCase(
             "spec_06_both_soft_predicted_030",
-            (PAIR_K, PAIR_L),
+            (0, 1),
             "soft_predicted",
             0.30,
             "correct only rows whose main argmax belongs to the pair",
         ),
         SpecialistCase(
             "spec_07_both_hard_predicted",
-            (PAIR_K, PAIR_L),
+            (0, 1),
             "hard_predicted",
             1.00,
             "screenshot-style hard rerouting",
@@ -176,7 +182,7 @@ def prepare_seed(
     genes: list[str],
     *,
     seed: int,
-    use_fixed_contrast: bool = True,
+    use_fixed_contrast: bool = False,
 ) -> tuple[list[PreparedFold], np.ndarray, np.ndarray]:
     """Build exp13 matrices once per fold and reuse them across model cases."""
 
@@ -198,6 +204,19 @@ def prepare_seed(
             seed=seed * 100 + fold,
             use_fixed_contrast=use_fixed_contrast,
         )
+        # Remove externally recognisable, preselected exact-event columns.
+        # R__ recurrent missense columns remain: they are selected by support
+        # from this outer-fold training split only.
+        safe_columns = np.array(
+            [not name.startswith(("C__", "D__exact_")) for name in names]
+        )
+        x_fit = x_fit[:, safe_columns]
+        x_valid = x_valid[:, safe_columns]
+        names = [name for name, keep in zip(names, safe_columns) if keep]
+        assert not any(name.startswith(("C__", "D__exact_")) for name in names)
+        audit["fixed_contrast_enabled"] = False
+        audit["fixed_exact_event_columns_removed"] = True
+        audit["feature_names"] = tuple(names)
         assert audit["raw_train_test_concat"] is False
         assert audit["vocabulary_source"] == "fit_frame_only"
         prepared.append(
@@ -391,22 +410,44 @@ def _result(
     return OOFResult(name, seed, classes, probability, prediction, fold_metrics, summary)
 
 
-def _specialist_parameters(pair: tuple[str, str], seed: int) -> dict:
-    if pair == PAIR_K:
-        return {
-            "n_estimators": 10,
-            "learning_rate": 0.10,
-            "num_leaves": 20,
-            "min_child_samples": 20,
-        }
-    if pair == PAIR_L:
-        return {
-            "n_estimators": 100,
-            "learning_rate": 0.02,
-            "num_leaves": 20,
-            "min_child_samples": 10,
-        }
-    raise KeyError(pair)
+def _discover_similar_class_pairs(
+    fold: PreparedFold,
+    *,
+    top_n: int = 2,
+) -> tuple[tuple[str, str], ...]:
+    """Find hard class pairs from outer-fold train statistics only.
+
+    Classes are represented by their mean mutation-gene vectors.  The pairs
+    with highest cosine similarity are selected.  No class name, validation
+    label, external cancer relationship, or test statistic is hard-coded.
+    """
+
+    gene_columns = np.array(
+        [name.startswith("G__") for name in fold.audit["feature_names"]]
+    )
+    matrix = fold.x_fit[:, gene_columns]
+    classes = sorted(np.unique(fold.y_fit))
+    centroids = []
+    for name in classes:
+        centroid = np.asarray(matrix[fold.y_fit == name].mean(axis=0)).ravel()
+        norm = np.linalg.norm(centroid)
+        centroids.append(centroid / norm if norm > 0 else centroid)
+    candidates = []
+    for left_index, left in enumerate(classes):
+        for right_index in range(left_index + 1, len(classes)):
+            similarity = float(centroids[left_index] @ centroids[right_index])
+            candidates.append((-similarity, left, classes[right_index]))
+    candidates.sort()
+    return tuple((left, right) for _, left, right in candidates[:top_n])
+
+
+def _specialist_parameters(seed: int) -> dict:
+    return {
+        "n_estimators": 100,
+        "learning_rate": 0.02,
+        "num_leaves": 20,
+        "min_child_samples": 10,
+    }
 
 
 def fit_specialist_probabilities(
@@ -414,16 +455,15 @@ def fit_specialist_probabilities(
     labels: np.ndarray,
     *,
     seed: int,
-) -> dict[tuple[str, str], np.ndarray]:
-    """Fit each binary specialist on pair rows from outer-train only."""
+) -> list[DynamicSpecialistFold]:
+    """Discover and fit binary specialists inside each outer-fold train."""
 
-    output = {
-        PAIR_K: np.zeros((len(labels), 2), dtype=np.float64),
-        PAIR_L: np.zeros((len(labels), 2), dtype=np.float64),
-    }
-    for pair in (PAIR_K, PAIR_L):
-        parameters = _specialist_parameters(pair, seed)
-        for fold in prepared:
+    output: list[DynamicSpecialistFold] = []
+    parameters = _specialist_parameters(seed)
+    for fold in prepared:
+        pairs = _discover_similar_class_pairs(fold, top_n=2)
+        probabilities = []
+        for pair in pairs:
             pair_mask = np.isin(fold.y_fit, pair)
             model = LGBMClassifier(
                 objective="binary",
@@ -442,45 +482,59 @@ def fit_specialist_probabilities(
             model.fit(fold.x_fit[pair_mask], fold.y_fit[pair_mask])
             raw = model.predict_proba(fold.x_valid)
             lookup = {name: index for index, name in enumerate(model.classes_)}
-            output[pair][fold.valid_index] = raw[:, [lookup[name] for name in pair]]
+            probabilities.append(raw[:, [lookup[name] for name in pair]])
+        output.append(
+            DynamicSpecialistFold(
+                fold.fold, fold.valid_index, pairs, tuple(probabilities)
+            )
+        )
     return output
 
 
 def apply_specialist_case(
     main: OOFResult,
-    specialist_probability: dict[tuple[str, str], np.ndarray],
+    specialist_probability: list[DynamicSpecialistFold],
     labels: np.ndarray,
     case: SpecialistCase,
 ) -> OOFResult:
     probability = main.probability.copy()
     class_lookup = {name: index for index, name in enumerate(main.classes)}
     original_prediction = main.prediction
-    for pair in case.pairs:
-        left, right = pair
-        columns = [class_lookup[left], class_lookup[right]]
-        pair_probability = probability[:, columns]
-        pair_mass = pair_probability.sum(axis=1)
-        main_ratio = np.divide(
-            pair_probability[:, 0], pair_mass, out=np.full(len(labels), 0.5), where=pair_mass > 0
-        )
-        specialist_ratio = specialist_probability[pair][:, 0]
-        predicted_in_pair = np.isin(original_prediction, pair)
+    for fold_output in specialist_probability:
+        rows = fold_output.valid_index
+        for rank in case.pair_ranks:
+            if rank >= len(fold_output.pairs):
+                continue
+            pair = fold_output.pairs[rank]
+            left, right = pair
+            columns = [class_lookup[left], class_lookup[right]]
+            pair_probability = probability[np.ix_(rows, columns)]
+            pair_mass = pair_probability.sum(axis=1)
+            main_ratio = np.divide(
+                pair_probability[:, 0],
+                pair_mass,
+                out=np.full(len(rows), 0.5),
+                where=pair_mass > 0,
+            )
+            specialist_ratio = fold_output.probabilities[rank][:, 0]
+            predicted_in_pair = np.isin(original_prediction[rows], pair)
 
-        if case.mode == "soft_mass":
-            weight = case.alpha * pair_mass
-            new_ratio = (1.0 - weight) * main_ratio + weight * specialist_ratio
-            apply_mask = np.ones(len(labels), dtype=bool)
-        elif case.mode == "soft_predicted":
-            new_ratio = (1.0 - case.alpha) * main_ratio + case.alpha * specialist_ratio
-            apply_mask = predicted_in_pair
-        elif case.mode == "hard_predicted":
-            new_ratio = specialist_ratio
-            apply_mask = predicted_in_pair
-        else:
-            raise ValueError(case.mode)
+            if case.mode == "soft_mass":
+                weight = case.alpha * pair_mass
+                new_ratio = (1.0 - weight) * main_ratio + weight * specialist_ratio
+                apply_mask = np.ones(len(rows), dtype=bool)
+            elif case.mode == "soft_predicted":
+                new_ratio = (1.0 - case.alpha) * main_ratio + case.alpha * specialist_ratio
+                apply_mask = predicted_in_pair
+            elif case.mode == "hard_predicted":
+                new_ratio = specialist_ratio
+                apply_mask = predicted_in_pair
+            else:
+                raise ValueError(case.mode)
 
-        probability[apply_mask, columns[0]] = pair_mass[apply_mask] * new_ratio[apply_mask]
-        probability[apply_mask, columns[1]] = pair_mass[apply_mask] * (1.0 - new_ratio[apply_mask])
+            apply_rows = rows[apply_mask]
+            probability[apply_rows, columns[0]] = pair_mass[apply_mask] * new_ratio[apply_mask]
+            probability[apply_rows, columns[1]] = pair_mass[apply_mask] * (1.0 - new_ratio[apply_mask])
 
     np.testing.assert_allclose(probability.sum(axis=1), 1.0, atol=1e-6)
     fold_rows = []

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from scipy import sparse
 
 import lgbm_experiment as exp
 
@@ -61,3 +62,35 @@ def test_fixed_blend_preserves_probability_contract() -> None:
     result = exp.fixed_blends(lr, model, labels)
     assert list(result["model_weight"]) == list(exp.BLEND_MODEL_WEIGHTS)
     assert np.isfinite(result["f1_macro"]).all()
+
+
+def test_similar_pairs_are_discovered_from_fold_train() -> None:
+    # A and B have identical mutation prevalence; C is orthogonal.
+    matrix = sparse.csr_matrix(
+        [
+            [1, 0], [1, 0],
+            [1, 0], [1, 0],
+            [0, 1], [0, 1],
+        ],
+        dtype=np.float32,
+    )
+    labels = np.array(["A", "A", "B", "B", "C", "C"])
+    fold = exp.PreparedFold(
+        1,
+        np.arange(6),
+        np.array([], dtype=int),
+        matrix,
+        sparse.csr_matrix((0, 2)),
+        labels,
+        np.array([], dtype=object),
+        2,
+        {"feature_names": ("G__X", "G__Y")},
+    )
+    pairs = exp._discover_similar_class_pairs(fold, top_n=2)
+    assert pairs[0] == ("A", "B")
+
+
+def test_specialist_catalog_contains_no_fixed_class_names() -> None:
+    text = repr(exp.specialist_cases())
+    for forbidden in ("KIRC", "KIPAN", "LGG", "GBMLGG"):
+        assert forbidden not in text

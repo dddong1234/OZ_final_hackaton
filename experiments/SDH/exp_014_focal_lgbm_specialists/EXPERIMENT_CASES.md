@@ -5,7 +5,7 @@
 exp14는 세 단계로 진행한다.
 
 ```text
-exp13 피처 고정
+고정 암종·exact mutation을 제거한 exp13 기반 피처
 → 메인 LGBM loss와 class weight 비교
 → 메인 승자에 pair specialist 추가
 → exp13 LR과 확률 blend
@@ -17,7 +17,9 @@ specialist와 blend를 사용하지 않고, specialist를 비교할 때는 seed 
 
 ## 2. 공통 전처리와 검증 조건
 
-모든 메인 모델은 exp13 standalone 챔피언과 같은 피처를 사용한다.
+모든 메인 모델은 exp13 기반 피처에서 고정 `C__` contrast와 고정
+`D__exact` mutation을 제거한 피처를 사용한다. `R__` recurrent missense는
+각 outer-fold train의 support로 자동 선택되므로 유지한다.
 
 | 블록 | 설명 |
 | --- | --- |
@@ -28,12 +30,12 @@ specialist와 blend를 사용하지 않고, specialist를 비교할 때는 seed 
 | R | fold-train support 5 이상 recurrent missense |
 | A | 아미노산 치환 방향 380개 |
 | S | 유전자 내부 mutation topology 8개 |
-| Exact | 정확한 mutation 4개 |
-| Contrast | 주요 혼동 암종쌍의 train-only 변이율 contrast |
+| Exact | 고정 exact mutation은 제거 |
+| Contrast | 고정 암종쌍 contrast는 제거 |
 | Enrichment | gene×mutation-type의 클래스별 cross-fit score 26개 |
 
-full-train 기준 피처 수는 8,425개다. fold별로 train에서 활성·비상수 피처를
-선택하므로 CV 피처 수는 조금 달라질 수 있다.
+안전 버전의 fold별 피처 수는 8,152~8,241개, 평균 8,193.2개다. fold별
+train에서 활성·비상수 피처와 recurrent mutation을 선택하므로 조금씩 달라진다.
 
 공통 검증:
 
@@ -221,28 +223,14 @@ SELECTED_MAIN = max(
 
 ---
 
-## 6. Pair specialist 공통 원리
+## 6. Train-discovered pair specialist 공통 원리
 
-메인 LGBM을 학습한 뒤 다음 두 혼동쌍을 위한 binary LGBM을 별도로 학습한다.
+각 outer fold에서 fold-train의 암종별 mutation-gene prevalence 벡터를 만든다.
+cosine similarity가 높은 암종쌍 두 개를 자동 선택하고, 해당 클래스의
+fold-train 행만 사용해 binary LGBM을 학습한다. 암종 이름은 고정하지 않으며
+outer validation label과 test 정보는 쌍 발견에 사용하지 않는다.
 
-```text
-KIRC ↔ KIPAN
-LGG ↔ GBMLGG
-```
-
-각 outer fold에서 specialist는 fold-train 중 해당 두 클래스의 행만 사용한다.
-validation label은 학습이나 routing 결정에 사용하지 않는다.
-
-### KIRC/KIPAN specialist
-
-```python
-n_estimators = 10
-learning_rate = 0.10
-num_leaves = 20
-min_child_samples = 20
-```
-
-### LGG/GBMLGG specialist
+모든 자동 발견 specialist는 같은 파라미터를 사용한다.
 
 ```python
 n_estimators = 100
@@ -258,17 +246,16 @@ specialist는 새로운 클래스를 추가하지 않는다. 메인 모델이 �
 
 ## 7. Specialist 실험
 
-### spec_01_k_soft_mass_030
+### spec_01_rank1_soft_mass_030
 
 연구 질문:
 
-> KIRC/KIPAN specialist 하나만 사용했을 때 해당 혼동쌍과 전체 Macro F1이
-> 개선되는가?
+> fold-train 유사도 1위 암종쌍 specialist가 전체 Macro F1을 개선하는가?
 
 설정:
 
 ```text
-pair = KIRC/KIPAN
+pair = train-discovered rank 1
 mode = soft mass
 alpha = 0.30
 ```
@@ -276,17 +263,16 @@ alpha = 0.30
 쌍별 단독 효과를 분리하기 위한 case다. pair probability mass가 클수록 specialist
 보정이 강하게 작동한다.
 
-### spec_02_l_soft_mass_030
+### spec_02_rank2_soft_mass_030
 
 연구 질문:
 
-> LGG/GBMLGG specialist 하나만 사용했을 때 해당 혼동쌍과 전체 Macro F1이
-> 개선되는가?
+> fold-train 유사도 2위 암종쌍 specialist가 추가 정보를 제공하는가?
 
 설정:
 
 ```text
-pair = LGG/GBMLGG
+pair = train-discovered rank 2
 mode = soft mass
 alpha = 0.30
 ```
