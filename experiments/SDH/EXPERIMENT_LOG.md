@@ -33,6 +33,7 @@ OOF Macro F1이며, 대회 제출 점수(LB)는 별도 항목으로 구분한다
 | exp_013 | 챔피언 전처리를 독립 구현하고 고정 암종쌍·exact mutation을 제거 | 안전 LR **0.52761 ± 0.00128**, 누수·재현 감사 통과 | 안전 기준 파이프 |
 | exp_014 | balanced LGBM과 train-discovered pair specialist로 LR 오류 다양성을 보완 | LR80+LGBM20 **0.53984 ± 0.00322**, Public LB **0.4489813603** | 현재 챔피언 |
 | exp_015 | LGBM 전용 피처 공간 26종을 비교 | Top-1000 LGBM **0.48233 ± 0.00317**; LR blend **0.53738** | exp14 미달 |
+| exp_016 | class-mass 보정과 LR/LGBM 혼합비를 seed-holdout으로 재검증 | mass 평균 -0.00113; blend holdout 1/3 하락 | 모두 폐기 |
 
 ## 실험별 해석
 
@@ -146,6 +147,18 @@ exp015에서는 LGBM용 피처 제거, count bin 및 fold-train gain Top-K 등 2
 blend는 0.53738까지 개선됐지만 exp014의 0.53984에는 미치지 못했다. 따라서
 exp014를 유지하고 exp015는 후속 LGBM 경량화 후보로 보관한다.
 
+### exp_016 — OOF 후처리 안정성 검증
+
+모델 재학습 없이 개선할 수 있는지 확인하기 위해 class-mass calibration과 LGBM
+혼합비를 각각 저차원으로 탐색했다. 두 seed에서 설정을 선택하고 남은 seed에
+적용하는 seed-holdout을 세 번 반복했으며, 세 번 모두 개선될 때만 채택하도록 했다.
+
+class-mass 보정은 alpha 0/0.2/0을 선택했고 seed 52에서 -0.003383 하락해 평균
+-0.001128로 FAIL이었다. 혼합비는 12.5%/17.5%/17.5%를 선택했지만 holdout
+seed 42에서 -0.003149 하락해 역시 FAIL이었다. 전체 curve의 사후 최고인 LGBM
+17.5%는 3-seed 평균 0.540513으로 기존 20%보다 +0.000669 높았지만, 선택 안정성이
+없고 개선폭이 작아 제출하지 않았다. exp14의 LR80/LGBM20을 그대로 유지한다.
+
 ## OOF와 실제 LB의 차이
 
 exp_009 `case_06_plus_A_pair`의 OOF Macro F1은 **0.46360 ± 0.00109**였지만,
@@ -175,3 +188,5 @@ exp011과 거의 같아 shrinkage 10을 새 고정 기준으로 채택한다.
 5. exp015의 Top-1000 피처 선택은 LGBM 경량화 후보지만 현재 앙상블 교체 근거는
    부족하다. 다음 모델 실험도 단일 점수뿐 아니라 LR 대비 disagreement, 오류 복구,
    3-seed blend 개선을 함께 평가한다.
+6. exp016의 class-mass 보정과 17.5% 혼합비는 seed-holdout을 통과하지 못했으므로
+   사용하지 않는다. 후처리 수치 미세조정보다 독립 모델의 오류 다양성 확보를 우선한다.
