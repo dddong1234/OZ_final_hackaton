@@ -1,0 +1,57 @@
+{
+  "experiment_id": "H-AS-LR-exact-confusion-pairs-Apair-log1p",
+  "pipeline": "exp_009 hardened (train-only vocabulary)",
+  "validation": "StratifiedKFold-5",
+  "seeds": [
+    42,
+    2024,
+    777
+  ],
+  "macro_f1_mean": 0.47850164684994495,
+  "macro_f1_std": 0.002483753024006558,
+  "accuracy_mean": 0.4598720636456486,
+  "feature_count_mean": 8173.533333333333,
+  "convergence_warning_count": 0,
+  "per_seed": [
+    {
+      "seed": 42,
+      "oof_macro_f1": 0.47814168846488037,
+      "oof_accuracy": 0.45879696823093047,
+      "fold_macro_f1_mean": 0.47829869725520846,
+      "fold_macro_f1_std": 0.008298637176475701,
+      "feature_count_mean": 8175.2,
+      "convergence_warning_count": 0,
+      "runtime_seconds": 163.74911966687068
+    },
+    {
+      "seed": 2024,
+      "oof_macro_f1": 0.4762175133106753,
+      "oof_accuracy": 0.4594420254797613,
+      "fold_macro_f1_mean": 0.47455525475426424,
+      "fold_macro_f1_std": 0.016029343519538886,
+      "feature_count_mean": 8175.0,
+      "convergence_warning_count": 0,
+      "runtime_seconds": 159.35172908310778
+    },
+    {
+      "seed": 777,
+      "oof_macro_f1": 0.481145738774279,
+      "oof_accuracy": 0.4613771972262538,
+      "fold_macro_f1_mean": 0.48023186500651416,
+      "fold_macro_f1_std": 0.016618944095251567,
+      "feature_count_mean": 8170.4,
+      "convergence_warning_count": 0,
+      "runtime_seconds": 151.8405431250576
+    }
+  ],
+  "reference": {
+    "source": "exp-gs-002-08A_factorial_summary.csv",
+    "experiment_id": "H-AS-LR-exact-confusion-pairs-Apair-log1p",
+    "macro_f1_mean": 0.47850164684994484,
+    "macro_f1_std": 0.002483753024006579,
+    "feature_count_mean": 8173.533333333333,
+    "convergence_warning_count": 0
+  },
+  "delta_vs_reference": 1.1102230246251565e-16,
+  "macro_f1_std_convention": "ddof=1 (표본표준편차, gs 기준값과 동일 관례)"
+}

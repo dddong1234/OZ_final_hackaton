@@ -1,0 +1,157 @@
+{
+  "base_candidate": "H-AS-LR-exact-confusion-pairs-Apair-log1p",
+  "weak_k": [
+    5,
+    8
+  ],
+  "class_genes": 5,
+  "auto_pairs": 8,
+  "seeds": [
+    42,
+    52,
+    62
+  ],
+  "n_splits": 5,
+  "stage1": {
+    "manual2": 0.47911,
+    "manual2+class5": 0.47298,
+    "manual2+class8": 0.47622,
+    "auto8": 0.48405,
+    "auto8+class5": 0.48113,
+    "auto8+class8": 0.48127
+  },
+  "best_variant": "auto8",
+  "per_seed": {
+    "manual2": {
+      "42": 0.47911,
+      "52": 0.48239,
+      "62": 0.47686
+    },
+    "manual2+class5": {
+      "42": 0.47298
+    },
+    "manual2+class8": {
+      "42": 0.47622
+    },
+    "auto8": {
+      "42": 0.48405,
+      "52": 0.48329,
+      "62": 0.47884
+    },
+    "auto8+class5": {
+      "42": 0.48113
+    },
+    "auto8+class8": {
+      "42": 0.48127
+    }
+  },
+  "final": {
+    "manual2": {
+      "f1_macro": 0.47945,
+      "std": 0.00278
+    },
+    "auto8": {
+      "f1_macro": 0.48206,
+      "std": 0.00281
+    }
+  },
+  "best_vs_manual2": {
+    "mean": 0.00261,
+    "std": 0.00209,
+    "pos": "3/3",
+    "detected": true
+  },
+  "weak_classes_fold0": [
+    [
+      0.1281,
+      "CESC"
+    ],
+    [
+      0.1451,
+      "KIPAN"
+    ],
+    [
+      0.1469,
+      "SARC"
+    ],
+    [
+      0.1847,
+      "THYM"
+    ],
+    [
+      0.1913,
+      "BLCA"
+    ],
+    [
+      0.1996,
+      "PCPG"
+    ],
+    [
+      0.2132,
+      "PAAD"
+    ],
+    [
+      0.2309,
+      "PRAD"
+    ]
+  ],
+  "pairs_fold0": [
+    [
+      0.3043,
+      "GBMLGG",
+      "LGG"
+    ],
+    [
+      0.2931,
+      "KIPAN",
+      "KIRC"
+    ],
+    [
+      0.2755,
+      "PCPG",
+      "THYM"
+    ],
+    [
+      0.2192,
+      "PRAD",
+      "THYM"
+    ],
+    [
+      0.2189,
+      "THCA",
+      "THYM"
+    ],
+    [
+      0.1788,
+      "PCPG",
+      "PRAD"
+    ],
+    [
+      0.165,
+      "LAML",
+      "THYM"
+    ],
+    [
+      0.148,
+      "BRCA",
+      "OV"
+    ]
+  ],
+  "table": [
+    {
+      "변형": "manual2",
+      "Macro F1": 0.47945,
+      "σ": 0.00278,
+      "기준 대비": "—",
+      "양수seed": "—"
+    },
+    {
+      "변형": "auto8",
+      "Macro F1": 0.48206,
+      "σ": 0.00281,
+      "기준 대비": "+0.00261",
+      "양수seed": "3/3"
+    }
+  ],
+  "note": "K 블록 = 클래스 vs 나머지 contrast. fold-train 도출, 규칙 안전. gs 원본 무수정(상속으로 덧붙임)."
+}

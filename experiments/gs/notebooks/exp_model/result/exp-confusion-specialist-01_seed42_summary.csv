@@ -1,0 +1,3 @@
+experiment_id,variant,seed,oof_macro_f1,delta_vs_baseline,feature_count_mean,runtime_seconds,convergence_warning_count,leakage_check,nan_as_mutation_count,inner_splits,max_pairs,alpha,min_pair_mass,max_pair_confidence
+exp-confusion-specialist-01,lr08_primary,42,0.4825927951809337,0.0,8175.2,103.9904421250103,0,True,0,3,3,0.3,0.2,0.85
+exp-confusion-specialist-01,multi_pair_soft_specialist,42,0.4815872352457371,-0.001005559935196576,8175.2,103.99045762501191,0,True,0,3,3,0.3,0.2,0.85

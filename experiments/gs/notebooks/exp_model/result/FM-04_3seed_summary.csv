@@ -1,0 +1,2 @@
+experiment_id,seed_count,lr08_macro_f1_mean,blend_0p25_macro_f1_mean,blend_0p25_macro_f1_std,delta_vs_lr08_mean,all_seed_delta_positive,feature_count_mean,runtime_seconds_mean,loss_finite,leakage_check,nan_as_mutation_count
+FM-04,3,0.4820144718595431,0.48302420812616065,0.003516658070643461,0.0010097362666174666,False,14495.0,334.40509695833316,True,True,0

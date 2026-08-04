@@ -1,0 +1,167 @@
+{
+  "gene (G 블록, 대조군)": {
+    "test_occurrences": 337294,
+    "by_min_count": {
+      "1": {
+        "columns": 4230,
+        "test_occurrences_covered": 330042,
+        "occurrence_coverage": 0.9784994693057095,
+        "test_patients_with_any_hit": 2515,
+        "patient_hit_rate": 0.9878240377062059
+      },
+      "3": {
+        "columns": 4217,
+        "test_occurrences_covered": 329849,
+        "occurrence_coverage": 0.9779272681992565,
+        "test_patients_with_any_hit": 2515,
+        "patient_hit_rate": 0.9878240377062059
+      },
+      "5": {
+        "columns": 4171,
+        "test_occurrences_covered": 329163,
+        "occurrence_coverage": 0.9758934342146613,
+        "test_patients_with_any_hit": 2515,
+        "patient_hit_rate": 0.9878240377062059
+      },
+      "10": {
+        "columns": 3984,
+        "test_occurrences_covered": 326087,
+        "occurrence_coverage": 0.966773793782279,
+        "test_patients_with_any_hit": 2515,
+        "patient_hit_rate": 0.9878240377062059
+      }
+    }
+  },
+  "gene x exact event (08 의 R 블록 수준)": {
+    "test_occurrences": 337294,
+    "by_min_count": {
+      "1": {
+        "columns": 226795,
+        "test_occurrences_covered": 18714,
+        "occurrence_coverage": 0.05548275391794696,
+        "test_patients_with_any_hit": 2226,
+        "patient_hit_rate": 0.8743126472898665
+      },
+      "3": {
+        "columns": 2254,
+        "test_occurrences_covered": 2878,
+        "occurrence_coverage": 0.008532615463067827,
+        "test_patients_with_any_hit": 1510,
+        "patient_hit_rate": 0.5930871956009427
+      },
+      "5": {
+        "columns": 429,
+        "test_occurrences_covered": 1771,
+        "occurrence_coverage": 0.005250612225536179,
+        "test_patients_with_any_hit": 1221,
+        "patient_hit_rate": 0.4795758051846033
+      },
+      "10": {
+        "columns": 120,
+        "test_occurrences_covered": 1179,
+        "occurrence_coverage": 0.0034954668627369596,
+        "test_patients_with_any_hit": 929,
+        "patient_hit_rate": 0.3648860958366064
+      }
+    }
+  },
+  "gene x position": {
+    "test_occurrences": 337294,
+    "by_min_count": {
+      "1": {
+        "columns": 213946,
+        "test_occurrences_covered": 51312,
+        "occurrence_coverage": 0.1521284102296513,
+        "test_patients_with_any_hit": 2381,
+        "patient_hit_rate": 0.9351924587588374
+      },
+      "3": {
+        "columns": 4200,
+        "test_occurrences_covered": 6708,
+        "occurrence_coverage": 0.019887694414961427,
+        "test_patients_with_any_hit": 1922,
+        "patient_hit_rate": 0.7549096622152396
+      },
+      "5": {
+        "columns": 575,
+        "test_occurrences_covered": 3437,
+        "occurrence_coverage": 0.01018992333098128,
+        "test_patients_with_any_hit": 1664,
+        "patient_hit_rate": 0.6535742340926944
+      },
+      "10": {
+        "columns": 152,
+        "test_occurrences_covered": 2077,
+        "occurrence_coverage": 0.0061578326326587485,
+        "test_patients_with_any_hit": 1355,
+        "patient_hit_rate": 0.5322073841319718
+      }
+    }
+  },
+  "gene x 50aa-bin": {
+    "test_occurrences": 337294,
+    "by_min_count": {
+      "1": {
+        "columns": 49116,
+        "test_occurrences_covered": 314900,
+        "occurrence_coverage": 0.9336068830160038,
+        "test_patients_with_any_hit": 2515,
+        "patient_hit_rate": 0.9878240377062059
+      },
+      "3": {
+        "columns": 38328,
+        "test_occurrences_covered": 258927,
+        "occurrence_coverage": 0.767659667826881,
+        "test_patients_with_any_hit": 2509,
+        "patient_hit_rate": 0.9854673998428908
+      },
+      "5": {
+        "columns": 23684,
+        "test_occurrences_covered": 176711,
+        "occurrence_coverage": 0.5239079260229947,
+        "test_patients_with_any_hit": 2492,
+        "patient_hit_rate": 0.9787902592301649
+      },
+      "10": {
+        "columns": 4102,
+        "test_occurrences_covered": 46876,
+        "occurrence_coverage": 0.13897667909894632,
+        "test_patients_with_any_hit": 2350,
+        "patient_hit_rate": 0.9230164964650432
+      }
+    }
+  },
+  "gene x functype x 50aa-bin (signature)": {
+    "test_occurrences": 337294,
+    "by_min_count": {
+      "1": {
+        "columns": 95736,
+        "test_occurrences_covered": 258940,
+        "occurrence_coverage": 0.7676982098703209,
+        "test_patients_with_any_hit": 2505,
+        "patient_hit_rate": 0.9838963079340142
+      },
+      "3": {
+        "columns": 36157,
+        "test_occurrences_covered": 140838,
+        "occurrence_coverage": 0.4175526395370211,
+        "test_patients_with_any_hit": 2477,
+        "patient_hit_rate": 0.9728986645718775
+      },
+      "5": {
+        "columns": 13129,
+        "test_occurrences_covered": 66428,
+        "occurrence_coverage": 0.1969439124324773,
+        "test_patients_with_any_hit": 2397,
+        "patient_hit_rate": 0.941476826394344
+      },
+      "10": {
+        "columns": 1017,
+        "test_occurrences_covered": 12209,
+        "occurrence_coverage": 0.03619690833516161,
+        "test_patients_with_any_hit": 2035,
+        "patient_hit_rate": 0.7992930086410055
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "train_rows": 6201,
+  "test_rows": 2546,
+  "exact_event": {
+    "train_vocabulary": 226795,
+    "test_distinct": 273514,
+    "test_distinct_covered": 13910,
+    "test_distinct_coverage": 0.05085662891113435,
+    "test_occurrences": 337294,
+    "test_occurrences_covered": 18714,
+    "test_occurrence_coverage": 0.05548275391794696,
+    "test_only_distinct": 259604
+  },
+  "recurrent_missense_block": {
+    "min_count": 5,
+    "columns": 230,
+    "test_occurrences_captured": 1400,
+    "test_occurrence_coverage": 0.004150681601214371,
+    "test_rows_with_any_hit": 1107,
+    "test_row_hit_rate": 0.4347996857816182
+  },
+  "gene_block": {
+    "train_genes_with_variant": 4230,
+    "test_genes_with_variant": 4358,
+    "test_genes_covered": 4225,
+    "test_gene_coverage": 0.9694814134924277
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "profile_cosine_threshold": 0.9,
+  "exact_duplicate_rows": 1031,
+  "near_neighbour_pairs": 939,
+  "n_groups": 5609,
+  "max_group_size": 94,
+  "grouped_row_fraction": 0.1665860345105628
+}

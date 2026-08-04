@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/admin/Documents/FinalProject/OZ_fianl_hackaton/experiments/gs/notebooks/exp_model/common/sparse_fm_runner.py", line 292, in <module>
+    main()
+  File "/Users/admin/Documents/FinalProject/OZ_fianl_hackaton/experiments/gs/notebooks/exp_model/common/sparse_fm_runner.py", line 287, in main
+    result, report = run_seed(cache, train[CFG.target_col], args.seed, contrast=args.experiment == "FM-02"); pd.DataFrame([result]).to_csv(output / f"{stem}_oof.csv", index=False); report.to_csv(output / f"{stem}_class_f1.csv", index=False); print(json.dumps(result, ensure_ascii=False, indent=2))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/admin/Documents/FinalProject/OZ_fianl_hackaton/experiments/gs/notebooks/exp_model/common/sparse_fm_runner.py", line 259, in run_seed
+    fm_probability[va] = _probability(model, fm_all[va], device); lr = LogisticRegression(solver="lbfgs", C=0.07, max_iter=2000, class_weight="balanced", random_state=seed).fit(lr_all[tr], value[tr]); raw = lr.predict_proba(lr_all[va]); lr_probability[va, [classes.index(name) for name in lr.classes_]] = raw
+                                                                                                                                                                                                                                             ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IndexError: shape mismatch: indexing arrays could not be broadcast together with shapes (1241,) (26,) 

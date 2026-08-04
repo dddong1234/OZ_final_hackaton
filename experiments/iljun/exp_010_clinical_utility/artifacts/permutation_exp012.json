@@ -1,0 +1,44 @@
+{
+  "seed": 42,
+  "permutation_seed": 20260803,
+  "source": "experiments/SDH/exp_012_enrichment_stability/preprocessing.py",
+  "n_classes": 26,
+  "runs": {
+    "real_b04": {
+      "tag": "real + B04",
+      "case": "case_00_b04",
+      "oof_macro_f1": 0.47814168846488037,
+      "feature_count_mean": 8175.2,
+      "convergence_warning_count": 0
+    },
+    "real_champion": {
+      "tag": "real + shrink10",
+      "case": "case_04_shrink10",
+      "oof_macro_f1": 0.531001480510099,
+      "feature_count_mean": 8201.2,
+      "convergence_warning_count": 0
+    },
+    "permuted_b04": {
+      "tag": "permuted + B04",
+      "case": "case_00_b04",
+      "oof_macro_f1": 0.031996427698703284,
+      "feature_count_mean": 8173.8,
+      "convergence_warning_count": 0
+    },
+    "permuted_champion": {
+      "tag": "permuted + shrink10",
+      "case": "case_04_shrink10",
+      "oof_macro_f1": 0.03373975340835858,
+      "feature_count_mean": 8199.8,
+      "convergence_warning_count": 0
+    }
+  },
+  "real_delta": 0.05285979204521862,
+  "permuted_delta": 0.0017433257096552968,
+  "chance_level": 0.038461538461538464,
+  "reference": {
+    "sdh_b04_seed42": 0.47786,
+    "sdh_shrink10_seed42": 0.52918
+  },
+  "verdict": "PASS"
+}
