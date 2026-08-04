@@ -13,8 +13,8 @@
 - LIHC, DLBC, HNSC, LUSC score를 빼는 방식은 해당 클래스 F1을 안정적으로
   회복시키지 못했고 전체 Macro F1도 하락했다. 따라서 26개 score를 유지한다.
 - 모든 실행에서 LR 수렴 경고는 0회였다.
-- exp012 후보는 아직 Public LB에 제출하지 않았다. 제출 검증이 끝난 현재
-  챔피언은 exp011의 Public LB `0.43525`다.
+- exp012 Public LB는 **`0.4388787816`**으로 exp011 `0.4352596431`보다
+  **`+0.0036191385`** 상승했다. 따라서 exp012를 새 제출 챔피언으로 채택한다.
 
 ## 1. 실험 배경
 
@@ -221,7 +221,25 @@ LIHC는 `-0.00647`, HNSC는 `-0.00085`, DLBC와 LUSC는 변화가 없다. 즉 �
 shrinkage의 Macro F1 개선은 네 하락 클래스를 직접 복구해서가 아니라 기존에
 강했던 confusion-pair 및 여러 중간 클래스의 경계를 더 개선해서 발생했다.
 
-## 12. 최종 판정
+## 12. Public LB 결과
+
+seed 42 전체 train 학습 제출 결과는 다음과 같다.
+
+| 파이프라인 | 3-seed CV Macro F1 | Public LB Macro F1 |
+| --- | ---: | ---: |
+| exp011 support10/shrink20 | 0.52395 | 0.4352596431 |
+| exp012 support10/shrink10 | **0.52824** | **0.4388787816** |
+| 개선폭 | **+0.00428** | **+0.0036191385** |
+
+CV 개선폭의 약 84.5%가 Public LB에도 전달됐다. CV→LB gap은 exp011 약
+`-0.08869`, exp012 약 `-0.08936`으로 거의 동일하다. 따라서 shrinkage 10의
+상승은 CV에만 국한된 미세 튜닝 효과가 아니라 test에도 전이된 것으로 판단한다.
+
+제출 파일:
+
+`submission_exp012_b04_gene_type_shrink10_seed42.csv`
+
+## 13. 최종 판정
 
 ### 채택
 
@@ -240,11 +258,9 @@ shrinkage의 Macro F1 개선은 네 하락 클래스를 직접 복구해서가 �
 
 ### 다음 단계
 
-1. shrinkage 10 구현에 permutation-label sanity check 적용
-2. 동일 seed 42 제출 파일을 만들어 Public LB 확인
-3. LB가 유지되면 exp011 winner 대신 exp012 설정을 새 고정 기준으로 채택
-4. LIHC/HNSC/LUSC 보완은 score 제거가 아니라 fold-train 내부의 pairwise margin
-   또는 독립적인 row-local 피처로 검증
+1. exp012 support10/shrink10을 새 고정 기준으로 사용
+2. enrichment의 positive/negative evidence mass를 분리해 독립 검증
+3. one-vs-rest nonlinear margin과 행 내부 score rank를 독립 검증
+4. LIHC/HNSC/LUSC 보완은 score 제거가 아니라 안전한 row-local 표현으로 진행
 
-현재 단계에서는 exp012가 **새 로컬 CV 후보**이고, Public LB까지 확인된 최종
-챔피언은 exp011이다.
+exp012는 실제 코드 permutation audit와 Public LB 확인을 모두 통과한 새 챔피언이다.

@@ -48,6 +48,30 @@ B04 = _load_b04_module()
 B04_CANDIDATE = B04.CANDIDATES[B04_ID]
 
 
+def _load_safe_submission_module() -> ModuleType:
+    """Load the audited train-vocabulary-only RowCache implementation."""
+
+    module_name = "_sdh_exp012_safe_submission_source"
+    if module_name in sys.modules:
+        return sys.modules[module_name]
+    experiments_dir = Path(__file__).resolve().parents[2]
+    source = (
+        experiments_dir
+        / "iljun"
+        / "exp_009_leakage_audit_and_coverage"
+        / "run_submission.py"
+    )
+    if not source.exists():
+        raise FileNotFoundError(f"감사 완료 제출 모듈을 찾지 못했습니다: {source}")
+    spec = importlib.util.spec_from_file_location(module_name, source)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"제출 모듈 spec 생성 실패: {source}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 @dataclass(frozen=True)
 class EnrichmentCase:
     name: str
@@ -63,6 +87,48 @@ class FeatureContext:
     cache: object
     gene_type_matrix: sparse.csr_matrix
     gene_type_names: list[str]
+
+
+def _build_gene_type_matrix(
+    events: pd.DataFrame,
+    n_rows: int,
+    genes: list[str],
+    *,
+    vocabulary: list[str] | None = None,
+) -> tuple[sparse.csr_matrix, list[str]]:
+    """Build row-local gene×event-type indicators in a fixed vocabulary."""
+
+    if events.empty:
+        names = list(vocabulary) if vocabulary is not None else []
+        return sparse.csr_matrix((n_rows, len(names)), dtype=np.float32), names
+
+    observed = events[["row", "gene_idx", "event_type"]].drop_duplicates().copy()
+    gene_lookup = dict(enumerate(genes))
+    observed["gene_type"] = (
+        observed["gene_idx"].map(gene_lookup).astype(str)
+        + "__"
+        + observed["event_type"].astype(str)
+    )
+    names = (
+        sorted(observed["gene_type"].unique())
+        if vocabulary is None
+        else list(vocabulary)
+    )
+    name_lookup = {name: index for index, name in enumerate(names)}
+    column = observed["gene_type"].map(name_lookup)
+    known = column.notna().to_numpy()
+    matrix = sparse.coo_matrix(
+        (
+            np.ones(int(known.sum()), dtype=np.float32),
+            (
+                observed["row"].to_numpy(dtype=np.int32)[known],
+                column.to_numpy()[known].astype(np.int32),
+            ),
+        ),
+        shape=(n_rows, len(names)),
+    ).tocsr()
+    matrix.data[:] = 1.0
+    return matrix, names
 
 
 def make_cases() -> dict[str, EnrichmentCase]:
@@ -134,32 +200,86 @@ def make_context(
     """Build only deterministic row-local representations."""
 
     cache = B04.RowCache.build(frame, genes, show_progress=show_progress)
-    events = cache.events
-    if events.empty:
-        matrix = sparse.csr_matrix((len(frame), 0), dtype=np.float32)
-        return FeatureContext(cache, matrix, [])
-
-    observed = events[["row", "gene_idx", "event_type"]].drop_duplicates().copy()
-    gene_lookup = dict(enumerate(genes))
-    observed["gene_type"] = (
-        observed["gene_idx"].map(gene_lookup).astype(str)
-        + "__"
-        + observed["event_type"].astype(str)
-    )
-    names = sorted(observed["gene_type"].unique())
-    name_lookup = {name: index for index, name in enumerate(names)}
-    matrix = sparse.coo_matrix(
-        (
-            np.ones(len(observed), dtype=np.float32),
-            (
-                observed["row"].to_numpy(dtype=np.int32),
-                observed["gene_type"].map(name_lookup).to_numpy(dtype=np.int32),
-            ),
-        ),
-        shape=(len(frame), len(names)),
-    ).tocsr()
-    matrix.data[:] = 1.0
+    matrix, names = _build_gene_type_matrix(cache.events, len(frame), genes)
     return FeatureContext(cache, matrix, names)
+
+
+def make_submission_context(
+    train_frame: pd.DataFrame,
+    test_frame: pd.DataFrame,
+    genes: list[str],
+    *,
+    show_progress: bool = True,
+) -> tuple[FeatureContext, FeatureContext, dict[str, int | str | bool]]:
+    """Build train/test caches without letting test define any vocabulary.
+
+    The audited RowCache parses train and test in separate passes. Exact-event
+    and gene×event-type vocabularies come only from train; unseen test tokens
+    still contribute to row-local burden/type/amino/topology aggregates.
+    """
+
+    safe = _load_safe_submission_module()
+    train_cache = safe.RowCache.build(
+        train_frame,
+        genes,
+        show_progress=show_progress,
+    )
+    test_cache = safe.RowCache.build(
+        test_frame,
+        genes,
+        show_progress=show_progress,
+        vocabulary=train_cache.event_names,
+    )
+    stacked_cache = safe.RowCache.stack(train_cache, test_cache)
+
+    train_gene_type, gene_type_names = _build_gene_type_matrix(
+        train_cache.events,
+        len(train_frame),
+        genes,
+    )
+    test_gene_type, _ = _build_gene_type_matrix(
+        test_cache.events,
+        len(test_frame),
+        genes,
+        vocabulary=gene_type_names,
+    )
+    stacked_gene_type = sparse.vstack(
+        [train_gene_type, test_gene_type],
+        format="csr",
+    )
+    assert (stacked_gene_type[: len(train_frame)] != train_gene_type).nnz == 0
+
+    train_exact = set(train_cache.event_names)
+    test_exact = set(test_cache.events.get("pair", pd.Series(dtype=str)).unique())
+    train_gene_type_names = set(gene_type_names)
+    if test_cache.events.empty:
+        test_gene_type_names: set[str] = set()
+    else:
+        test_gene_type_names = set(
+            test_cache.events["gene_idx"].map(dict(enumerate(genes))).astype(str)
+            + "__"
+            + test_cache.events["event_type"].astype(str)
+        )
+
+    context = FeatureContext(stacked_cache, stacked_gene_type, gene_type_names)
+    train_only_context = FeatureContext(
+        train_cache,
+        train_gene_type,
+        gene_type_names,
+    )
+    audit = {
+        "train_rows": len(train_frame),
+        "test_rows": len(test_frame),
+        "exact_vocabulary_size": len(train_exact),
+        "gene_type_vocabulary_size": len(gene_type_names),
+        "test_only_exact_tokens_dropped": len(test_exact - train_exact),
+        "test_only_gene_type_tokens_dropped": len(
+            test_gene_type_names - train_gene_type_names
+        ),
+        "vocabulary_source": "train",
+        "raw_train_test_concat_used": False,
+    }
+    return context, train_only_context, audit
 
 
 def _b04_builder(context: FeatureContext):
