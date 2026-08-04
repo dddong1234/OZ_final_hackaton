@@ -1,0 +1,431 @@
+{
+  "case": "case_04_shrink10",
+  "contrast": "auto",
+  "seeds": [
+    42,
+    52,
+    62
+  ],
+  "inner_splits": 3,
+  "contract_grid": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.3
+  ],
+  "three_way_grid": [
+    {
+      "champion": 1.0,
+      "ovr": 0.0,
+      "lgbm": 0.0
+    },
+    {
+      "champion": 0.9,
+      "ovr": 0.05,
+      "lgbm": 0.05
+    },
+    {
+      "champion": 0.85,
+      "ovr": 0.1,
+      "lgbm": 0.05
+    },
+    {
+      "champion": 0.8,
+      "ovr": 0.1,
+      "lgbm": 0.1
+    },
+    {
+      "champion": 0.75,
+      "ovr": 0.15,
+      "lgbm": 0.1
+    },
+    {
+      "champion": 0.7,
+      "ovr": 0.2,
+      "lgbm": 0.1
+    },
+    {
+      "champion": 0.7,
+      "ovr": 0.15,
+      "lgbm": 0.15
+    },
+    {
+      "champion": 0.6,
+      "ovr": 0.25,
+      "lgbm": 0.15
+    },
+    {
+      "champion": 0.55,
+      "ovr": 0.3,
+      "lgbm": 0.15
+    }
+  ],
+  "legacy_weights": {
+    "champion": 0.55,
+    "ovr": 0.3,
+    "lgbm": 0.15
+  },
+  "runs": [
+    {
+      "seed": 42,
+      "contrast": "auto",
+      "anchor": {
+        "macro_f1": 0.5335327264669314,
+        "accuracy": 0.5350749879051766
+      },
+      "solo": {
+        "champion": {
+          "macro_f1": 0.5335327264669314,
+          "accuracy": 0.5350749879051766
+        },
+        "ovr": {
+          "macro_f1": 0.5292923913318537,
+          "accuracy": 0.5405579745202387
+        },
+        "lgbm": {
+          "macro_f1": 0.4862964267181921,
+          "accuracy": 0.5099177552007741
+        }
+      },
+      "foldlocal": {
+        "pair_ovr": {
+          "macro_f1": 0.5354213096626211,
+          "accuracy": 0.5383002741493308,
+          "gain_vs_anchor": 0.0018885831956897414
+        },
+        "pair_lgbm": {
+          "macro_f1": 0.5412347354761251,
+          "accuracy": 0.5471698113207547,
+          "gain_vs_anchor": 0.007702009009193711
+        },
+        "three_way": {
+          "macro_f1": 0.5399784224320128,
+          "accuracy": 0.5463634897597162,
+          "gain_vs_anchor": 0.006445695965081377
+        }
+      },
+      "legacy_fixed_weights": {
+        "macro_f1": 0.5415489396398268,
+        "accuracy": 0.5482986615062087,
+        "gain_vs_anchor": 0.008016213172895359
+      },
+      "fold_choices": [
+        {
+          "fold": 1,
+          "pair_ovr_weight": 0.1,
+          "pair_lgbm_weight": 0.2,
+          "three_way_weights": {
+            "champion": 0.55,
+            "ovr": 0.3,
+            "lgbm": 0.15
+          }
+        },
+        {
+          "fold": 2,
+          "pair_ovr_weight": 0.1,
+          "pair_lgbm_weight": 0.15,
+          "three_way_weights": {
+            "champion": 0.55,
+            "ovr": 0.3,
+            "lgbm": 0.15
+          }
+        },
+        {
+          "fold": 3,
+          "pair_ovr_weight": 0.2,
+          "pair_lgbm_weight": 0.1,
+          "three_way_weights": {
+            "champion": 0.75,
+            "ovr": 0.15,
+            "lgbm": 0.1
+          }
+        },
+        {
+          "fold": 4,
+          "pair_ovr_weight": 0.3,
+          "pair_lgbm_weight": 0.1,
+          "three_way_weights": {
+            "champion": 0.7,
+            "ovr": 0.2,
+            "lgbm": 0.1
+          }
+        },
+        {
+          "fold": 5,
+          "pair_ovr_weight": 0.3,
+          "pair_lgbm_weight": 0.2,
+          "three_way_weights": {
+            "champion": 0.6,
+            "ovr": 0.25,
+            "lgbm": 0.15
+          }
+        }
+      ],
+      "feature_count_mean": 8213.2,
+      "convergence_warning_count": 0,
+      "runtime_minutes": 20.02688871875095
+    },
+    {
+      "seed": 52,
+      "contrast": "auto",
+      "anchor": {
+        "macro_f1": 0.5245585120380928,
+        "accuracy": 0.5291082083534914
+      },
+      "solo": {
+        "champion": {
+          "macro_f1": 0.5245585120380928,
+          "accuracy": 0.5291082083534914
+        },
+        "ovr": {
+          "macro_f1": 0.5252356637282882,
+          "accuracy": 0.5376552169004999
+        },
+        "lgbm": {
+          "macro_f1": 0.47812584798923174,
+          "accuracy": 0.5107240767618126
+        }
+      },
+      "foldlocal": {
+        "pair_ovr": {
+          "macro_f1": 0.5274442854488396,
+          "accuracy": 0.531527173036607,
+          "gain_vs_anchor": 0.002885773410746806
+        },
+        "pair_lgbm": {
+          "macro_f1": 0.5361765003195832,
+          "accuracy": 0.5421706176423158,
+          "gain_vs_anchor": 0.01161798828149041
+        },
+        "three_way": {
+          "macro_f1": 0.5373883406248356,
+          "accuracy": 0.5423318819545234,
+          "gain_vs_anchor": 0.012829828586742864
+        }
+      },
+      "legacy_fixed_weights": {
+        "macro_f1": 0.542816533164016,
+        "accuracy": 0.5476536042573779,
+        "gain_vs_anchor": 0.01825802112592323
+      },
+      "fold_choices": [
+        {
+          "fold": 1,
+          "pair_ovr_weight": 0.05,
+          "pair_lgbm_weight": 0.1,
+          "three_way_weights": {
+            "champion": 0.85,
+            "ovr": 0.1,
+            "lgbm": 0.05
+          }
+        },
+        {
+          "fold": 2,
+          "pair_ovr_weight": 0.3,
+          "pair_lgbm_weight": 0.15,
+          "three_way_weights": {
+            "champion": 0.55,
+            "ovr": 0.3,
+            "lgbm": 0.15
+          }
+        },
+        {
+          "fold": 3,
+          "pair_ovr_weight": 0.3,
+          "pair_lgbm_weight": 0.15,
+          "three_way_weights": {
+            "champion": 0.7,
+            "ovr": 0.2,
+            "lgbm": 0.1
+          }
+        },
+        {
+          "fold": 4,
+          "pair_ovr_weight": 0.2,
+          "pair_lgbm_weight": 0.15,
+          "three_way_weights": {
+            "champion": 0.7,
+            "ovr": 0.15,
+            "lgbm": 0.15
+          }
+        },
+        {
+          "fold": 5,
+          "pair_ovr_weight": 0.3,
+          "pair_lgbm_weight": 0.2,
+          "three_way_weights": {
+            "champion": 0.55,
+            "ovr": 0.3,
+            "lgbm": 0.15
+          }
+        }
+      ],
+      "feature_count_mean": 8208.6,
+      "convergence_warning_count": 0,
+      "runtime_minutes": 19.960240890283604
+    },
+    {
+      "seed": 62,
+      "contrast": "auto",
+      "anchor": {
+        "macro_f1": 0.5228751527017027,
+        "accuracy": 0.5308821157877761
+      },
+      "solo": {
+        "champion": {
+          "macro_f1": 0.5228751527017027,
+          "accuracy": 0.5308821157877761
+        },
+        "ovr": {
+          "macro_f1": 0.5226872086260418,
+          "accuracy": 0.5345911949685535
+        },
+        "lgbm": {
+          "macro_f1": 0.49016115068290744,
+          "accuracy": 0.5165295920012901
+        }
+      },
+      "foldlocal": {
+        "pair_ovr": {
+          "macro_f1": 0.5248403915498667,
+          "accuracy": 0.531527173036607,
+          "gain_vs_anchor": 0.0019652388481640193
+        },
+        "pair_lgbm": {
+          "macro_f1": 0.5328529515071184,
+          "accuracy": 0.5426544105789389,
+          "gain_vs_anchor": 0.009977798805415716
+        },
+        "three_way": {
+          "macro_f1": 0.5358209577823781,
+          "accuracy": 0.5445895823254314,
+          "gain_vs_anchor": 0.012945805080675443
+        }
+      },
+      "legacy_fixed_weights": {
+        "macro_f1": 0.5386912166974254,
+        "accuracy": 0.548621190130624,
+        "gain_vs_anchor": 0.015816063995722662
+      },
+      "fold_choices": [
+        {
+          "fold": 1,
+          "pair_ovr_weight": 0.3,
+          "pair_lgbm_weight": 0.2,
+          "three_way_weights": {
+            "champion": 0.55,
+            "ovr": 0.3,
+            "lgbm": 0.15
+          }
+        },
+        {
+          "fold": 2,
+          "pair_ovr_weight": 0.3,
+          "pair_lgbm_weight": 0.2,
+          "three_way_weights": {
+            "champion": 0.55,
+            "ovr": 0.3,
+            "lgbm": 0.15
+          }
+        },
+        {
+          "fold": 3,
+          "pair_ovr_weight": 0.1,
+          "pair_lgbm_weight": 0.15,
+          "three_way_weights": {
+            "champion": 0.8,
+            "ovr": 0.1,
+            "lgbm": 0.1
+          }
+        },
+        {
+          "fold": 4,
+          "pair_ovr_weight": 0.1,
+          "pair_lgbm_weight": 0.05,
+          "three_way_weights": {
+            "champion": 0.8,
+            "ovr": 0.1,
+            "lgbm": 0.1
+          }
+        },
+        {
+          "fold": 5,
+          "pair_ovr_weight": 0.3,
+          "pair_lgbm_weight": 0.2,
+          "three_way_weights": {
+            "champion": 0.55,
+            "ovr": 0.3,
+            "lgbm": 0.15
+          }
+        }
+      ],
+      "feature_count_mean": 8208.8,
+      "convergence_warning_count": 0,
+      "runtime_minutes": 21.18149088958356
+    }
+  ],
+  "summary": {
+    "anchor": {
+      "macro_f1_mean": 0.526988797068909,
+      "macro_f1_std": 0.005729370265446247,
+      "gain_mean": 0.0,
+      "gain_std": 0.0,
+      "positive_seeds": "0/3",
+      "per_seed": {
+        "42": 0.5335327264669314,
+        "52": 0.5245585120380928,
+        "62": 0.5228751527017027
+      }
+    },
+    "pair_ovr": {
+      "macro_f1_mean": 0.5292353288871091,
+      "macro_f1_std": 0.005513151047770225,
+      "gain_mean": 0.002246531818200189,
+      "gain_std": 0.0005549246638015071,
+      "positive_seeds": "3/3",
+      "per_seed": {
+        "42": 0.5354213096626211,
+        "52": 0.5274442854488396,
+        "62": 0.5248403915498667
+      }
+    },
+    "pair_lgbm": {
+      "macro_f1_mean": 0.5367547291009424,
+      "macro_f1_std": 0.004220703379588329,
+      "gain_mean": 0.009765932032033279,
+      "gain_std": 0.001966567838268479,
+      "positive_seeds": "3/3",
+      "per_seed": {
+        "42": 0.5412347354761251,
+        "52": 0.5361765003195832,
+        "62": 0.5328529515071184
+      }
+    },
+    "three_way": {
+      "macro_f1_mean": 0.5377292402797421,
+      "macro_f1_std": 0.00209959222452288,
+      "gain_mean": 0.010740443210833228,
+      "gain_std": 0.003719812235241996,
+      "positive_seeds": "3/3",
+      "per_seed": {
+        "42": 0.5399784224320128,
+        "52": 0.5373883406248356,
+        "62": 0.5358209577823781
+      }
+    },
+    "legacy_fixed_weights": {
+      "macro_f1_mean": 0.5410188965004227,
+      "macro_f1_std": 0.0021131181426041826,
+      "gain_mean": 0.01403009943151375,
+      "gain_std": 0.005349384039787542,
+      "positive_seeds": "3/3",
+      "per_seed": {
+        "42": 0.5415489396398268,
+        "52": 0.542816533164016,
+        "62": 0.5386912166974254
+      }
+    }
+  },
+  "note": "fold-local 선택분은 계약 준수 추정치다. legacy_fixed_weights 는 계약 이전 방식(전체 OOF 에서 고른 0.55/0.30/0.15)을 같은 split 에서 다시 잰 값으로, 두 값의 차이가 선택 편향의 실측 크기다."
+}
