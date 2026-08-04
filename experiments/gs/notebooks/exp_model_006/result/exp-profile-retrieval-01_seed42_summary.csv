@@ -1,0 +1,4 @@
+variant,oof_macro_f1,oof_accuracy,feature_count,convergence_warning_count,leakage_check,nan_as_mutation_count,delta_vs_h0
+H0,0.5447438599818917,0.5555555555555556,8193.2,0,True,0,0.0
+profile_retrieval,0.017969046923543987,0.13143041444928238,8193.2,0,True,0,-0.5267748130583477
+H0_profile_retrieval_blend,0.5377228251520274,0.5442670537010159,8193.2,0,True,0,-0.00702103482986427
