@@ -1,0 +1,48 @@
+{
+  "case": "case_04_shrink10",
+  "weights": {
+    "champion": 0.55,
+    "ovr": 0.3,
+    "lgbm": 0.15
+  },
+  "seeds": [
+    42,
+    2024,
+    777
+  ],
+  "single_seed": {
+    "42": {
+      "macro_f1": 0.5402364431432428,
+      "accuracy": 0.5470085470085471
+    },
+    "2024": {
+      "macro_f1": 0.5440028630287033,
+      "accuracy": 0.5510401548137397
+    },
+    "777": {
+      "macro_f1": 0.5418330569792821,
+      "accuracy": 0.5487824544428318
+    }
+  },
+  "single_seed_macro_f1_mean": 0.5420241210504094,
+  "single_seed_macro_f1_std": 0.0018904652331780077,
+  "seed_averaged": {
+    "macro_f1": 0.5564641478928951,
+    "accuracy": 0.5632962425415255,
+    "delta_vs_single_seed_mean": 0.014440026842485687
+  },
+  "reference": {
+    "ENS-011a_seed42_cv": 0.54202,
+    "ENS-011a_seed42_lb": 0.4534879688,
+    "exp_011_cv": 0.52395,
+    "exp_011_lb": 0.43525
+  },
+  "note": "CV 는 seed 가 outer fold 분할을 바꿔 배깅 효과가 크지만, 제출 경로는 train 100% 로 학습하므로 enrichment inner 분할만 바뀐다. CV 이득을 제출 이득의 상한으로 읽어야 한다.",
+  "submission": {
+    "path": "/Users/iljun/Claude/OZ_final_hackaton/outputs/submission_ENS-011b_three_way_seedavg.csv",
+    "rows": 2546,
+    "distinct_classes": 26,
+    "convergence_warning_count": 0,
+    "rows_changed_vs_ENS_011a": 118
+  }
+}

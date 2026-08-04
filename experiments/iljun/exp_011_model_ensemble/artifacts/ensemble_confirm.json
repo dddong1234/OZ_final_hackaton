@@ -1,0 +1,121 @@
+{
+  "case": "case_04_shrink10",
+  "seeds": [
+    42,
+    2024,
+    777
+  ],
+  "selection_seed": 42,
+  "clean_seeds": [
+    2024,
+    777
+  ],
+  "fixed_weights": {
+    "champion+lgbm(w=0.2)": {
+      "lgbm": 0.2
+    },
+    "champion+ovr(w=0.4)": {
+      "ovr": 0.4
+    },
+    "three_way(ovr .3/lgbm .15)": {
+      "ovr": 0.3,
+      "lgbm": 0.15
+    }
+  },
+  "champion_macro_f1_mean": 0.5282239523703981,
+  "champion_macro_f1_std": 0.002405431007112394,
+  "seed_averaged_champion": {
+    "macro_f1": 0.541120071665538,
+    "accuracy": 0.5460409611353008,
+    "delta_vs_champion_mean": 0.012896119295139896
+  },
+  "blends": {
+    "champion+lgbm(w=0.2)": {
+      "macro_f1_mean": 0.5380299217476452,
+      "delta_mean_all_seeds": 0.009805969377247129,
+      "delta_mean_clean_seeds": 0.01201040012065785,
+      "delta_std": 0.004409459201817408,
+      "positive_seeds": "3/3"
+    },
+    "champion+ovr(w=0.4)": {
+      "macro_f1_mean": 0.5325542933705817,
+      "delta_mean_all_seeds": 0.004330341000183591,
+      "delta_mean_clean_seeds": 0.005006409183313798,
+      "delta_std": 0.0012677114598815577,
+      "positive_seeds": "3/3"
+    },
+    "three_way(ovr .3/lgbm .15)": {
+      "macro_f1_mean": 0.5420241210504094,
+      "delta_mean_all_seeds": 0.013800168680011327,
+      "delta_mean_clean_seeds": 0.016082771703445076,
+      "delta_std": 0.004102413388202541,
+      "positive_seeds": "3/3"
+    }
+  },
+  "per_seed": {
+    "42": {
+      "champion": {
+        "macro_f1": 0.531001480510099,
+        "accuracy": 0.5334623447830995
+      },
+      "champion+lgbm(w=0.2)": {
+        "macro_f1": 0.5363985884005247,
+        "accuracy": 0.5421706176423158,
+        "delta": 0.00539710789042569
+      },
+      "champion+ovr(w=0.4)": {
+        "macro_f1": 0.5339796851440222,
+        "accuracy": 0.538139009837123,
+        "delta": 0.002978204633923176
+      },
+      "three_way(ovr .3/lgbm .15)": {
+        "macro_f1": 0.5402364431432428,
+        "accuracy": 0.5470085470085471,
+        "delta": 0.009234962633143828
+      }
+    },
+    "2024": {
+      "champion": {
+        "macro_f1": 0.5268251183027883,
+        "accuracy": 0.5303983228511531
+      },
+      "champion+lgbm(w=0.2)": {
+        "macro_f1": 0.5410411443538816,
+        "accuracy": 0.548621190130624,
+        "delta": 0.014216026051093289
+      },
+      "champion+ovr(w=0.4)": {
+        "macro_f1": 0.5323172102846364,
+        "accuracy": 0.5365263667150459,
+        "delta": 0.0054920919818480796
+      },
+      "three_way(ovr .3/lgbm .15)": {
+        "macro_f1": 0.5440028630287033,
+        "accuracy": 0.5510401548137397,
+        "delta": 0.017177744725914934
+      }
+    },
+    "777": {
+      "champion": {
+        "macro_f1": 0.5268452582983069,
+        "accuracy": 0.5324947589098532
+      },
+      "champion+lgbm(w=0.2)": {
+        "macro_f1": 0.5366500324885293,
+        "accuracy": 0.543138203515562,
+        "delta": 0.00980477419022241
+      },
+      "champion+ovr(w=0.4)": {
+        "macro_f1": 0.5313659846830864,
+        "accuracy": 0.5374939525882922,
+        "delta": 0.0045207263847795165
+      },
+      "three_way(ovr .3/lgbm .15)": {
+        "macro_f1": 0.5418330569792821,
+        "accuracy": 0.5487824544428318,
+        "delta": 0.014987798680975217
+      }
+    }
+  },
+  "note": "가중치는 seed 42 스윕에서 고른 뒤 고정했다. seed 42 는 선택에 쓰였으므로 낙관 편향이 있어 clean_seeds(2024/777) 평균을 정직한 추정치로 본다."
+}

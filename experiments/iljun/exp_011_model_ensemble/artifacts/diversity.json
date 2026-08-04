@@ -1,0 +1,92 @@
+{
+  "singles": {
+    "champion": {
+      "macro_f1": 0.531001480510099,
+      "accuracy": 0.5334623447830995
+    },
+    "ovr": {
+      "macro_f1": 0.5275465507442157,
+      "accuracy": 0.5383002741493308
+    },
+    "lgbm": {
+      "macro_f1": 0.485210295766929,
+      "accuracy": 0.5104015481373972
+    }
+  },
+  "pairs": [
+    {
+      "pair": "champion + ovr",
+      "disagreement_rate": 0.18480890179003387,
+      "oracle_either_correct": 0.5849056603773585,
+      "champion_wrong_other_right": 319,
+      "champion_wrong_total": 2893,
+      "rescue_rate": 0.11026615969581749,
+      "blend_sweep": [
+        {
+          "weight_other": 0.1,
+          "macro_f1": 0.5332957430166467
+        },
+        {
+          "weight_other": 0.2,
+          "macro_f1": 0.5331652237257238
+        },
+        {
+          "weight_other": 0.3,
+          "macro_f1": 0.5338676866429245
+        },
+        {
+          "weight_other": 0.4,
+          "macro_f1": 0.5339796851440222
+        },
+        {
+          "weight_other": 0.5,
+          "macro_f1": 0.5352639554111269
+        }
+      ],
+      "best_blend": {
+        "weight_other": 0.5,
+        "macro_f1": 0.5352639554111269
+      },
+      "best_blend_gain": 0.004262474901027935
+    },
+    {
+      "pair": "champion + lgbm",
+      "disagreement_rate": 0.389937106918239,
+      "oracle_either_correct": 0.6247379454926625,
+      "champion_wrong_other_right": 566,
+      "champion_wrong_total": 2893,
+      "rescue_rate": 0.1956446595229865,
+      "blend_sweep": [
+        {
+          "weight_other": 0.1,
+          "macro_f1": 0.5342970172040099
+        },
+        {
+          "weight_other": 0.2,
+          "macro_f1": 0.5363985884005247
+        },
+        {
+          "weight_other": 0.3,
+          "macro_f1": 0.5339766143873332
+        },
+        {
+          "weight_other": 0.4,
+          "macro_f1": 0.5300176477423677
+        },
+        {
+          "weight_other": 0.5,
+          "macro_f1": 0.522509674434851
+        }
+      ],
+      "best_blend": {
+        "weight_other": 0.2,
+        "macro_f1": 0.5363985884005247
+      },
+      "best_blend_gain": 0.00539710789042569
+    }
+  ],
+  "champion_top1_accuracy": 0.5334623447830995,
+  "seed": 42,
+  "case": "case_04_shrink10",
+  "note": "가중치 스윕은 같은 OOF 에서 최적 w 를 골라 낙관 편향이 있다. 채택하려면 w 고정 후 3-seed 재측정이 필요하다."
+}

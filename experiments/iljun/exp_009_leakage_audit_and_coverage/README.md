@@ -81,7 +81,8 @@ assert 한다. 어떤 test 행이라도 어휘·선택·스케일에 영향을 �
 .venv/bin/python experiments/iljun/exp_009_leakage_audit_and_coverage/run_submission.py \
     --submission-name patched.csv
 .venv/bin/python experiments/iljun/exp_009_leakage_audit_and_coverage/compare_submissions.py \
-    outputs/baseline_original.csv outputs/patched.csv
+    experiments/iljun/results/baseline_original.csv \
+    experiments/iljun/results/patched.csv
 ```
 
 ---
