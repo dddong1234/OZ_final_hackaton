@@ -1,0 +1,16 @@
+outer_split_seed,model_seed,fold,test_read,train_test_concat,outer_validation_used_for_fit,fold_train_only_eb,fixed_class_gene_mutation_rules,leakage_check,nan_as_mutation_count,valid_row_count
+42,42,1,False,False,False,True,False,True,0,1241
+42,777,1,False,False,False,True,False,True,0,1241
+42,2024,1,False,False,False,True,False,True,0,1241
+42,42,2,False,False,False,True,False,True,0,1240
+42,777,2,False,False,False,True,False,True,0,1240
+42,2024,2,False,False,False,True,False,True,0,1240
+42,42,3,False,False,False,True,False,True,0,1240
+42,777,3,False,False,False,True,False,True,0,1240
+42,2024,3,False,False,False,True,False,True,0,1240
+42,42,4,False,False,False,True,False,True,0,1240
+42,777,4,False,False,False,True,False,True,0,1240
+42,2024,4,False,False,False,True,False,True,0,1240
+42,42,5,False,False,False,True,False,True,0,1240
+42,777,5,False,False,False,True,False,True,0,1240
+42,2024,5,False,False,False,True,False,True,0,1240
