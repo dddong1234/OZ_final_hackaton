@@ -1,0 +1,4 @@
+profile_kind,unique_profiles,duplicate_rows,weighted_purity,conflict_profiles
+raw,47,74,0.5333333333333333,1
+canonical_event,47,74,0.5333333333333333,1
+gene_type,44,80,0.5083333333333333,4

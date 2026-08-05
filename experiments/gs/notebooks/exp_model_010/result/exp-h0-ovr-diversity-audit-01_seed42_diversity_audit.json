@@ -1,0 +1,18 @@
+{
+  "run_id": "exp-h0-ovr-diversity-audit-01",
+  "h0_reference": 0.547915,
+  "h0_reference_match": true,
+  "h0_reference_delta": -3.387370274277046e-07,
+  "test_read": false,
+  "train_test_concat": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "hard_prediction_disagreement_rate": 0.20754716981132076,
+  "h0_wrong_ovr_recovered_count": 288,
+  "h0_wrong_ovr_recovered_rate_of_all_rows": 0.04644412191582003,
+  "h0_correct_ovr_broken_count": 355,
+  "h0_correct_ovr_broken_rate_of_all_rows": 0.0572488308337365,
+  "joint_wrong_count": 2447,
+  "oracle_macro_f1_diagnostic_only": 0.587012249585215,
+  "ovr_diversity_candidate": false
+}
