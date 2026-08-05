@@ -1,0 +1,16 @@
+seed,fold,test_read,raw_train_test_concat,vocabulary_source,outer_validation_used_for_fit,fixed_class_gene_mutation_rules,fold_train_only_eb,leakage_check,nan_as_mutation_count,h0_convergence_warning_count,eb_convergence_warning_count,specialist_pairs,gate_non_eb_rows
+42,1,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))",278
+42,2,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))",263
+42,3,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))",274
+42,4,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))",269
+42,5,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))",295
+777,1,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))",287
+777,2,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))",263
+777,3,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))",292
+777,4,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))",279
+777,5,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))",255
+2024,1,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))",256
+2024,2,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))",279
+2024,3,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))",287
+2024,4,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))",264
+2024,5,False,False,fit_frame_only,False,False,True,True,0,0,0,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))",282

@@ -1,0 +1,34 @@
+{
+  "run_id": "submission-h0-selective-eb-lr-lgbm-specialist",
+  "model_seed": 42,
+  "lr_weight": 0.8,
+  "specialist_weight": 0.2,
+  "selective_margin": 0.05,
+  "threshold_retuned": false,
+  "test_role": "transform_and_predict_only",
+  "test_read_for_fit_statistics_selection_or_scaling": false,
+  "raw_train_test_concat": false,
+  "vocabulary_source": "full_train_only",
+  "specialist_pair_source": "full_train_only_automatic_discovery",
+  "fixed_cancer_gene_exact_mutation_rules": false,
+  "nan_as_mutation_count": 0,
+  "leakage_check": true,
+  "structured_feature_count": 8417,
+  "eb_feature_count": 26,
+  "final_feature_count": 8443,
+  "specialist_pairs": [
+    [
+      "KIPAN",
+      "KIRC"
+    ],
+    [
+      "GBMLGG",
+      "LGG"
+    ]
+  ],
+  "selective_non_eb_test_rows": 407,
+  "convergence_warning_count": 0,
+  "output_file": "/Users/admin/Documents/FinalProject/OZ_fianl_hackaton/experiments/gs/notebooks/submission/submission_h0_selective_eb_lr_lgbm_specialist_seed42.csv",
+  "row_count": 2546,
+  "runtime_seconds": 289.5993355830433
+}

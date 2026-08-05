@@ -1,0 +1,19 @@
+{
+  "run_id": "exp-h0-selective-eb-branch-replacement-01",
+  "seeds": [
+    42,
+    777,
+    2024
+  ],
+  "h0_weight": 0.8,
+  "specialist_weight": 0.2,
+  "selective_margin": 0.05,
+  "threshold_retuned": false,
+  "screen_pass": false,
+  "three_seed_pass": true,
+  "positive_fold_count": 12,
+  "test_read": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "decision": "accepted_3seed"
+}
