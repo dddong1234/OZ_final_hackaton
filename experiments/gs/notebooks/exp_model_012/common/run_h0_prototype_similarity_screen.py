@@ -79,6 +79,12 @@ def metrics(labels: np.ndarray, probability: np.ndarray, classes: np.ndarray) ->
     )
 
 
+def class_delta_frame(h0: pd.Series, candidate: pd.Series) -> pd.DataFrame:
+    """Return class F1 deltas without pandas-version-specific Series APIs."""
+    delta = (candidate - h0).rename("delta_f1")
+    return delta.rename_axis("class").reset_index()
+
+
 def _checkpoint_path(run_id: str) -> Path:
     return RESULT / f"{run_id}_seed42_checkpoint.npz"
 
@@ -144,7 +150,7 @@ def _write_outputs(run_id: str, labels: np.ndarray, classes: np.ndarray, oof: di
     candidate_low = float(low_metrics.loc[low_metrics.variant.eq("H0_plus_prototype"), "macro_f1"].iloc[0])
     h0_class = class_metrics.loc[class_metrics.variant.eq("H0_selective_EB")].set_index("class").f1
     candidate_class = class_metrics.loc[class_metrics.variant.eq("H0_plus_prototype")].set_index("class").f1
-    class_delta = (candidate_class - h0_class).rename("delta_f1").reset_index(names="class")
+    class_delta = class_delta_frame(h0_class, candidate_class)
     decision = {
         **contract(),
         "run_id": run_id,
@@ -272,4 +278,3 @@ if __name__ == "__main__":
     parser.add_argument("--smoke", action="store_true")
     arguments = parser.parse_args()
     smoke() if arguments.smoke else run(arguments.run_id)
-

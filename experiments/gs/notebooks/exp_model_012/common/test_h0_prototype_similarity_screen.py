@@ -5,6 +5,7 @@ import sys
 import unittest
 
 import nbformat
+import pandas as pd
 
 
 HERE = Path(__file__).resolve().parent
@@ -15,6 +16,16 @@ NOTEBOOK = HERE.parent / "exp" / "exp-h0-prototype-similarity-01.ipynb"
 
 
 class PrototypeSimilarityRunnerContractTest(unittest.TestCase):
+    def test_class_delta_frame_has_explicit_class_and_delta_columns(self):
+        from run_h0_prototype_similarity_screen import class_delta_frame
+
+        h0 = pd.Series([0.2, 0.5], index=pd.Index(["A", "B"], name="class"))
+        candidate = pd.Series([0.4, 0.3], index=pd.Index(["A", "B"], name="class"))
+        result = class_delta_frame(h0, candidate)
+
+        self.assertEqual(result.columns.tolist(), ["class", "delta_f1"])
+        self.assertEqual(result.to_dict("records"), [{"class": "A", "delta_f1": 0.2}, {"class": "B", "delta_f1": -0.2}])
+
     def test_runner_has_no_test_file_reference_or_team_import(self):
         source = RUNNER.read_text(encoding="utf-8")
         self.assertNotIn("test.csv", source)

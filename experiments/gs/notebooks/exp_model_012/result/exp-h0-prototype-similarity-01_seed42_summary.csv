@@ -1,0 +1,4 @@
+variant,oof_macro_f1,oof_accuracy,feature_count,convergence_warning_count,leakage_check,nan_as_mutation_count,runtime_seconds,delta_vs_h0,recovered_h0_errors,broken_h0_correct
+H0_selective_EB,0.5479146612629726,0.5589421061119174,8219.2,0,True,0,3.6161314169876277,0.0,0,0
+prototype_similarity,0.012926932821301956,0.1298177713272053,198040.6,0,True,0,3.6568754999898374,-0.5349877284416706,348,3009
+H0_plus_prototype,0.5471075517324151,0.5582970488630866,8219.2,0,True,0,3.695145000005141,-0.0008071095305575149,28,32
