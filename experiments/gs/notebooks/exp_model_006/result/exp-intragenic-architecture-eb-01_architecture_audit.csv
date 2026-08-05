@@ -1,0 +1,16 @@
+seed,fold,architecture_vocabulary_size,architecture_feature_count,outer_validation_used_for_eb_fit,leakage_check,nan_as_mutation_count
+42,1,10394,26,False,True,0
+42,2,10006,26,False,True,0
+42,3,10026,26,False,True,0
+42,4,10882,26,False,True,0
+42,5,10525,26,False,True,0
+777,1,10908,26,False,True,0
+777,2,9886,26,False,True,0
+777,3,11031,26,False,True,0
+777,4,10168,26,False,True,0
+777,5,9742,26,False,True,0
+2024,1,10287,26,False,True,0
+2024,2,10464,26,False,True,0
+2024,3,10184,26,False,True,0
+2024,4,10023,26,False,True,0
+2024,5,10885,26,False,True,0

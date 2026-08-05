@@ -1,0 +1,6 @@
+fold,leakage_check,test_read,nan_as_mutation_count,raw_train_test_concat,vocabulary_source,fixed_contrast_enabled,fixed_exact_event_enabled,enrichment_inner_splits,exact_vocabulary_size,gene_type_vocabulary_size,pre_filter_block_counts,total_feature_count
+1,True,False,0,False,fit_frame_only,False,False,5,183895,13967,"{'burden': 3, 'variant': 7, 'amino_pair': 380, 'topology': 8, 'enrichment': 26}",8152
+2,True,False,0,False,fit_frame_only,False,False,5,180349,13937,"{'burden': 3, 'variant': 7, 'amino_pair': 380, 'topology': 8, 'enrichment': 26}",8195
+3,True,False,0,False,fit_frame_only,False,False,5,180745,13884,"{'burden': 3, 'variant': 7, 'amino_pair': 380, 'topology': 8, 'enrichment': 26}",8161
+4,True,False,0,False,fit_frame_only,False,False,5,190931,14087,"{'burden': 3, 'variant': 7, 'amino_pair': 380, 'topology': 8, 'enrichment': 26}",8241
+5,True,False,0,False,fit_frame_only,False,False,5,184441,13967,"{'burden': 3, 'variant': 7, 'amino_pair': 380, 'topology': 8, 'enrichment': 26}",8217

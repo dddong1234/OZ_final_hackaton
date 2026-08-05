@@ -1,0 +1,3 @@
+variant,seed_count,oof_macro_f1_mean,oof_macro_f1_std,delta_vs_h0_mean,delta_vs_h0_std,convergence_warning_count,leakage_check,nan_as_mutation_count
+H0,3,0.5425867021200214,0.003364616564624108,0.0,0.0,0,True,0
+H0_intragenic_architecture_EB,3,0.5408363574800638,0.0030077937211721753,-0.0017503446399575646,0.00041227876751589917,0,True,0

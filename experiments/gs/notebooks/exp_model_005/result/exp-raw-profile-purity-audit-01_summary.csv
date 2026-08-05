@@ -1,0 +1,3 @@
+profile_kind,unique_profiles,duplicate_rows,weighted_purity,conflict_profiles
+raw,5636,1016,0.9175939364618609,447
+normalized,5636,1016,0.9175939364618609,447

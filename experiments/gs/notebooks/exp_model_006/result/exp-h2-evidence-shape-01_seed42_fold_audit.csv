@@ -1,0 +1,6 @@
+fold,leakage_check,outer_validation_used_for_fit,outer_validation_used_for_eb_fit,outer_validation_used_for_pairwise_fit,test_read,nan_as_mutation_count
+1,True,False,False,False,False,0
+2,True,False,False,False,False,0
+3,True,False,False,False,False,0
+4,True,False,False,False,False,0
+5,True,False,False,False,False,0
