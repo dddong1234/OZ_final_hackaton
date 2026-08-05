@@ -1,0 +1,7 @@
+variant,k,recall
+H0_selective_EB,1,0.5568456700532172
+H0_selective_EB,2,0.7060151588453475
+H0_selective_EB,3,0.7743912272214158
+H3_candidate_ranker,1,0.5549104983067247
+H3_candidate_ranker,2,0.7052088372843089
+H3_candidate_ranker,3,0.7731011127237543

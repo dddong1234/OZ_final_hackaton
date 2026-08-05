@@ -1,0 +1,3 @@
+variant,oof_macro_f1,oof_accuracy,feature_count,convergence_warning_count,leakage_check,nan_as_mutation_count,runtime_seconds,delta_vs_h0
+H0_selective_EB,0.546895409572313,0.5568456700532172,8219.2,0,True,0,3.589352915994823,0.0
+H3_candidate_ranker,0.5455688505797707,0.5549104983067247,19.0,0,True,0,3.6131772079970688,-0.0013265589925423038

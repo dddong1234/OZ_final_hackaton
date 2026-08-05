@@ -60,6 +60,7 @@ def run_contract() -> dict:
         "outer_validation_used_for_ranker_fit": False,
         "fixed_class_gene_exact_mutation_rules": False,
         "nan_as_mutation_count": 0,
+        "leakage_check": True,
     }
 
 
@@ -265,6 +266,18 @@ def run(args: argparse.Namespace) -> None:
         gc.collect()
 
     fold_frame, audit_frame = pd.DataFrame(fold_rows), pd.DataFrame(audit_rows)
+    # Checkpoints created before leakage_check was added retain the atomic audit
+    # fields. Reconstruct the derived flag so completed folds can be aggregated
+    # without re-fitting any model.
+    if "leakage_check" not in audit_frame.columns:
+        audit_frame["leakage_check"] = (
+            audit_frame["test_read"].eq(False)
+            & audit_frame["raw_train_test_concat"].eq(False)
+            & audit_frame["outer_validation_used_for_eb_fit"].eq(False)
+            & audit_frame["outer_validation_used_for_ranker_fit"].eq(False)
+            & audit_frame["inner_audit_all_disjoint"].eq(True)
+            & audit_frame["nan_as_mutation_count"].eq(0)
+        )
     if not bool(audit_frame.leakage_check.all()) or not bool(audit_frame.inner_audit_all_disjoint.all()) or int(audit_frame.nan_as_mutation_count.max()) != 0:
         raise AssertionError("fold leakage/NaN audit failed")
     warning_count = int(audit_frame.h0_convergence_warning_count.sum() + audit_frame.ranker_convergence_warning_count.sum())
