@@ -1,0 +1,102 @@
+{
+  "owner": "SDH",
+  "experiment_id": "exp_019_xgb_catboost_diversity",
+  "primary_metric": "f1_macro",
+  "status": "seed42_screen_complete",
+  "seed": 42,
+  "validation": {
+    "outer": "StratifiedKFold(n_splits=5, shuffle=true)",
+    "weight_selection": "outer-train-only inner StratifiedKFold(n_splits=3)",
+    "test_used": false
+  },
+  "preprocessing": {
+    "representation": "safe G+B+V+T+R+A+S + gene-type enrichment",
+    "contrast": "outer-fit auto confusion pairs",
+    "fixed_exact_event": false,
+    "fixed_cancer_pair": false,
+    "learned_statistics": "fit split only",
+    "feature_views": [
+      "full",
+      "compact",
+      "hybrid512",
+      "hybrid1024"
+    ]
+  },
+  "screen": {
+    "xgboost_cases": 12,
+    "catboost_cases": 12,
+    "failed_cases": 0,
+    "best_single_xgboost": {
+      "case": "x01_full_d3_400",
+      "f1_macro": 0.5028344877837869
+    },
+    "best_single_catboost": {
+      "case": "c03_full_d8_500",
+      "f1_macro": 0.49057164774420287
+    },
+    "fixed_lr80_lgbm20_f1_macro": 0.542540628527211,
+    "best_fixed_incremental_xgboost": {
+      "case": "x12_hybrid1024_dart",
+      "f1_macro": 0.5436740421216465,
+      "delta": 0.0011334135944355284
+    },
+    "best_fixed_incremental_catboost": {
+      "case": "c01_full_d4_500",
+      "f1_macro": 0.5424993048835448,
+      "delta": -0.00004132364366615793
+    }
+  },
+  "strict_foldlocal": {
+    "baseline_lr_lgbm_f1_macro": 0.5412992204097389,
+    "candidates": [
+      {
+        "case": "x12_hybrid1024_dart",
+        "family": "xgboost",
+        "f1_macro": 0.5416650964355676,
+        "delta": 0.00036587602582871526,
+        "positive_folds": 3,
+        "candidate_weight_mean": 0.08,
+        "candidate_zero_weight_folds": 1,
+        "recovered_count": 43,
+        "damaged_count": 43,
+        "net_correct_count": 0,
+        "fold_deltas": [
+          -0.002931568273722651,
+          0.0002695826494314435,
+          0.0,
+          0.0006061073681321583,
+          0.004612160441769597
+        ]
+      },
+      {
+        "case": "c01_full_d4_500",
+        "family": "catboost",
+        "f1_macro": 0.5414894666138671,
+        "delta": 0.00019024620412821935,
+        "positive_folds": 3,
+        "candidate_weight_mean": 0.13,
+        "candidate_zero_weight_folds": 0,
+        "recovered_count": 44,
+        "damaged_count": 60,
+        "net_correct_count": -16,
+        "fold_deltas": [
+          -0.005174520006135164,
+          -0.0008269428443606897,
+          0.0011474836397609156,
+          0.004604220030273498,
+          0.0029432180246203865
+        ]
+      }
+    ]
+  },
+  "decision": {
+    "adopt_now": [],
+    "three_seed_priority": [
+      "x12_hybrid1024_dart"
+    ],
+    "hold": [
+      "c01_full_d4_500"
+    ],
+    "reason": "Both strict gains are below 0.0004 and are fold-unstable; XGBoost DART alone merits a 3-seed confirmation."
+  }
+}

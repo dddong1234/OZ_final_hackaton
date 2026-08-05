@@ -1,0 +1,28 @@
+{
+  "owner": "SDH",
+  "experiment_id": "exp_018_hierarchical_enrichment",
+  "model": "B04 safe LR with hierarchical gene-A-pair and position enrichment",
+  "primary_metric": "f1_macro",
+  "validation": "Stratified 5-fold x seeds 42/52/62",
+  "baseline": {
+    "case": "e01_gene_type_baseline",
+    "f1_macro_mean": 0.5276088067617027,
+    "f1_macro_std": 0.0015789988506537094
+  },
+  "best_new_feature": {
+    "case": "e06_gene_type_plus_position50_independent",
+    "f1_macro_mean": 0.5259717275898279,
+    "delta_mean": -0.0016370791718748,
+    "improved_seeds": 0,
+    "total_seeds": 3,
+    "status": "rejected"
+  },
+  "fixed_three_way_reference": {
+    "f1_macro_mean": 0.5423922499952668,
+    "interpretation": "reference only; not an unbiased weight-selection estimate"
+  },
+  "public_f1_macro": null,
+  "leakage_audit_pass": true,
+  "convergence_warning_count": 0,
+  "decision": "Reject all new hierarchical enrichment features and retain gene-type enrichment."
+}

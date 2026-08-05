@@ -1,0 +1,5 @@
+results/*
+!results/.gitkeep
+catboost_info/
+__pycache__/
+*.pyc

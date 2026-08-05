@@ -1,0 +1,874 @@
+{
+  "base": "three_way",
+  "base_macro_f1": 0.5419387240693244,
+  "seed": 42,
+  "contract_grid": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.3
+  ],
+  "seed_matched_only": true,
+  "candidates": [
+    {
+      "file": "exp-point-process-eb-01_seed42_oof_probabilities.csv",
+      "variant": "point_process_eb",
+      "solo_macro_f1": 0.5182550885517622,
+      "blend_macro_f1": 0.5594032481833887,
+      "gain": 0.017464524114064295,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.31591678761490083,
+        "recovery_rate": 0.16071428571428573,
+        "reverse_loss_rate": 0.16024698618053515,
+        "double_fault": 0.3789711336881148,
+        "oracle_macro_f1": 0.615369356004651,
+        "probability_correlation": 0.9041553501120113
+      }
+    },
+    {
+      "file": "exp-parser-recovery-g1-01_seed42_oof_probabilities.csv",
+      "variant": "G0_P1_EB",
+      "solo_macro_f1": 0.5343909021245085,
+      "blend_macro_f1": 0.5541804951624132,
+      "gain": 0.012241771093088771,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.2409288824383164,
+        "recovery_rate": 0.13,
+        "reverse_loss_rate": 0.12261099676565716,
+        "double_fault": 0.39283986453797776,
+        "oracle_macro_f1": 0.6065777759505676,
+        "probability_correlation": 0.9454651807399527
+      }
+    },
+    {
+      "file": "exp-empirical-bayes-enrichment-01_seed42_oof_probabilities.csv",
+      "variant": "eb",
+      "solo_macro_f1": 0.5340841790753434,
+      "blend_macro_f1": 0.5541606689303238,
+      "gain": 0.012221944860999367,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.24141267537493952,
+        "recovery_rate": 0.13071428571428573,
+        "reverse_loss_rate": 0.12349309026756836,
+        "double_fault": 0.3925173359135623,
+        "oracle_macro_f1": 0.6066802680088167,
+        "probability_correlation": 0.9454478616229194
+      }
+    },
+    {
+      "file": "exp-multivariate-eb-01_seed42_oof_probabilities.csv",
+      "variant": "baseline",
+      "solo_macro_f1": 0.5344443574801144,
+      "blend_macro_f1": 0.5541046019112741,
+      "gain": 0.012165877841949668,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.2409288824383164,
+        "recovery_rate": 0.13,
+        "reverse_loss_rate": 0.12261099676565716,
+        "double_fault": 0.39283986453797776,
+        "oracle_macro_f1": 0.606487784306157,
+        "probability_correlation": 0.9454848010115203
+      }
+    },
+    {
+      "file": "exp-empirical-bayes-enrichment-02_seed42_oof_probabilities.csv",
+      "variant": "eb",
+      "solo_macro_f1": 0.5339547563214375,
+      "blend_macro_f1": 0.554102700495293,
+      "gain": 0.012163976425968559,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.24141267537493952,
+        "recovery_rate": 0.13,
+        "reverse_loss_rate": 0.12290502793296089,
+        "double_fault": 0.39283986453797776,
+        "oracle_macro_f1": 0.606487784306157,
+        "probability_correlation": 0.945414180252566
+      }
+    },
+    {
+      "file": "exp-point-process-eb-01_seed42_oof_probabilities.csv",
+      "variant": "baseline",
+      "solo_macro_f1": 0.5344162926505477,
+      "blend_macro_f1": 0.5539917256978184,
+      "gain": 0.012053001628493987,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.240606353813901,
+        "recovery_rate": 0.13035714285714287,
+        "reverse_loss_rate": 0.12261099676565716,
+        "double_fault": 0.39267860022577006,
+        "oracle_macro_f1": 0.6068006798456641,
+        "probability_correlation": 0.9454438693770246
+      }
+    },
+    {
+      "file": "exp-frozen-biomedical-encoder-01_seed42_oof_probabilities.csv",
+      "variant": "E0_P1_EB",
+      "solo_macro_f1": 0.5337855174326824,
+      "blend_macro_f1": 0.5539522375073401,
+      "gain": 0.01201351343801571,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.24173520399935494,
+        "recovery_rate": 0.13,
+        "reverse_loss_rate": 0.1237871214348721,
+        "double_fault": 0.39283986453797776,
+        "oracle_macro_f1": 0.6065892764493659,
+        "probability_correlation": 0.9454161134250094
+      }
+    },
+    {
+      "file": "exp-eb-topk-parser-audit-01_seed42_oof_probabilities.csv",
+      "variant": "eb",
+      "solo_macro_f1": 0.5333852700056534,
+      "blend_macro_f1": 0.5539443991568308,
+      "gain": 0.012005675087506384,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.24044508950169327,
+        "recovery_rate": 0.12892857142857142,
+        "reverse_loss_rate": 0.12319905910026463,
+        "double_fault": 0.39332365747460085,
+        "oracle_macro_f1": 0.6060819138261071,
+        "probability_correlation": 0.9453835750414673
+      }
+    },
+    {
+      "file": "exp-all-class-evidence-ranker-01_seed42_oof_probabilities.csv",
+      "variant": "p1_eb",
+      "solo_macro_f1": 0.5346421601035954,
+      "blend_macro_f1": 0.5539116337768705,
+      "gain": 0.011972909707546053,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.24044508950169327,
+        "recovery_rate": 0.13035714285714287,
+        "reverse_loss_rate": 0.12231696559835342,
+        "double_fault": 0.39267860022577006,
+        "oracle_macro_f1": 0.6066628534754267,
+        "probability_correlation": 0.9454719024134638
+      }
+    },
+    {
+      "file": "exp-eb-offset-sparse-residual-01_seed42_oof_probabilities.csv",
+      "variant": "p1_eb",
+      "solo_macro_f1": 0.5338637336031957,
+      "blend_macro_f1": 0.553756792856155,
+      "gain": 0.01181806878683056,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.24173520399935494,
+        "recovery_rate": 0.13,
+        "reverse_loss_rate": 0.12349309026756836,
+        "double_fault": 0.39283986453797776,
+        "oracle_macro_f1": 0.6064556878189407,
+        "probability_correlation": 0.9454763934447574
+      }
+    },
+    {
+      "file": "exp-parser-recovery-g1-01_seed42_oof_probabilities.csv",
+      "variant": "G1_legacy_parser",
+      "solo_macro_f1": 0.5321731752646068,
+      "blend_macro_f1": 0.5532355616439641,
+      "gain": 0.011296837574639729,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.24350911143363974,
+        "recovery_rate": 0.12964285714285714,
+        "reverse_loss_rate": 0.12496324610408703,
+        "double_fault": 0.39300112885018545,
+        "oracle_macro_f1": 0.6056861533531344,
+        "probability_correlation": 0.9453623605110077
+      }
+    },
+    {
+      "file": "exp-intragenic-architecture-eb-01_oof_probabilities.csv",
+      "variant": "architecture",
+      "solo_macro_f1": 0.5429481060117529,
+      "blend_macro_f1": 0.5503707726380871,
+      "gain": 0.008432048568762673,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.20174165457184326,
+        "recovery_rate": 0.11892857142857143,
+        "reverse_loss_rate": 0.08615113201999412,
+        "double_fault": 0.3978390582164167,
+        "oracle_macro_f1": 0.5879017667004726,
+        "probability_correlation": 0.9691837350542656
+      }
+    },
+    {
+      "file": "exp-h2-evidence-shape-01_seed42_oof_probabilities.csv",
+      "variant": "h0",
+      "solo_macro_f1": 0.5237165047556878,
+      "blend_macro_f1": 0.5503181773259406,
+      "gain": 0.008379453256616154,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.26721496532817285,
+        "recovery_rate": 0.1467857142857143,
+        "reverse_loss_rate": 0.12672743310790943,
+        "double_fault": 0.38526044186421543,
+        "oracle_macro_f1": 0.6002554415231921,
+        "probability_correlation": 0.9340905200881434
+      }
+    },
+    {
+      "file": "exp-all-class-evidence-ranker-01_seed42_oof_probabilities.csv",
+      "variant": "ranker",
+      "solo_macro_f1": 0.5517921241013167,
+      "blend_macro_f1": 0.5502138773375045,
+      "gain": 0.008275153268180069,
+      "weights": {
+        "1": 0.15,
+        "2": 0.15,
+        "3": 0.15,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.19577487502015803,
+        "recovery_rate": 0.12607142857142858,
+        "reverse_loss_rate": 0.08556306968538666,
+        "double_fault": 0.39461377197226255,
+        "oracle_macro_f1": 0.5947613381153948,
+        "probability_correlation": 0.9005877361875442
+      }
+    },
+    {
+      "file": "exp-all-class-evidence-ranker-01_seed42_oof_probabilities.csv",
+      "variant": "gate",
+      "solo_macro_f1": 0.5360088197819727,
+      "blend_macro_f1": 0.5502070148222213,
+      "gain": 0.008268290752896923,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.19029188840509595,
+        "recovery_rate": 0.1,
+        "reverse_loss_rate": 0.1005586592178771,
+        "double_fault": 0.40638606676342526,
+        "oracle_macro_f1": 0.5932995795453008,
+        "probability_correlation": 0.9511249385283084
+      }
+    },
+    {
+      "file": "exp-eb-offset-sparse-residual-01_seed42_oof_probabilities.csv",
+      "variant": "residual",
+      "solo_macro_f1": 0.5233794746589407,
+      "blend_macro_f1": 0.5501859493503342,
+      "gain": 0.00824722528100974,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.2,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.25528140622480244,
+        "recovery_rate": 0.12357142857142857,
+        "reverse_loss_rate": 0.13554836812702145,
+        "double_fault": 0.3957426221577165,
+        "oracle_macro_f1": 0.6084485726269456,
+        "probability_correlation": 0.9362841938294981
+      }
+    },
+    {
+      "file": "exp-h2-evidence-shape-01_seed42_oof_probabilities.csv",
+      "variant": "h2_s",
+      "solo_macro_f1": 0.5255605612732557,
+      "blend_macro_f1": 0.5500504506681678,
+      "gain": 0.008111726598843405,
+      "weights": {
+        "1": 0.3,
+        "2": 0.2,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.2591517497177874,
+        "recovery_rate": 0.14714285714285713,
+        "reverse_loss_rate": 0.12114084092913849,
+        "double_fault": 0.38509917755200773,
+        "oracle_macro_f1": 0.6014594086683993,
+        "probability_correlation": 0.9220116587153224
+      }
+    },
+    {
+      "file": "exp-eb-offset-sparse-residual-01_seed42_oof_probabilities.csv",
+      "variant": "gate",
+      "solo_macro_f1": 0.5355613083788602,
+      "blend_macro_f1": 0.5498871194467145,
+      "gain": 0.007948395377390116,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.19029188840509595,
+        "recovery_rate": 0.09964285714285714,
+        "reverse_loss_rate": 0.10085269038518083,
+        "double_fault": 0.40654733107563296,
+        "oracle_macro_f1": 0.5931704525488821,
+        "probability_correlation": 0.9511250052242205
+      }
+    },
+    {
+      "file": "exp-comutation-enrichment-01_seed42_oof_probabilities.csv",
+      "variant": "pair",
+      "solo_macro_f1": 0.5283536689091493,
+      "blend_macro_f1": 0.5491783941488971,
+      "gain": 0.007239670079572713,
+      "weights": {
+        "1": 0.2,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.25528140622480244,
+        "recovery_rate": 0.1325,
+        "reverse_loss_rate": 0.13172596295207292,
+        "double_fault": 0.3917110143525238,
+        "oracle_macro_f1": 0.601378842570513,
+        "probability_correlation": 0.9242137977707834
+      }
+    },
+    {
+      "file": "exp-auto-validated-pair-specialist-01_seed42_oof_probabilities.csv",
+      "variant": "specialist",
+      "solo_macro_f1": 0.5463846273901051,
+      "blend_macro_f1": 0.5470561115855938,
+      "gain": 0.005117387516269334,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.19238832446379617,
+        "recovery_rate": 0.11714285714285715,
+        "reverse_loss_rate": 0.08203469567774184,
+        "double_fault": 0.39864537977745523,
+        "oracle_macro_f1": 0.5849404161226647,
+        "probability_correlation": 0.97330242582767
+      }
+    },
+    {
+      "file": "exp-frozen-biomedical-encoder-01_seed42_oof_probabilities.csv",
+      "variant": "E2_fixed_blend",
+      "solo_macro_f1": 0.5082183760504919,
+      "blend_macro_f1": 0.5465776955076339,
+      "gain": 0.0046389714383094915,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.3228511530398323,
+        "recovery_rate": 0.13714285714285715,
+        "reverse_loss_rate": 0.18523963540135255,
+        "double_fault": 0.38961457829382357,
+        "oracle_macro_f1": 0.6084461645617055,
+        "probability_correlation": 0.9317408772263277
+      }
+    },
+    {
+      "file": "exp-auto-validated-pair-specialist-01_seed42_oof_probabilities.csv",
+      "variant": "h0",
+      "solo_macro_f1": 0.5447438599818917,
+      "blend_macro_f1": 0.5464560310615678,
+      "gain": 0.004517306992243397,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.18271246573133365,
+        "recovery_rate": 0.1075,
+        "reverse_loss_rate": 0.07556600999705969,
+        "double_fault": 0.40299951620706337,
+        "oracle_macro_f1": 0.5808712142821919,
+        "probability_correlation": 0.9795305721571221
+      }
+    },
+    {
+      "file": "exp-intragenic-architecture-eb-01_oof_probabilities.csv",
+      "variant": "h0",
+      "solo_macro_f1": 0.5447438599818917,
+      "blend_macro_f1": 0.5464560310615678,
+      "gain": 0.004517306992243397,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.18271246573133365,
+        "recovery_rate": 0.1075,
+        "reverse_loss_rate": 0.07556600999705969,
+        "double_fault": 0.40299951620706337,
+        "oracle_macro_f1": 0.5808712142821919,
+        "probability_correlation": 0.9795305721571221
+      }
+    },
+    {
+      "file": "exp-safe-3way-ensemble-01_seed42_oof_probabilities.csv",
+      "variant": "H0",
+      "solo_macro_f1": 0.5447438599818917,
+      "blend_macro_f1": 0.5464560310615678,
+      "gain": 0.004517306992243397,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.18271246573133365,
+        "recovery_rate": 0.1075,
+        "reverse_loss_rate": 0.07556600999705969,
+        "double_fault": 0.40299951620706337,
+        "oracle_macro_f1": 0.5808712142821919,
+        "probability_correlation": 0.9795305721571221
+      }
+    },
+    {
+      "file": "exp-class-conditional-evidence-set-network-01_seed42_oof_probabilities.csv",
+      "variant": "evidence_set_network",
+      "solo_macro_f1": 0.2976576454037786,
+      "blend_macro_f1": 0.5455468728019435,
+      "gain": 0.0036081487326190542,
+      "weights": {
+        "1": 0.15,
+        "2": 0.15,
+        "3": 0.15,
+        "4": 0.15,
+        "5": 0.15
+      },
+      "diversity": {
+        "disagreement": 0.5982905982905983,
+        "recovery_rate": 0.11321428571428571,
+        "reverse_loss_rate": 0.4563363716553955,
+        "double_fault": 0.40041928721174,
+        "oracle_macro_f1": 0.6003243882291677,
+        "probability_correlation": 0.713390147912506
+      }
+    },
+    {
+      "file": "exp-safe-3way-ensemble-01_seed42_oof_probabilities.csv",
+      "variant": "base_LGBM",
+      "solo_macro_f1": 0.47740740457643766,
+      "blend_macro_f1": 0.5452520008126475,
+      "gain": 0.003313276743323046,
+      "weights": {
+        "1": 0.05,
+        "2": 0.05,
+        "3": 0.05,
+        "4": 0.05,
+        "5": 0.05
+      },
+      "diversity": {
+        "disagreement": 0.35397516529592,
+        "recovery_rate": 0.1625,
+        "reverse_loss_rate": 0.2149367832990297,
+        "double_fault": 0.37816481212707626,
+        "oracle_macro_f1": 0.6011113023413182,
+        "probability_correlation": 0.7935447622501263
+      }
+    },
+    {
+      "file": "exp-p1-ovr-01_seed42_oof_probabilities.csv",
+      "variant": "ovr",
+      "solo_macro_f1": 0.5214497429786502,
+      "blend_macro_f1": 0.54377017835138,
+      "gain": 0.0018314542820555557,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.3,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.2044831478793743,
+        "recovery_rate": 0.1075,
+        "reverse_loss_rate": 0.1126139370773302,
+        "double_fault": 0.40299951620706337,
+        "oracle_macro_f1": 0.5836539122158135,
+        "probability_correlation": 0.9111714675213733
+      }
+    },
+    {
+      "file": "exp-comutation-enrichment-01_seed42_oof_probabilities.csv",
+      "variant": "p1",
+      "solo_macro_f1": 0.527549997670646,
+      "blend_macro_f1": 0.543107358762735,
+      "gain": 0.001168634693410553,
+      "weights": {
+        "1": 0.2,
+        "2": 0.2,
+        "3": 0.2,
+        "4": 0.2,
+        "5": 0.2
+      },
+      "diversity": {
+        "disagreement": 0.16868247056926303,
+        "recovery_rate": 0.07107142857142858,
+        "reverse_loss_rate": 0.09232578653337253,
+        "double_fault": 0.41944847605224966,
+        "oracle_macro_f1": 0.5776177706046788,
+        "probability_correlation": 0.9713070301220498
+      }
+    },
+    {
+      "file": "exp-dense-enrichment-lgbm-01_seed42_oof_probabilities.csv",
+      "variant": "p1",
+      "solo_macro_f1": 0.527549997670646,
+      "blend_macro_f1": 0.543107358762735,
+      "gain": 0.001168634693410553,
+      "weights": {
+        "1": 0.2,
+        "2": 0.2,
+        "3": 0.2,
+        "4": 0.2,
+        "5": 0.2
+      },
+      "diversity": {
+        "disagreement": 0.16868247056926303,
+        "recovery_rate": 0.07107142857142858,
+        "reverse_loss_rate": 0.09232578653337253,
+        "double_fault": 0.41944847605224966,
+        "oracle_macro_f1": 0.5776177706046788,
+        "probability_correlation": 0.9713070301220498
+      }
+    },
+    {
+      "file": "exp-empirical-bayes-enrichment-01_seed42_oof_probabilities.csv",
+      "variant": "p1",
+      "solo_macro_f1": 0.527549997670646,
+      "blend_macro_f1": 0.543107358762735,
+      "gain": 0.001168634693410553,
+      "weights": {
+        "1": 0.2,
+        "2": 0.2,
+        "3": 0.2,
+        "4": 0.2,
+        "5": 0.2
+      },
+      "diversity": {
+        "disagreement": 0.16868247056926303,
+        "recovery_rate": 0.07107142857142858,
+        "reverse_loss_rate": 0.09232578653337253,
+        "double_fault": 0.41944847605224966,
+        "oracle_macro_f1": 0.5776177706046788,
+        "probability_correlation": 0.9713070301220498
+      }
+    },
+    {
+      "file": "exp-empirical-bayes-enrichment-02_seed42_oof_probabilities.csv",
+      "variant": "p1",
+      "solo_macro_f1": 0.527549997670646,
+      "blend_macro_f1": 0.543107358762735,
+      "gain": 0.001168634693410553,
+      "weights": {
+        "1": 0.2,
+        "2": 0.2,
+        "3": 0.2,
+        "4": 0.2,
+        "5": 0.2
+      },
+      "diversity": {
+        "disagreement": 0.16868247056926303,
+        "recovery_rate": 0.07107142857142858,
+        "reverse_loss_rate": 0.09232578653337253,
+        "double_fault": 0.41944847605224966,
+        "oracle_macro_f1": 0.5776177706046788,
+        "probability_correlation": 0.9713070301220498
+      }
+    },
+    {
+      "file": "exp-p1-ovr-01_seed42_oof_probabilities.csv",
+      "variant": "p1",
+      "solo_macro_f1": 0.527549997670646,
+      "blend_macro_f1": 0.543107358762735,
+      "gain": 0.001168634693410553,
+      "weights": {
+        "1": 0.2,
+        "2": 0.2,
+        "3": 0.2,
+        "4": 0.2,
+        "5": 0.2
+      },
+      "diversity": {
+        "disagreement": 0.16868247056926303,
+        "recovery_rate": 0.07107142857142858,
+        "reverse_loss_rate": 0.09232578653337253,
+        "double_fault": 0.41944847605224966,
+        "oracle_macro_f1": 0.5776177706046788,
+        "probability_correlation": 0.9713070301220498
+      }
+    },
+    {
+      "file": "exp-safe-3way-ensemble-01_seed42_oof_probabilities.csv",
+      "variant": "OVR_LR",
+      "solo_macro_f1": 0.5245005693069025,
+      "blend_macro_f1": 0.542976733020745,
+      "gain": 0.0010380089514205881,
+      "weights": {
+        "1": 0.3,
+        "2": 0.3,
+        "3": 0.3,
+        "4": 0.15,
+        "5": 0.3
+      },
+      "diversity": {
+        "disagreement": 0.193033381712627,
+        "recovery_rate": 0.10214285714285715,
+        "reverse_loss_rate": 0.10732137606586298,
+        "double_fault": 0.405418480890179,
+        "oracle_macro_f1": 0.5826963274742059,
+        "probability_correlation": 0.9216271069599156
+      }
+    },
+    {
+      "file": "exp-multivariate-eb-01_seed42_oof_probabilities.csv",
+      "variant": "multieb_rank4",
+      "solo_macro_f1": 0.48319416293636913,
+      "blend_macro_f1": 0.5424990753971097,
+      "gain": 0.0005603513277853134,
+      "weights": {
+        "1": 0.15,
+        "2": 0.15,
+        "3": 0.15,
+        "4": 0.15,
+        "5": 0.05
+      },
+      "diversity": {
+        "disagreement": 0.30237058538945333,
+        "recovery_rate": 0.10857142857142857,
+        "reverse_loss_rate": 0.24169361952366952,
+        "double_fault": 0.4025157232704403,
+        "oracle_macro_f1": 0.5956981542676898,
+        "probability_correlation": 0.92342487890999
+      }
+    },
+    {
+      "file": "exp-safe-3way-ensemble-01_seed42_oof_probabilities.csv",
+      "variant": "safe_3way",
+      "solo_macro_f1": 0.5374922477078703,
+      "blend_macro_f1": 0.542467065233276,
+      "gain": 0.0005283411639516178,
+      "weights": {
+        "1": 0.15,
+        "2": 0.15,
+        "3": 0.2,
+        "4": 0.2,
+        "5": 0.15
+      },
+      "diversity": {
+        "disagreement": 0.18287373004354138,
+        "recovery_rate": 0.09678571428571428,
+        "reverse_loss_rate": 0.08438694501617171,
+        "double_fault": 0.40783744557329465,
+        "oracle_macro_f1": 0.5772927943533618,
+        "probability_correlation": 0.9855604706066727
+      }
+    },
+    {
+      "file": "exp-frozen-biomedical-encoder-01_seed42_oof_probabilities.csv",
+      "variant": "E1_frozen_encoder",
+      "solo_macro_f1": 0.31103368571017137,
+      "blend_macro_f1": 0.5419387240693244,
+      "gain": 0.0,
+      "weights": {
+        "1": 0.0,
+        "2": 0.0,
+        "3": 0.0,
+        "4": 0.0,
+        "5": 0.0
+      },
+      "diversity": {
+        "disagreement": 0.6260280599903242,
+        "recovery_rate": 0.14,
+        "reverse_loss_rate": 0.5548368127021465,
+        "double_fault": 0.3883244637961619,
+        "oracle_macro_f1": 0.604140571348757,
+        "probability_correlation": 0.635603142254053
+      }
+    },
+    {
+      "file": "exp-safe-3way-ensemble-01_seed42_oof_probabilities.csv",
+      "variant": "multinomial_LR",
+      "solo_macro_f1": 0.5259096721951139,
+      "blend_macro_f1": 0.541502488169399,
+      "gain": -0.0004362358999253635,
+      "weights": {
+        "1": 0.15,
+        "2": 0.15,
+        "3": 0.15,
+        "4": 0.15,
+        "5": 0.0
+      },
+      "diversity": {
+        "disagreement": 0.16932752781809385,
+        "recovery_rate": 0.07071428571428572,
+        "reverse_loss_rate": 0.09261981770067627,
+        "double_fault": 0.41960974036445736,
+        "oracle_macro_f1": 0.5756230592023834,
+        "probability_correlation": 0.9779590962319901
+      }
+    },
+    {
+      "file": "exp-multivariate-eb-01_seed42_oof_probabilities.csv",
+      "variant": "multieb_rank8",
+      "solo_macro_f1": 0.4962960900908136,
+      "blend_macro_f1": 0.5403401238410407,
+      "gain": -0.0015986002282837308,
+      "weights": {
+        "1": 0.15,
+        "2": 0.2,
+        "3": 0.2,
+        "4": 0.05,
+        "5": 0.0
+      },
+      "diversity": {
+        "disagreement": 0.2930172552814062,
+        "recovery_rate": 0.1175,
+        "reverse_loss_rate": 0.22052337547780065,
+        "double_fault": 0.39848411546524753,
+        "oracle_macro_f1": 0.599707293789858,
+        "probability_correlation": 0.9258850232635832
+      }
+    },
+    {
+      "file": "exp-dense-enrichment-lgbm-01_seed42_oof_probabilities.csv",
+      "variant": "dense",
+      "solo_macro_f1": 0.381396396088224,
+      "blend_macro_f1": 0.5403310316215415,
+      "gain": -0.0016076924477829158,
+      "weights": {
+        "1": 0.1,
+        "2": 0.05,
+        "3": 0.1,
+        "4": 0.05,
+        "5": 0.0
+      },
+      "diversity": {
+        "disagreement": 0.4397677793904209,
+        "recovery_rate": 0.12285714285714286,
+        "reverse_loss_rate": 0.3275507203763599,
+        "double_fault": 0.3960651507821319,
+        "oracle_macro_f1": 0.5899339940635641,
+        "probability_correlation": 0.7929015322528636
+      }
+    }
+  ],
+  "note": "seed 42 스크리닝이다. 파트너 OOF 는 우리 fold 에 중첩되어 있지 않으므로 잔여 낙관이 있고, 계약상 채택 판정 단위(3-seed)가 아니다."
+}
