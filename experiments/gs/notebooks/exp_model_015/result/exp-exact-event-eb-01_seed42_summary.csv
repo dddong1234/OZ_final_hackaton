@@ -1,0 +1,3 @@
+seed,variant,oof_macro_f1,oof_accuracy,feature_count_mean,convergence_warning_count,leakage_check,nan_as_mutation_count,runtime_seconds,delta_vs_h0
+42,H0_selective_EB,0.5479146612629726,0.5589421061119174,8219.2,0,True,0,1798.6670888750232,0.0
+42,exact_event_EB,0.5701536251918302,0.5849056603773585,8245.2,0,True,0,1798.6893600840122,0.022238963928857602
