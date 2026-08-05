@@ -1,0 +1,6 @@
+seed,fold,test_read,raw_train_test_concat,fixed_class_gene_exact_mutation_rules,outer_validation_used_for_fit,leakage_check,nan_as_mutation_count,h0_weight,nb_weight,nb_alpha,inner_eb_crossfit,h0_convergence_warning_count,eb_convergence_warning_count,nb_vocabulary_source,nb_feature_count,auto_specialist_pairs
+42,1,False,False,False,False,True,0,0.8,0.2,1.0,True,0,0,outer_fold_train_only,4230,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))"
+42,2,False,False,False,False,True,0,0.8,0.2,1.0,True,0,0,outer_fold_train_only,4229,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))"
+42,3,False,False,False,False,True,0,0.8,0.2,1.0,True,0,0,outer_fold_train_only,4230,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))"
+42,4,False,False,False,False,True,0,0.8,0.2,1.0,True,0,0,outer_fold_train_only,4228,"(('GBMLGG', 'LGG'), ('KIPAN', 'KIRC'))"
+42,5,False,False,False,False,True,0,0.8,0.2,1.0,True,0,0,outer_fold_train_only,4226,"(('KIPAN', 'KIRC'), ('GBMLGG', 'LGG'))"

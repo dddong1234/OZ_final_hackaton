@@ -11,10 +11,18 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
-from h0_selective_eb_submission import make_submission_frame, submission_directory
+from h0_selective_eb_submission import average_seed_probabilities, make_submission_frame, submission_directory
 
 
 class SubmissionContractTest(unittest.TestCase):
+    def test_average_seed_probabilities_uses_equal_weight_and_preserves_rows(self) -> None:
+        seed42 = np.asarray([[0.8, 0.2], [0.2, 0.8]], dtype=np.float32)
+        seed777 = np.asarray([[0.2, 0.8], [0.5, 0.5]], dtype=np.float32)
+        seed2024 = np.asarray([[0.5, 0.5], [0.8, 0.2]], dtype=np.float32)
+        actual = average_seed_probabilities([seed42, seed777, seed2024])
+        np.testing.assert_allclose(actual, (seed42 + seed777 + seed2024) / 3.0)
+        np.testing.assert_allclose(actual.sum(axis=1), 1.0)
+
     def test_submission_preserves_sample_id_order_and_schema(self) -> None:
         sample = pd.DataFrame({"ID": ["t2", "t1"], "SUBCLASS": ["", ""]})
         test = pd.DataFrame({"ID": ["t2", "t1"]})
