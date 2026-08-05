@@ -1,0 +1,77 @@
+{
+  "case": "case_04_shrink10",
+  "config": "자동 contrast + 고정 exact 제거 (2026-08-04 공지 준수)",
+  "budget": "LGBM 과 동일 — 100 트리 · lr 0.05 · balanced",
+  "gates": {
+    "correlation_vs_lgbm": 0.95,
+    "gain_vs_lr_lgbm": 0.001
+  },
+  "runs": {
+    "xgb": {
+      "42": {
+        "solo_macro_f1": 0.48424990847275823,
+        "solo_accuracy": 0.5008869537171424,
+        "lr_plus_x": 0.5332273605494717,
+        "lr_plus_x_gain": 0.0008656735367200685,
+        "lr_lgbm_base": 0.5424662527531751,
+        "lr_lgbm_plus_x": 0.5411917579334065,
+        "stack_gain": -0.0012744948197686012,
+        "stack_weights": {
+          "1": 0.0,
+          "2": 0.1,
+          "3": 0.0,
+          "4": 0.0,
+          "5": 0.0
+        },
+        "vs_lr": {
+          "disagreement": 0.3301080470891792,
+          "recovery_rate": 0.14285714285714285,
+          "reverse_loss_rate": 0.18782031956587278,
+          "double_fault": 0.39864537977745523,
+          "probability_correlation": 0.8828923050462392
+        },
+        "vs_lgbm": {
+          "disagreement": 0.30543460732139976,
+          "recovery_rate": 0.13655807831523528,
+          "reverse_loss_rate": 0.14895635673624288,
+          "double_fault": 0.42315755523302695,
+          "probability_correlation": 0.9042274996868773
+        },
+        "verdict": "기각 — LR+LGBM 대비 이득 부족"
+      }
+    },
+    "catboost": {
+      "42": {
+        "solo_macro_f1": 0.34599860748099165,
+        "solo_accuracy": 0.34913723592968876,
+        "lr_plus_x": 0.5319448101200146,
+        "lr_plus_x_gain": -0.0004168768927370614,
+        "lr_lgbm_base": 0.5424662527531751,
+        "lr_lgbm_plus_x": 0.5424662527531751,
+        "stack_gain": 0.0,
+        "stack_weights": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0,
+          "4": 0.0,
+          "5": 0.0
+        },
+        "vs_lr": {
+          "disagreement": 0.480083857442348,
+          "recovery_rate": 0.08564493758668516,
+          "reverse_loss_rate": 0.4217666566174254,
+          "double_fault": 0.42525399129172714,
+          "probability_correlation": 0.7803031402771656
+        },
+        "vs_lgbm": {
+          "disagreement": 0.6047411707789067,
+          "recovery_rate": 0.16946363935505102,
+          "reverse_loss_rate": 0.4781783681214421,
+          "double_fault": 0.4070311240122561,
+          "probability_correlation": 0.6338678219390789
+        },
+        "verdict": "기각 — LR+LGBM 대비 이득 부족"
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "case": "case_04_shrink10",
+  "config": "자동 contrast + 고정 exact 제거 (2026-08-04 공지 준수)",
+  "budget": "LGBM/XGB 는 클래스당 100 트리(총 2,600). CatBoost MultiClass 는 multi-output 트리라 iterations=500·depth 6 으로 용량을 맞췄다.",
+  "gates": {
+    "correlation_vs_lgbm": 0.95,
+    "gain_vs_lr_lgbm": 0.001
+  },
+  "runs": {
+    "catboost": {
+      "42": {
+        "solo_macro_f1": 0.4951521636685463,
+        "solo_accuracy": 0.4918561522335107,
+        "lr_plus_x": 0.5346809671113422,
+        "lr_plus_x_gain": 0.0023192800985905038,
+        "lr_lgbm_base": 0.5424662527531751,
+        "lr_lgbm_plus_x": 0.5410391929519134,
+        "stack_gain": -0.0014270598012616764,
+        "stack_weights": {
+          "1": 0.05,
+          "2": 0.2,
+          "3": 0.05,
+          "4": 0.2,
+          "5": 0.1
+        },
+        "vs_lr": {
+          "disagreement": 0.2865666827930979,
+          "recovery_rate": 0.10540915395284327,
+          "reverse_loss_rate": 0.172143503165511,
+          "double_fault": 0.4160619254958878,
+          "probability_correlation": 0.9204126017771115
+        },
+        "vs_lgbm": {
+          "disagreement": 0.40670859538784065,
+          "recovery_rate": 0.1934846989141165,
+          "reverse_loss_rate": 0.22137887413029728,
+          "double_fault": 0.3952588292210934,
+          "probability_correlation": 0.8234060761504541
+        },
+        "verdict": "기각 — LR+LGBM 대비 이득 부족"
+      }
+    }
+  }
+}
