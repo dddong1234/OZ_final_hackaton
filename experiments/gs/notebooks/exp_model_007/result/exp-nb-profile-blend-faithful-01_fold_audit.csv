@@ -1,0 +1,16 @@
+seed,fold,profile_vocabulary_size,profile_vocabulary_source,outer_validation_used_for_nb_fit,test_read,leakage_check,nan_as_mutation_count
+42,1,13967,outer_fold_train_only,False,False,True,0
+42,2,13937,outer_fold_train_only,False,False,True,0
+42,3,13884,outer_fold_train_only,False,False,True,0
+42,4,14087,outer_fold_train_only,False,False,True,0
+42,5,13967,outer_fold_train_only,False,False,True,0
+777,1,14026,outer_fold_train_only,False,False,True,0
+777,2,13899,outer_fold_train_only,False,False,True,0
+777,3,14078,outer_fold_train_only,False,False,True,0
+777,4,13940,outer_fold_train_only,False,False,True,0
+777,5,13907,outer_fold_train_only,False,False,True,0
+2024,1,14026,outer_fold_train_only,False,False,True,0
+2024,2,13964,outer_fold_train_only,False,False,True,0
+2024,3,13888,outer_fold_train_only,False,False,True,0
+2024,4,13928,outer_fold_train_only,False,False,True,0
+2024,5,14056,outer_fold_train_only,False,False,True,0

@@ -1,0 +1,18 @@
+{
+  "test_read": false,
+  "raw_train_test_concat": false,
+  "fixed_class_gene_exact_mutation_rules": false,
+  "outer_validation_used_for_fit": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "h0_weight": 0.8,
+  "nb_weight": 0.2,
+  "nb_alpha": 1.0,
+  "run_id": "exp-h0-complement-nb-profile-blend-01",
+  "seed": 42,
+  "h0_macro_f1": 0.5479146612629726,
+  "blend_macro_f1": 0.5479146612629726,
+  "screen_delta": 0.0,
+  "positive_fold_count": 0,
+  "screen_candidate": false
+}

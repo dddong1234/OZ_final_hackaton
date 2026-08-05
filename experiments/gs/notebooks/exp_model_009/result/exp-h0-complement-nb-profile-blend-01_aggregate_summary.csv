@@ -1,0 +1,4 @@
+variant,seed_count,oof_macro_f1_mean,oof_macro_f1_std,delta_vs_h0_mean,delta_vs_h0_std,convergence_warning_count,leakage_check,nan_as_mutation_count
+Complement_NB,1,0.19722169941494366,,-0.35069296184802895,,0,True,0
+H0_plus_Complement_NB,1,0.5479146612629726,,0.0,,0,True,0
+H0_selective_EB,1,0.5479146612629726,,0.0,,0,True,0

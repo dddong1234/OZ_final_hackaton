@@ -1,0 +1,4 @@
+variant,seed_count,oof_macro_f1_mean,oof_macro_f1_std,delta_vs_h0_mean,delta_vs_h0_std,feature_count_mean,convergence_warning_count,leakage_check,nan_as_mutation_count
+H0,1,0.5447438599818917,,0.0,,8193.2,0,True,0
+H0_080_XGB_020,1,0.5441142393844282,,-0.0006296205974635205,,8193.2,0,True,0
+XGB_structured,1,0.4836346576813903,,-0.061109202300501375,,8193.2,0,True,0

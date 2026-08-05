@@ -1,0 +1,21 @@
+{
+  "test_read": false,
+  "raw_train_test_concat": false,
+  "outer_validation_used_for_eb_fit": false,
+  "outer_validation_used_for_ranker_fit": false,
+  "fixed_class_gene_exact_mutation_rules": false,
+  "nan_as_mutation_count": 0,
+  "leakage_check": true,
+  "selection": {
+    "h0": 0.546895409572313,
+    "candidate": 0.5455688505797707,
+    "delta": -0.0013265589925423038,
+    "low_margin_delta": -0.001765010879899609,
+    "delta_at_least_0015": false,
+    "four_positive_folds": false,
+    "low_margin_not_below_minus_0003": true,
+    "no_single_fold_dominates": false,
+    "no_single_class_dominates": true,
+    "decision": "rejected_or_not_detected"
+  }
+}

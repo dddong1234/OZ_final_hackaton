@@ -1,0 +1,15 @@
+{
+  "seeds": [
+    42
+  ],
+  "h0_weight": 0.8,
+  "xgb_weight": 0.2,
+  "h0_seed42_reference_delta": -1.4001810832997563e-07,
+  "h0_seed42_reference_match": true,
+  "positive_fold_count": 3,
+  "mean_delta": -0.0006296205974635205,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "test_read": false,
+  "decision": "rejected_or_not_detected"
+}

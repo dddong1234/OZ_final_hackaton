@@ -1,0 +1,6 @@
+seed,fold,test_read,raw_train_test_concat,vocabulary_source,outer_validation_used_for_fit,fixed_class_gene_mutation_rules,leakage_check,nan_as_mutation_count,h0_convergence_warning_count
+42,1,False,False,fit_frame_only,False,False,True,0,0
+42,2,False,False,fit_frame_only,False,False,True,0,0
+42,3,False,False,fit_frame_only,False,False,True,0,0
+42,4,False,False,fit_frame_only,False,False,True,0,0
+42,5,False,False,fit_frame_only,False,False,True,0,0

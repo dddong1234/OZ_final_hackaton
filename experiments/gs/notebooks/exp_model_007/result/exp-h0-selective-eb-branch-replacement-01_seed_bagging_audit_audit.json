@@ -1,0 +1,13 @@
+{
+  "seeds": [
+    42,
+    777,
+    2024
+  ],
+  "test_read": false,
+  "source": "existing train-only OOF probability files",
+  "row_alignment": true,
+  "class_order_alignment": true,
+  "fixed_weight": "1/3 per seed",
+  "decision": "audit_only_no_weight_tuning"
+}

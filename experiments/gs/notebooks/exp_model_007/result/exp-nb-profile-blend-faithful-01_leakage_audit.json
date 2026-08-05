@@ -1,0 +1,20 @@
+{
+  "seeds": [
+    42,
+    777,
+    2024
+  ],
+  "weights": {
+    "h0": 0.75,
+    "complement_nb": 0.25
+  },
+  "all_seed_delta_positive": false,
+  "mean_delta": -0.00043629470428419026,
+  "positive_fold_count": 5,
+  "h0_seed42_reference_delta": -1.4001810832997563e-07,
+  "h0_seed42_reference_match": true,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "test_read": false,
+  "decision": "rejected_or_not_detected"
+}

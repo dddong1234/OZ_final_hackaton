@@ -1,0 +1,6 @@
+seed,fold,test_read,raw_train_test_concat,outer_validation_used_for_eb_fit,outer_validation_used_for_ranker_fit,fixed_class_gene_exact_mutation_rules,nan_as_mutation_count,inner_oof_rows,outer_validation_rows,inner_audit_all_disjoint,h0_convergence_warning_count,ranker_convergence_warning_count,ranker_training_rows_are_inner_oof,pairwise_coefficient_norm,leakage_check
+42,1,False,False,False,False,False,0,4960,1241,True,0,0,True,2.3953535556793213,True
+42,2,False,False,False,False,False,0,4961,1240,True,0,0,True,2.2044835090637207,True
+42,3,False,False,False,False,False,0,4961,1240,True,0,0,True,2.089611530303955,True
+42,4,False,False,False,False,False,0,4961,1240,True,0,0,True,2.2380850315093994,True
+42,5,False,False,False,False,False,0,4961,1240,True,0,0,True,2.246945381164551,True
