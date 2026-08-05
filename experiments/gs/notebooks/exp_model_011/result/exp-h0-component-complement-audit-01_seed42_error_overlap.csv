@@ -1,0 +1,5 @@
+variant,hard_prediction_disagreement_rate,h0_wrong_recovered,h0_correct_broken
+H0_non_EB,0.05176584421867441,75,96
+H0_EB,0.030962747943880018,45,50
+equal_H0_non_EB,0.02580228995323335,40,39
+equal_H0_EB,0.01628769553297855,25,23

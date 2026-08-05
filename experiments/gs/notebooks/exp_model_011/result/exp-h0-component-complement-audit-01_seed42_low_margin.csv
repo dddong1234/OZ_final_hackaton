@@ -1,0 +1,6 @@
+variant,group,support,macro_f1
+H0_selective_EB,h0_margin_lt_005,1037,0.23409076498652398
+H0_non_EB,h0_margin_lt_005,1037,0.21842087172277166
+H0_EB,h0_margin_lt_005,1037,0.23909257856480964
+equal_H0_non_EB,h0_margin_lt_005,1037,0.22655698847781422
+equal_H0_EB,h0_margin_lt_005,1037,0.23943897630131356
