@@ -1,0 +1,20 @@
+{
+  "owner": "SDH",
+  "experiment_id": "exp_016_oof_class_calibration",
+  "model": "exp14 LR/LGBM blend with class-mass calibration",
+  "primary_metric": "f1_macro",
+  "validation": "seed-holdout over OOF seeds 42/52/62",
+  "class_mass_calibration": {
+    "mean_delta": -0.0011277668645534404,
+    "minimum_delta": -0.003383300593660321,
+    "status": "rejected"
+  },
+  "blend_weight_ablation": {
+    "baseline_lgbm_weight": 0.2,
+    "holdout_deltas": [-0.003149095009541081, 0.001100135368973909, 0.00043222734503223226],
+    "all_holdouts_improved": false,
+    "status": "rejected"
+  },
+  "public_f1_macro": null,
+  "decision": "Keep the exp14 LR 80% + specialist LGBM 20% baseline."
+}
