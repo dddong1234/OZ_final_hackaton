@@ -21,6 +21,7 @@ if not H0_COMMON.exists():
     raise FileNotFoundError("GS faithful H0 implementation was not found: exp_model_006/common")
 sys.path.insert(0, str(H0_COMMON))
 from h1_auto_confusion_moe import fit_h0_fold  # noqa: E402
+from fold_checkpoint import experiment_result_dir, load_checkpoint, save_checkpoint  # noqa: E402
 from xgb_complement import H0_WEIGHT, XGB_WEIGHT, fixed_blend, xgb_config  # noqa: E402
 
 DEFAULT_SEEDS = (42,)
@@ -51,16 +52,23 @@ def evaluate(labels: np.ndarray, probability: np.ndarray, classes: np.ndarray) -
     )
 
 
-def run_seed(train: pd.DataFrame, genes: list[str], labels: np.ndarray, classes: np.ndarray, seed: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
+def run_seed(train: pd.DataFrame, genes: list[str], labels: np.ndarray, classes: np.ndarray, seed: int, checkpoint_path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
     started = perf_counter()
     splitter = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
-    h0_oof = np.zeros((len(train), len(classes)), dtype=np.float32)
-    xgb_oof = np.zeros_like(h0_oof)
-    blend_oof = np.zeros_like(h0_oof)
-    fold_rows: list[dict] = []
-    audit_rows: list[dict] = []
+    checkpoint = load_checkpoint(checkpoint_path)
+    if checkpoint is None:
+        h0_oof = np.zeros((len(train), len(classes)), dtype=np.float32)
+        xgb_oof = np.zeros_like(h0_oof)
+        blend_oof = np.zeros_like(h0_oof)
+        fold_rows, audit_rows, completed = [], [], set()
+    else:
+        h0_oof = checkpoint["oof"]["h0"]; xgb_oof = checkpoint["oof"]["xgb"]; blend_oof = checkpoint["oof"]["blend"]
+        fold_rows, audit_rows, completed = checkpoint["fold_rows"], checkpoint["audit_rows"], set(checkpoint["completed_folds"])
+        print(f"[H0-XGB] seed {seed}: resume completed folds {sorted(completed)}", flush=True)
 
     for fold, (fit_index, valid_index) in enumerate(splitter.split(np.zeros(len(train)), labels), 1):
+        if fold in completed:
+            continue
         print(f"[H0-XGB] seed {seed}, fold {fold}/5: H0 fit + XGB fit", flush=True)
         fit_frame = train.iloc[fit_index][genes].reset_index(drop=True)
         valid_frame = train.iloc[valid_index][genes].reset_index(drop=True)
@@ -95,6 +103,9 @@ def run_seed(train: pd.DataFrame, genes: list[str], labels: np.ndarray, classes:
             "nan_as_mutation_count": int(h0.audit["nan_as_mutation_count"]),
             "h0_convergence_warning_count": h0.convergence_warnings,
         })
+        completed.add(fold)
+        save_checkpoint(checkpoint_path, {"completed_folds": list(completed), "fold_rows": fold_rows, "audit_rows": audit_rows, "oof": {"h0": h0_oof, "xgb": xgb_oof, "blend": blend_oof}})
+        print(f"[H0-XGB] seed {seed}, fold {fold}/5 checkpoint saved", flush=True)
         del model, h0, fit_frame, valid_frame, xgb_probability, blend_probability
         gc.collect()
 
@@ -148,7 +159,8 @@ def run(run_id: str, seeds: tuple[int, ...]) -> None:
     classes = np.asarray(sorted(np.unique(labels)), dtype=object)
     if int(train[genes].isna().sum().sum()) != 0:
         raise AssertionError("train NaN contract violation")
-    outputs = [run_seed(train, genes, labels, classes, seed) for seed in seeds]
+    result = experiment_result_dir(HERE); result.mkdir(exist_ok=True)
+    outputs = [run_seed(train, genes, labels, classes, seed, result / f"{run_id}_seed{seed}_checkpoint.npz") for seed in seeds]
     summary, folds, audits, class_metrics, probabilities = (pd.concat([item[index] for item in outputs], ignore_index=True) for index in range(5))
     aggregate = summary.groupby("variant", as_index=False).agg(
         seed_count=("seed", "nunique"), oof_macro_f1_mean=("oof_macro_f1", "mean"),
@@ -172,7 +184,6 @@ def run(run_id: str, seeds: tuple[int, ...]) -> None:
         "nan_as_mutation_count": int(audits.nan_as_mutation_count.max()), "test_read": False,
         "decision": "screen_candidate" if screen_pass else ("accepted_3seed" if three_seed_pass else "rejected_or_not_detected"),
     }
-    result = HERE.parent / "result"; result.mkdir(exist_ok=True)
     summary.to_csv(result / f"{run_id}_seed_summary.csv", index=False)
     aggregate.to_csv(result / f"{run_id}_aggregate_summary.csv", index=False)
     folds.to_csv(result / f"{run_id}_fold_metrics.csv", index=False)

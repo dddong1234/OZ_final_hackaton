@@ -21,6 +21,7 @@ if not H0_COMMON.exists():
     raise FileNotFoundError("exp_model_006 faithful H0 common code is required")
 sys.path.insert(0, str(H0_COMMON))
 from h1_auto_confusion_moe import fit_h0_fold  # noqa: E402
+from fold_checkpoint import experiment_result_dir, load_checkpoint, save_checkpoint  # noqa: E402
 from nb_profile_blend import build_gene_type_matrix, fixed_blend  # noqa: E402
 
 SEEDS = (42, 777, 2024)
@@ -48,11 +49,19 @@ def score(labels: np.ndarray, probability: np.ndarray, classes: np.ndarray) -> t
     return float(f1_score(labels, prediction, average="macro", zero_division=0)), float(accuracy_score(labels, prediction)), prediction
 
 
-def run_seed(train: pd.DataFrame, genes: list[str], labels: np.ndarray, classes: np.ndarray, seed: int):
+def run_seed(train: pd.DataFrame, genes: list[str], labels: np.ndarray, classes: np.ndarray, seed: int, checkpoint_path: Path):
     started = perf_counter(); outer = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
-    h0_oof = np.zeros((len(train), len(classes)), dtype=np.float32); nb_oof = np.zeros_like(h0_oof); blend_oof = np.zeros_like(h0_oof)
-    folds, audits = [], []
+    checkpoint = load_checkpoint(checkpoint_path)
+    if checkpoint is None:
+        h0_oof = np.zeros((len(train), len(classes)), dtype=np.float32); nb_oof = np.zeros_like(h0_oof); blend_oof = np.zeros_like(h0_oof)
+        folds, audits, completed = [], [], set()
+    else:
+        h0_oof = checkpoint["oof"]["h0"]; nb_oof = checkpoint["oof"]["nb"]; blend_oof = checkpoint["oof"]["blend"]
+        folds, audits, completed = checkpoint["fold_rows"], checkpoint["audit_rows"], set(checkpoint["completed_folds"])
+        print(f"[NB-profile] seed {seed}: resume completed folds {sorted(completed)}", flush=True)
     for fold, (fit, valid) in enumerate(outer.split(np.zeros(len(train)), labels), 1):
+        if fold in completed:
+            continue
         print(f"[NB-profile] seed {seed}, fold {fold}/5", flush=True)
         fit_frame = train.iloc[fit][genes].reset_index(drop=True); valid_frame = train.iloc[valid][genes].reset_index(drop=True)
         h0 = fit_h0_fold(fit_frame, valid_frame, labels[fit], genes, classes, seed=seed * 100 + fold)
@@ -66,6 +75,9 @@ def run_seed(train: pd.DataFrame, genes: list[str], labels: np.ndarray, classes:
         for variant, probability, metric in (("H0", h0.probability, h0_f1), ("ComplementNB_profile", nb_probability, nb_f1), ("H0_075_ComplementNB_025", blended, blend_f1)):
             folds.append({"seed": seed, "fold": fold, "variant": variant, "macro_f1": metric, "accuracy": float(accuracy_score(labels[valid], classes[probability.argmax(axis=1)])), "feature_count": len(h0.names) if variant == "H0" else len(vocabulary), "delta_vs_h0": metric - h0_f1})
         audits.append({"seed": seed, "fold": fold, "profile_vocabulary_size": len(vocabulary), "profile_vocabulary_source": "outer_fold_train_only", "outer_validation_used_for_nb_fit": False, "test_read": False, "leakage_check": not h0.audit["raw_train_test_concat"], "nan_as_mutation_count": 0})
+        completed.add(fold)
+        save_checkpoint(checkpoint_path, {"completed_folds": list(completed), "fold_rows": folds, "audit_rows": audits, "oof": {"h0": h0_oof, "nb": nb_oof, "blend": blend_oof}})
+        print(f"[NB-profile] seed {seed}, fold {fold}/5 checkpoint saved", flush=True)
         del h0, nb, x_fit, x_valid, fit_frame, valid_frame; gc.collect()
     summaries, class_rows = [], []
     for variant, probability in (("H0", h0_oof), ("ComplementNB_profile", nb_oof), ("H0_075_ComplementNB_025", blend_oof)):
@@ -88,14 +100,14 @@ def smoke() -> None:
 def run(run_id: str, seeds: tuple[int, ...]) -> None:
     train = pd.read_csv(root() / "data" / "raw" / "train.csv"); genes = [column for column in train if column not in ("ID", "SUBCLASS")]; labels = train.SUBCLASS.to_numpy(); classes = np.asarray(sorted(np.unique(labels)), dtype=object)
     if int(train[genes].isna().sum().sum()) != 0: raise AssertionError("train NaN contract violation")
-    outputs = [run_seed(train, genes, labels, classes, seed) for seed in seeds]
+    result = experiment_result_dir(HERE); result.mkdir(exist_ok=True)
+    outputs = [run_seed(train, genes, labels, classes, seed, result / f"{run_id}_seed{seed}_checkpoint.npz") for seed in seeds]
     summary, folds, audits, classes_frame = (pd.concat([item[index] for item in outputs], ignore_index=True) for index in range(4))
     aggregate = summary.groupby("variant", as_index=False).agg(seed_count=("seed", "nunique"), oof_macro_f1_mean=("oof_macro_f1", "mean"), oof_macro_f1_std=("oof_macro_f1", "std"), delta_vs_h0_mean=("delta_vs_h0", "mean"), delta_vs_h0_std=("delta_vs_h0", "std"), feature_count_mean=("feature_count_mean", "mean"), leakage_check=("leakage_check", "all"), nan_as_mutation_count=("nan_as_mutation_count", "max"))
     candidate = summary[summary.variant.eq("H0_075_ComplementNB_025")].sort_values("seed"); h0 = summary[summary.variant.eq("H0")].sort_values("seed"); fold_pivot = folds.pivot_table(index=["seed", "fold"], columns="variant", values="macro_f1")
     reference_delta = next((item[4]["h0_seed42_reference_delta"] for item in outputs if item[4]["seed"] == 42), None)
     decision = {"seeds": list(seeds), "weights": BLEND, "all_seed_delta_positive": bool(np.all(candidate.oof_macro_f1.to_numpy() > h0.oof_macro_f1.to_numpy())), "mean_delta": float(candidate.delta_vs_h0.mean()), "positive_fold_count": int((fold_pivot["H0_075_ComplementNB_025"] > fold_pivot["H0"]).sum()), "h0_seed42_reference_delta": reference_delta, "h0_seed42_reference_match": reference_delta is None or abs(reference_delta) <= .0005, "leakage_check": bool(audits.leakage_check.all()), "nan_as_mutation_count": int(audits.nan_as_mutation_count.max()), "test_read": False}
     decision["decision"] = "accepted" if decision["h0_seed42_reference_match"] and decision["all_seed_delta_positive"] and decision["mean_delta"] >= .005 and decision["positive_fold_count"] >= 11 else "rejected_or_not_detected"
-    result = HERE.parent / "result"; result.mkdir(exist_ok=True)
     summary.to_csv(result / f"{run_id}_seed_summary.csv", index=False); aggregate.to_csv(result / f"{run_id}_3seed_summary.csv", index=False); folds.to_csv(result / f"{run_id}_fold_metrics.csv", index=False); audits.to_csv(result / f"{run_id}_fold_audit.csv", index=False); classes_frame.to_csv(result / f"{run_id}_class_metrics.csv", index=False)
     (result / f"{run_id}_leakage_audit.json").write_text(json.dumps(decision, ensure_ascii=False, indent=2), encoding="utf-8")
     ax = fold_pivot.plot(marker="o", figsize=(10, 4), title="H0 vs Complement NB profile blend"); ax.figure.tight_layout(); ax.figure.savefig(result / f"{run_id}_fold_macro_f1.png", dpi=160); plt.close(ax.figure)
