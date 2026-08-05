@@ -1,0 +1,48 @@
+{
+  "owner": "SDH",
+  "experiment_id": "exp_020_selective_eb_reproduction",
+  "model": "Selective-EB multinomial LR + automatic LGBM specialist",
+  "primary_metric": "f1_macro",
+  "validation": "Stratified 5-fold OOF probability averaging",
+  "champion": {
+    "seeds": [42, 777, 2024],
+    "f1_macro": 0.5641536849712305,
+    "accuracy": 0.5744234800838575,
+    "public_f1_macro": 0.48112,
+    "status": "accepted"
+  },
+  "reported_reference": {
+    "f1_macro": 0.564797,
+    "reproduction_delta": -0.0006433150287694644,
+    "tolerance": 0.001,
+    "matched": true
+  },
+  "fresh_validation": {
+    "seeds": [31415, 52, 62],
+    "f1_macro": 0.5652915121350396,
+    "accuracy": 0.575229801644896,
+    "all_seeds_improved_vs_h0": true,
+    "positive_folds": 12,
+    "total_folds": 15
+  },
+  "six_seed_ablation": {
+    "seeds": [42, 777, 2024, 31415, 52, 62],
+    "f1_macro": 0.5663092750386679,
+    "accuracy": 0.5773262377035961,
+    "public_f1_macro": 0.4748327994,
+    "public_delta_vs_champion": -0.0062872006,
+    "changed_test_predictions": 108,
+    "status": "rejected"
+  },
+  "parameters": {
+    "lr_C": 0.07,
+    "lr_max_iter": 2000,
+    "selective_margin": 0.05,
+    "selective_lr_weight": 0.8,
+    "specialist_weight": 0.2,
+    "lgbm_n_estimators": 400
+  },
+  "leakage_audit_pass": true,
+  "convergence_warning_count": 0,
+  "decision": "Keep the original 42/777/2024 three-seed probability average; reject six- and nine-seed expansion."
+}
