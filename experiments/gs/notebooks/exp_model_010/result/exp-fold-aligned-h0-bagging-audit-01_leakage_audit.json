@@ -1,0 +1,18 @@
+{
+  "run_id": "exp-fold-aligned-h0-bagging-audit-01",
+  "purpose": "fold_aligned_3seed_oof_bagging_audit",
+  "outer_split_seed": 42,
+  "model_seeds": [
+    42,
+    777,
+    2024
+  ],
+  "test_read": false,
+  "train_test_concat": false,
+  "all_models_exclude_each_validation_row": true,
+  "invalid_cross_split_oof_average_used": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "positive_fold_count_vs_seed42": 2,
+  "decision": "audit_complete"
+}

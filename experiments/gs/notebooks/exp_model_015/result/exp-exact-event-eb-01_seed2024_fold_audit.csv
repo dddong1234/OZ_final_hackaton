@@ -1,0 +1,6 @@
+seed,fold,test_read,train_test_concat,outer_validation_used_for_fit,inner_crossfit_only,fixed_class_gene_exact_mutation_rules,exact_support_cutoff,leakage_check,nan_as_mutation_count,convergence_warning_count,exact_gate_non_eb_rows
+2024,1,False,False,False,True,False,,True,0,0,200
+2024,2,False,False,False,True,False,,True,0,0,224
+2024,3,False,False,False,True,False,,True,0,0,238
+2024,4,False,False,False,True,False,,True,0,0,237
+2024,5,False,False,False,True,False,,True,0,0,258

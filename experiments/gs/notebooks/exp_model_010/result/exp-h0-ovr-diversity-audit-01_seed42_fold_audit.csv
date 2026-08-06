@@ -1,0 +1,6 @@
+fold,test_read,train_test_concat,outer_validation_used_for_fit,fold_train_only_eb,fixed_class_gene_mutation_rules,leakage_check,nan_as_mutation_count,h0_convergence_warning_count,ovr_convergence_warning_count
+1,False,False,False,True,False,True,0,0,0
+2,False,False,False,True,False,True,0,0,0
+3,False,False,False,True,False,True,0,0,0
+4,False,False,False,True,False,True,0,0,0
+5,False,False,False,True,False,True,0,0,0

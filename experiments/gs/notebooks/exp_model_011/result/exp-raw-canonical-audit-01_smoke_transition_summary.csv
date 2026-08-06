@@ -1,0 +1,3 @@
+transition,target_profiles,merged_target_profiles,merged_rows,max_source_profiles
+canonical_event_to_gene_type,44,3,6,2
+raw_to_canonical_event,47,0,0,1

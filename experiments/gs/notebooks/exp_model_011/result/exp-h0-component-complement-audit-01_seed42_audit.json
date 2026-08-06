@@ -1,0 +1,16 @@
+{
+  "run_id": "exp-h0-component-complement-audit-01",
+  "h0_reference": 0.547915,
+  "h0_reference_match": true,
+  "h0_reference_delta": -3.387370274277046e-07,
+  "test_read": false,
+  "train_test_concat": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "best_fixed_candidate": "equal_H0_non_EB",
+  "best_delta_vs_h0": 0.0002292724079451247,
+  "positive_fold_count": 3,
+  "recovered_exceeds_broken": true,
+  "low_margin_delta": -0.007533776508709761,
+  "three_seed_candidate": false
+}

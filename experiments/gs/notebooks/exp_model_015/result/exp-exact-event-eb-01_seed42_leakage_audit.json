@@ -1,0 +1,14 @@
+{
+  "run_id": "exp-exact-event-eb-01",
+  "seed": 42,
+  "screen_delta_required": 0.015,
+  "delta_vs_h0": 0.022238963928857602,
+  "positive_fold_count": 5,
+  "screen_pass": true,
+  "test_read": false,
+  "train_test_concat": false,
+  "fixed_class_gene_exact_mutation_rules": false,
+  "exact_support_cutoff": null,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0
+}

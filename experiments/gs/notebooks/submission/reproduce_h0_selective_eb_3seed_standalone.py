@@ -1,0 +1,627 @@
+"""Standalone, rule-safe reproduction script for the accepted 3-seed GS submission.
+
+Runs seeds (42, 777, 2024), fits transformations on train only, applies them
+to test for prediction only, and equally averages probability matrices.
+"""
+
+import argparse
+import gc
+import json
+import re
+import warnings
+from dataclasses import dataclass
+from pathlib import Path
+from time import perf_counter
+
+import numpy as np
+import pandas as pd
+from lightgbm import LGBMClassifier
+from scipy import sparse
+from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
+from sklearn.model_selection import StratifiedKFold
+
+# =============================================================================
+# 1. Fixed experiment contract
+# =============================================================================
+# Every vocabulary and supervised statistic is learned from train rows only.
+WT = "WT"
+EVENT_TYPES = ("MISSENSE", "SYNONYMOUS", "NONSENSE", "FRAMESHIFT", "SPLICE", "INFRAME_INDEL", "OTHER")
+TRUNCATING = frozenset({"NONSENSE", "FRAMESHIFT", "SPLICE"})
+AA = tuple("ACDEFGHIKLMNPQRSTVWY")
+AA_PAIRS = {(a, b): i for i, (a, b) in enumerate((a, b) for a in AA for b in AA if a != b)}
+SUB_RE = re.compile(r"^([A-Z*])(-?\d+)([A-Z*])$")
+SPLICE_RE = re.compile(r"SPLICE|IVS|[+-]\d+")
+INDEL_RE = re.compile(r"DEL|INS|DUP")
+RECURRENT_MIN_COUNT = 5
+ENRICHMENT_MIN_SUPPORT = 10
+ENRICHMENT_ALPHA = 1.0
+ENRICHMENT_SHRINKAGE = 10.0
+ENRICHMENT_CLIP = 4.0
+REFERENCE_LR = 0.526130
+REFERENCE_LGBM_SPECIALIST = 0.492332
+REFERENCE_BLEND = 0.543679
+REFERENCE_TOLERANCE = 0.001
+
+
+# =============================================================================
+# 2. Mutation-string parser and structured row features
+# =============================================================================
+# WT, blank, and NaN return zero events. Missing test cells are never mutations.
+def normalise_cell(value: object) -> tuple[str, ...]:
+    if pd.isna(value):
+        return ()
+    text = str(value).strip().upper()
+    if not text or text == WT:
+        return ()
+    return tuple(dict.fromkeys(token.removeprefix("P.") for token in re.sub(r"[;,|]+", " ", text).split() if token))
+
+
+def classify_event(event: str) -> str:
+    if "FS" in event: return "FRAMESHIFT"
+    if SPLICE_RE.search(event): return "SPLICE"
+    if INDEL_RE.search(event): return "INFRAME_INDEL"
+    if "*" in event or event.endswith("X"): return "NONSENSE"
+    matched = SUB_RE.fullmatch(event)
+    if matched: return "SYNONYMOUS" if matched.group(1) == matched.group(3) else "MISSENSE"
+    return "OTHER"
+
+
+@dataclass(frozen=True)
+class Vocabulary:
+    exact_events: tuple[str, ...]
+    gene_types: tuple[str, ...]
+
+
+@dataclass
+class Parsed:
+    genes: list[str]
+    mutation: sparse.csr_matrix
+    truncation: sparse.csr_matrix
+    exact: sparse.csr_matrix
+    gene_type: sparse.csr_matrix
+    burden: np.ndarray
+    variant: np.ndarray
+    amino_pair: np.ndarray
+    topology: np.ndarray
+
+
+def _records(frame: pd.DataFrame, genes: list[str]) -> pd.DataFrame:
+    rows: list[tuple[int, int, str, str]] = []
+    for gi, gene in enumerate(genes):
+        for ri, value in enumerate(frame[gene].array):
+            rows.extend((ri, gi, event, classify_event(event)) for event in normalise_cell(value))
+    out = pd.DataFrame(rows, columns=["row", "gene_index", "event", "event_type"])
+    if out.empty: return out
+    out = out.drop_duplicates(["row", "gene_index", "event"]).reset_index(drop=True)
+    out["gene"] = out.gene_index.map(dict(enumerate(genes)))
+    out["exact_name"] = out.gene + "__" + out.event
+    out["gene_type_name"] = out.gene + "__" + out.event_type
+    return out
+
+
+def fit_vocabulary(frame: pd.DataFrame, genes: list[str]) -> Vocabulary:
+    events = _records(frame, genes)
+    if events.empty: return Vocabulary((), ())
+    return Vocabulary(tuple(sorted(events.exact_name.unique())), tuple(sorted(events.gene_type_name.unique())))
+
+
+def _binary(events: pd.DataFrame, column: str, vocab: tuple[str, ...], n_rows: int) -> sparse.csr_matrix:
+    if events.empty or not vocab: return sparse.csr_matrix((n_rows, len(vocab)), dtype=np.float32)
+    lookup = {name: i for i, name in enumerate(vocab)}
+    cols = events[column].map(lookup)
+    known = cols.notna().to_numpy()
+    if not known.any(): return sparse.csr_matrix((n_rows, len(vocab)), dtype=np.float32)
+    result = sparse.coo_matrix((np.ones(known.sum(), dtype=np.float32), (events.loc[known, "row"], cols[known].astype(np.int32))), shape=(n_rows, len(vocab))).tocsr()
+    result.data[:] = 1
+    return result
+
+
+def transform_rows(frame: pd.DataFrame, genes: list[str], vocabulary: Vocabulary) -> Parsed:
+    n_rows = len(frame); events = _records(frame, genes)
+    if events.empty:
+        mutation = sparse.csr_matrix((n_rows, len(genes)), dtype=np.float32); truncation = mutation.copy()
+    else:
+        mutated = events[["row", "gene_index"]].drop_duplicates()
+        mutation = sparse.coo_matrix((np.ones(len(mutated), dtype=np.float32), (mutated.row, mutated.gene_index)), shape=(n_rows, len(genes))).tocsr()
+        trunc_events = events.loc[events.event_type.isin(TRUNCATING), ["row", "gene_index"]].drop_duplicates()
+        truncation = sparse.coo_matrix((np.ones(len(trunc_events), dtype=np.float32), (trunc_events.row, trunc_events.gene_index)), shape=(n_rows, len(genes))).tocsr()
+    mutation.data[:] = 1; truncation.data[:] = 1
+    burden = np.zeros((n_rows, 3), np.float32); burden[:, 0] = np.asarray(mutation.sum(axis=1)).ravel()
+    variant = np.zeros((n_rows, len(EVENT_TYPES)), np.float32); amino = np.zeros((n_rows, 380), np.float32); topology = np.zeros((n_rows, 8), np.float32)
+    if not events.empty:
+        burden[:, 1] = events.groupby("row").size().reindex(range(n_rows), fill_value=0)
+        gene_counts = events.groupby(["row", "gene_index"]).agg(event_count=("event", "size"), type_count=("event_type", "nunique"))
+        burden[:, 2] = gene_counts.event_count.gt(1).groupby(level=0).sum().reindex(range(n_rows), fill_value=0)
+        for col, kind in enumerate(EVENT_TYPES): variant[:, col] = events.event_type.eq(kind).groupby(events.row).sum().reindex(range(n_rows), fill_value=0)
+        for row, event in events[["row", "event"]].itertuples(index=False):
+            match = SUB_RE.fullmatch(event)
+            if match and (match.group(1), match.group(3)) in AA_PAIRS: amino[int(row), AA_PAIRS[(match.group(1), match.group(3))]] += 1
+        for col, mask in enumerate((gene_counts.event_count.eq(1), gene_counts.event_count.eq(2), gene_counts.event_count.ge(3), gene_counts.type_count.ge(2))): topology[:, col] = mask.groupby(level=0).sum().reindex(range(n_rows), fill_value=0)
+        topology[:, 4] = gene_counts.event_count.groupby(level=0).max().reindex(range(n_rows), fill_value=0)
+        type_counts = pd.crosstab(events.row, events.event_type).reindex(index=range(n_rows), columns=EVENT_TYPES, fill_value=0)
+        proportions = type_counts.div(type_counts.sum(axis=1).replace(0, np.nan), axis=0).fillna(0)
+        topology[:, 5] = type_counts.gt(0).sum(axis=1); safe = proportions.where(proportions.gt(0), 1); topology[:, 6] = -(safe * np.log(safe)).sum(axis=1); topology[:, 7] = proportions.max(axis=1)
+    return Parsed(genes, mutation, truncation, _binary(events, "exact_name", vocabulary.exact_events, n_rows), _binary(events, "gene_type_name", vocabulary.gene_types, n_rows), burden, variant, amino, topology)
+
+
+def _nonconstant(matrix: sparse.csr_matrix) -> np.ndarray:
+    return np.asarray(matrix.min(axis=0).toarray()).ravel() != np.asarray(matrix.max(axis=0).toarray()).ravel()
+
+
+# =============================================================================
+# 3. Cross-fitted gene×event-type enrichment scores
+# =============================================================================
+def _fit_weights(matrix: sparse.csr_matrix, labels: np.ndarray, classes: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    support = np.asarray(matrix.getnnz(axis=0)).ravel(); selected = np.flatnonzero((support >= ENRICHMENT_MIN_SUPPORT) & (support < matrix.shape[0]))
+    if not len(selected): return selected, np.zeros((len(classes), 0), np.float32)
+    x = matrix[:, selected]; support = support[selected].astype(float); weights = np.zeros((len(classes), len(selected)))
+    for ci, label in enumerate(classes):
+        positive_mask = labels == label; positive = np.asarray(x[positive_mask].getnnz(axis=0)).ravel(); negative = support - positive
+        weights[ci] = np.log((positive + ENRICHMENT_ALPHA) / (positive_mask.sum() - positive + ENRICHMENT_ALPHA)) - np.log((negative + ENRICHMENT_ALPHA) / ((~positive_mask).sum() - negative + ENRICHMENT_ALPHA))
+    return selected, np.clip(weights * (support / (support + ENRICHMENT_SHRINKAGE)), -ENRICHMENT_CLIP, ENRICHMENT_CLIP).astype(np.float32)
+
+
+def _apply_weights(matrix: sparse.csr_matrix, selected: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    if not len(selected): return np.zeros((matrix.shape[0], len(weights)), np.float32)
+    x = matrix[:, selected]; scores = np.asarray(x @ weights.T, np.float32); return scores / np.sqrt(np.maximum(np.asarray(x.getnnz(axis=1)).ravel(), 1))[:, None]
+
+
+def _crossfit_enrichment(train: Parsed, apply: Parsed, labels: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray, list[str], int]:
+    classes = np.asarray(sorted(np.unique(labels)), dtype=object); scores = np.zeros((train.mutation.shape[0], len(classes)), np.float32)
+    splitter = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
+    for fit, holdout in splitter.split(np.zeros(len(labels)), labels):
+        selected, weights = _fit_weights(train.gene_type[fit], labels[fit], classes); scores[holdout] = _apply_weights(train.gene_type[holdout], selected, weights)
+    selected, weights = _fit_weights(train.gene_type, labels, classes); apply_scores = _apply_weights(apply.gene_type, selected, weights)
+    keep = scores.min(axis=0) != scores.max(axis=0); scores, apply_scores = scores[:, keep], apply_scores[:, keep]
+    mean, std = scores.mean(axis=0), scores.std(axis=0); std[std < 1e-6] = 1
+    return ((scores - mean) / std).astype(np.float32), ((apply_scores - mean) / std).astype(np.float32), [f"E__gene_type__{item}" for item, include in zip(classes, keep) if include], 5
+
+
+def build_design_matrices(train_frame: pd.DataFrame, apply_frame: pd.DataFrame, labels: np.ndarray, genes: list[str], *, seed: int) -> tuple[sparse.csr_matrix, sparse.csr_matrix, list[str], dict]:
+    labels = np.asarray(labels); vocabulary = fit_vocabulary(train_frame, genes); train, apply = transform_rows(train_frame, genes, vocabulary), transform_rows(apply_frame, genes, vocabulary)
+    active = np.flatnonzero(np.asarray(train.mutation.getnnz(axis=0)).ravel()); truncating = np.flatnonzero(np.asarray(train.truncation.getnnz(axis=0)).ravel())
+    exact_count = np.asarray(train.exact.getnnz(axis=0)).ravel(); exact_type = np.asarray([classify_event(name.split("__", 1)[1]) for name in vocabulary.exact_events]); recurrent = np.flatnonzero((exact_count >= RECURRENT_MIN_COUNT) & (exact_type == "MISSENSE"))
+    train_parts = [train.mutation[:, active], sparse.csr_matrix(np.log1p(train.burden)), sparse.csr_matrix(np.log1p(train.variant)), train.truncation[:, truncating], sparse.csr_matrix(train.truncation.sum(axis=1)), train.exact[:, recurrent], sparse.csr_matrix(train.exact[:, recurrent].sum(axis=1)), sparse.csr_matrix(np.log1p(train.amino_pair)), sparse.csr_matrix(train.topology)]
+    apply_parts = [apply.mutation[:, active], sparse.csr_matrix(np.log1p(apply.burden)), sparse.csr_matrix(np.log1p(apply.variant)), apply.truncation[:, truncating], sparse.csr_matrix(apply.truncation.sum(axis=1)), apply.exact[:, recurrent], sparse.csr_matrix(apply.exact[:, recurrent].sum(axis=1)), sparse.csr_matrix(np.log1p(apply.amino_pair)), sparse.csr_matrix(apply.topology)]
+    names = [f"G__{genes[i]}" for i in active] + ["B__mutated_gene_count", "B__event_count", "B__multi_event_gene_count"] + [f"V__{name.lower()}_event_count" for name in EVENT_TYPES] + [f"T__{genes[i]}" for i in truncating] + ["T__truncating_gene_count"] + [f"R__{vocabulary.exact_events[i]}" for i in recurrent] + ["R__recurrent_missense_event_count"] + [f"A_pair__{i}" for i in range(380)] + [f"S__{i}" for i in range(8)]
+    train_scores, apply_scores, enrich_names, inner_splits = _crossfit_enrichment(train, apply, labels, seed)
+    train_parts.append(sparse.csr_matrix(train_scores)); apply_parts.append(sparse.csr_matrix(apply_scores)); names.extend(enrich_names)
+    x_train, x_apply = sparse.hstack(train_parts, format="csr"), sparse.hstack(apply_parts, format="csr"); keep = _nonconstant(x_train)
+    names = [name for name, include in zip(names, keep) if include]
+    audit = {"raw_train_test_concat": False, "vocabulary_source": "fit_frame_only", "fixed_contrast_enabled": False, "fixed_exact_event_enabled": False, "enrichment_inner_splits": inner_splits, "exact_vocabulary_size": len(vocabulary.exact_events), "gene_type_vocabulary_size": len(vocabulary.gene_types), "pre_filter_block_counts": {"burden": 3, "variant": 7, "amino_pair": 380, "topology": 8, "enrichment": len(enrich_names)}, "total_feature_count": len(names), "nan_as_mutation_count": 0}
+    return x_train[:, keep], x_apply[:, keep], names, audit
+
+
+def make_h0_fold_matrices(fit_frame: pd.DataFrame, valid_frame: pd.DataFrame, labels: np.ndarray, genes: list[str], seed: int) -> tuple[sparse.csr_matrix, sparse.csr_matrix, list[str], dict]:
+    """Compatibility wrapper with explicit fold-safety names for the audit."""
+    x_fit, x_valid, names, audit = build_design_matrices(fit_frame, valid_frame, labels, genes, seed=seed)
+    audit = {**audit, "vocabulary_source_fit_only": audit["vocabulary_source"] == "fit_frame_only"}
+    return x_fit, x_valid, names, audit
+
+
+def _aligned_probability(model, probability: np.ndarray, classes: np.ndarray) -> np.ndarray:
+    lookup = {label: index for index, label in enumerate(model.classes_)}
+    return probability[:, [lookup[label] for label in classes]]
+
+
+# =============================================================================
+# 4. Automatic two-pair LGBM specialist
+# =============================================================================
+# Specialists retain each pair's original probability mass and only redistribute
+# it inside the automatically discovered pair.
+def _discover_pairs(x_fit: sparse.csr_matrix, y_fit: np.ndarray, names: list[str]) -> tuple[tuple[str, str], ...]:
+    gene_columns = np.asarray([name.startswith("G__") for name in names])
+    matrix = x_fit[:, gene_columns]
+    classes = np.asarray(sorted(np.unique(y_fit)), dtype=object)
+    centroids = []
+    for label in classes:
+        centroid = np.asarray(matrix[y_fit == label].mean(axis=0)).ravel()
+        norm = np.linalg.norm(centroid)
+        centroids.append(centroid / norm if norm else centroid)
+    similarity = np.vstack(centroids) @ np.vstack(centroids).T
+    candidates = sorted((-float(similarity[left, right]), str(classes[left]), str(classes[right])) for left in range(len(classes)) for right in range(left + 1, len(classes)))
+    return tuple((left, right) for _, left, right in candidates[:2])
+
+
+def _hard_specialist(x_fit: sparse.csr_matrix, y_fit: np.ndarray, x_valid: sparse.csr_matrix, main_probability: np.ndarray, classes: np.ndarray, names: list[str], seed: int) -> tuple[np.ndarray, tuple[tuple[str, str], ...]]:
+    probability = main_probability.copy()
+    lookup = {label: index for index, label in enumerate(classes)}
+    original_prediction = classes[main_probability.argmax(axis=1)]
+    pairs = _discover_pairs(x_fit, y_fit, names)
+    for pair in pairs:
+        mask = np.isin(y_fit, pair)
+        model = LGBMClassifier(objective="binary", boosting_type="gbdt", n_estimators=100, learning_rate=.02, num_leaves=20, min_child_samples=10, reg_alpha=0.0, reg_lambda=0.0, importance_type="gain", class_weight="balanced", random_state=seed, n_jobs=-1, deterministic=True, force_col_wise=True, verbosity=-1)
+        model.fit(x_fit[mask], y_fit[mask])
+        pair_columns = [lookup[label] for label in pair]
+        raw = model.predict_proba(x_valid)
+        model_lookup = {label: index for index, label in enumerate(model.classes_)}
+        specialist = raw[:, [model_lookup[label] for label in pair]]
+        apply_mask = np.isin(original_prediction, pair)
+        pair_mass = main_probability[:, pair_columns].sum(axis=1)
+        probability[np.ix_(apply_mask, pair_columns)] = pair_mass[apply_mask, None] * specialist[apply_mask]
+    np.testing.assert_allclose(probability.sum(axis=1), 1.0, atol=1e-6)
+    return probability, pairs
+
+
+def evaluate_h0(train: pd.DataFrame, genes: list[str], seed: int = 42) -> dict:
+    """Reproduce exp013 LR + exp014 hard-specialist LGBM 80/20, train-only."""
+    labels = train.SUBCLASS.to_numpy()
+    classes = np.asarray(sorted(np.unique(labels)), dtype=object)
+    splitter = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
+    lr_oof = np.zeros((len(train), len(classes)), dtype=np.float64)
+    specialist_oof = np.zeros_like(lr_oof)
+    fold_rows, audit_rows, warning_count = [], [], 0
+    for fold, (fit_index, valid_index) in enumerate(splitter.split(np.zeros(len(train)), labels), 1):
+        x_fit, x_valid, names, audit = make_h0_fold_matrices(train.iloc[fit_index], train.iloc[valid_index], labels[fit_index], genes, seed * 100 + fold)
+        lr = LogisticRegression(solver="lbfgs", C=.07, max_iter=2000, class_weight="balanced", random_state=seed)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", ConvergenceWarning)
+            lr.fit(x_fit, labels[fit_index])
+        warning_count += sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+        lr_probability = _aligned_probability(lr, lr.predict_proba(x_valid), classes)
+        lgbm = LGBMClassifier(objective="multiclass", boosting_type="gbdt", num_class=len(classes), n_estimators=400, learning_rate=.05, num_leaves=25, min_child_samples=10, min_child_weight=1e-3, reg_alpha=0.0, reg_lambda=0.0, class_weight="balanced", random_state=seed, n_jobs=-1, deterministic=True, force_col_wise=True, verbosity=-1)
+        lgbm.fit(x_fit, labels[fit_index])
+        main_probability = _aligned_probability(lgbm, lgbm.predict_proba(x_valid), classes)
+        specialist_probability, pairs = _hard_specialist(x_fit, labels[fit_index], x_valid, main_probability, classes, names, seed)
+        blend_probability = .8 * lr_probability + .2 * specialist_probability
+        lr_oof[valid_index], specialist_oof[valid_index] = lr_probability, specialist_probability
+        fold_rows.append({"fold": fold, "feature_count": len(names), "lr_macro_f1": f1_score(labels[valid_index], classes[lr_probability.argmax(axis=1)], average="macro"), "lgbm_specialist_macro_f1": f1_score(labels[valid_index], classes[specialist_probability.argmax(axis=1)], average="macro"), "blend_macro_f1": f1_score(labels[valid_index], classes[blend_probability.argmax(axis=1)], average="macro"), "pairs": repr(pairs)})
+        audit_rows.append({"fold": fold, **audit, "leakage_check": True, "test_read": False, "outer_validation_used_for_fit": False, "nan_as_mutation_count": 0})
+    blend_oof = .8 * lr_oof + .2 * specialist_oof
+    return {"classes": classes, "labels": labels, "lr_oof": lr_oof, "specialist_oof": specialist_oof, "blend_oof": blend_oof, "scores": {"lr": f1_score(labels, classes[lr_oof.argmax(axis=1)], average="macro"), "lgbm_specialist": f1_score(labels, classes[specialist_oof.argmax(axis=1)], average="macro"), "blend": f1_score(labels, classes[blend_oof.argmax(axis=1)], average="macro")}, "folds": pd.DataFrame(fold_rows), "audits": pd.DataFrame(audit_rows), "convergence_warning_count": warning_count}
+
+
+# =============================================================================
+# 5. Empirical-Bayes evidence and fixed low-margin gate
+# =============================================================================
+SELECTIVE_LR_WEIGHT = 0.80
+H0_SPECIALIST_WEIGHT = 0.20
+SELECTIVE_MARGIN = 0.05
+EB_ALPHA = 1.0
+EB_SHRINKAGE = 20.0
+EB_CLIP = 4.0
+
+
+
+@dataclass(frozen=True)
+class EBState:
+    selected: np.ndarray
+    weights: np.ndarray
+
+
+def fixed_branch_replacement(selective_lr_probability: np.ndarray, specialist_probability: np.ndarray) -> np.ndarray:
+    """Preserve the H0 80/20 contract while replacing only its LR branch."""
+    selective_lr_probability = np.asarray(selective_lr_probability, dtype=np.float64)
+    specialist_probability = np.asarray(specialist_probability, dtype=np.float64)
+    if selective_lr_probability.ndim != 2 or selective_lr_probability.shape != specialist_probability.shape:
+        raise ValueError("LR and specialist probability matrices must share shape")
+    output = SELECTIVE_LR_WEIGHT * selective_lr_probability + H0_SPECIALIST_WEIGHT * specialist_probability
+    if not np.allclose(output.sum(axis=1), 1.0, atol=1e-6):
+        raise ValueError("Input probability rows must be normalized")
+    return output.astype(np.float32)
+
+
+def selective_probability(non_eb_probability: np.ndarray, eb_probability: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Apply the previously fixed margin rule without re-tuning it."""
+    non_eb_probability = np.asarray(non_eb_probability, dtype=np.float64)
+    eb_probability = np.asarray(eb_probability, dtype=np.float64)
+    if non_eb_probability.ndim != 2 or non_eb_probability.shape != eb_probability.shape or eb_probability.shape[1] < 2:
+        raise ValueError("Expected equal two-dimensional probability matrices with at least two classes")
+    top_two = np.partition(eb_probability, kth=-2, axis=1)[:, -2:]
+    use_non_eb = (top_two[:, 1] - top_two[:, 0]) < SELECTIVE_MARGIN
+    probability = np.where(use_non_eb[:, None], non_eb_probability, eb_probability)
+    if not np.allclose(probability.sum(axis=1), 1.0, atol=1e-6):
+        raise ValueError("Input probability rows must be normalized")
+    return probability.astype(np.float32), use_non_eb
+
+
+def fit_empirical_bayes(matrix: sparse.csr_matrix, labels: np.ndarray, classes: np.ndarray) -> EBState:
+    """Fit only outer/inner-train gene×event-type class evidence weights."""
+    matrix = matrix.tocsr()
+    support = np.asarray(matrix.getnnz(axis=0)).ravel().astype(np.float64)
+    selected = np.flatnonzero((support > 0) & (support < matrix.shape[0]))
+    if not len(selected):
+        return EBState(selected=selected, weights=np.zeros((len(classes), 0), dtype=np.float32))
+    x = matrix[:, selected]
+    selected_support = support[selected]
+    class_size = np.asarray([(labels == label).sum() for label in classes], dtype=np.float64)
+    p0 = (selected_support + EB_ALPHA) / (len(labels) + 2.0 * EB_ALPHA)
+    weights = np.zeros((len(classes), len(selected)), dtype=np.float64)
+    for class_index, label in enumerate(classes):
+        positive = np.asarray(x[labels == label].getnnz(axis=0)).ravel().astype(np.float64)
+        negative = selected_support - positive
+        positive_rate = (positive + EB_SHRINKAGE * p0) / (class_size[class_index] + EB_SHRINKAGE)
+        negative_rate = (negative + EB_SHRINKAGE * p0) / (len(labels) - class_size[class_index] + EB_SHRINKAGE)
+        positive_rate = np.clip(positive_rate, 1e-6, 1.0 - 1e-6)
+        negative_rate = np.clip(negative_rate, 1e-6, 1.0 - 1e-6)
+        weights[class_index] = np.log(positive_rate / (1.0 - positive_rate)) - np.log(negative_rate / (1.0 - negative_rate))
+    return EBState(selected=selected, weights=np.clip(weights, -EB_CLIP, EB_CLIP).astype(np.float32))
+
+
+def apply_empirical_bayes(matrix: sparse.csr_matrix, state: EBState, class_count: int) -> np.ndarray:
+    if not len(state.selected):
+        return np.zeros((matrix.shape[0], class_count), dtype=np.float32)
+    x = matrix[:, state.selected]
+    score = np.asarray(x @ state.weights.T, dtype=np.float32)
+    denominator = np.sqrt(np.maximum(np.asarray(x.getnnz(axis=1)).ravel(), 1.0))
+    return score / denominator[:, None]
+
+
+def cross_fitted_eb_scores(
+    fit_gene_type: sparse.csr_matrix,
+    apply_gene_type: sparse.csr_matrix,
+    labels: np.ndarray,
+    classes: np.ndarray,
+    *,
+    seed: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Create train OOF scores, then fit outer-train weights for validation."""
+    train_score = np.zeros((fit_gene_type.shape[0], len(classes)), dtype=np.float32)
+    splitter = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
+    for inner_fit, inner_valid in splitter.split(np.zeros(len(labels)), labels):
+        state = fit_empirical_bayes(fit_gene_type[inner_fit], labels[inner_fit], classes)
+        train_score[inner_valid] = apply_empirical_bayes(fit_gene_type[inner_valid], state, len(classes))
+    final_state = fit_empirical_bayes(fit_gene_type, labels, classes)
+    apply_score = apply_empirical_bayes(apply_gene_type, final_state, len(classes))
+    mean = train_score.mean(axis=0, keepdims=True)
+    std = np.maximum(train_score.std(axis=0, keepdims=True), 1e-6)
+    return ((train_score - mean) / std).astype(np.float32), ((apply_score - mean) / std).astype(np.float32)
+
+
+def empirical_bayes_features(
+    fit_frame: pd.DataFrame,
+    apply_frame: pd.DataFrame,
+    labels: np.ndarray,
+    classes: np.ndarray,
+    genes: list[str],
+    *,
+    seed: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Build fold-train vocabulary then standardized EB scores for one outer fold."""
+    vocabulary = fit_vocabulary(fit_frame, genes)
+    fit = transform_rows(fit_frame, genes, vocabulary)
+    apply = transform_rows(apply_frame, genes, vocabulary)
+    return cross_fitted_eb_scores(fit.gene_type, apply.gene_type, labels, classes, seed=seed)
+
+
+"""Final train-only submission pipeline for the accepted H0 Selective-EB model.
+
+This module intentionally uses no fixed cancer, gene, or mutation identifiers.
+All vocabularies, recurrent events, Empirical-Bayes weights, normalisation, and
+specialist pairs are fitted from the full training data only.  Test is used only
+to apply those fitted transformations and produce predictions.
+"""
+
+# =============================================================================
+# 6. Full-train fitting, test-only inference, and submission writing
+# =============================================================================
+HERE = Path(__file__).resolve()
+RUN_ID = "submission-h0-selective-eb-lr-lgbm-specialist"
+MODEL_SEED = 42
+
+
+def project_root() -> Path:
+    for candidate in (HERE, *HERE.parents):
+        if (candidate / "data" / "raw" / "train.csv").exists():
+            return candidate
+    raise FileNotFoundError("data/raw/train.csv was not found")
+
+
+def submission_directory() -> Path:
+    root = project_root()
+    path = root / "experiments" / "gs" / "notebooks" / "submission"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+
+
+
+def make_submission_frame(
+    sample_submission: pd.DataFrame,
+    test: pd.DataFrame,
+    probability: np.ndarray,
+    classes: np.ndarray,
+) -> pd.DataFrame:
+    """Validate sample order and write only the required submission columns."""
+    required = ["ID", "SUBCLASS"]
+    if list(sample_submission.columns) != required:
+        raise ValueError("sample_submission must have exactly ID and SUBCLASS columns")
+    if "ID" not in test or not sample_submission.ID.reset_index(drop=True).equals(test.ID.reset_index(drop=True)):
+        raise ValueError("sample_submission ID order must match test ID order")
+    probability = np.asarray(probability, dtype=np.float64)
+    if probability.shape != (len(test), len(classes)):
+        raise ValueError("probability shape does not match test rows and train classes")
+    if not np.isfinite(probability).all() or not np.allclose(probability.sum(axis=1), 1.0, atol=1e-6):
+        raise ValueError("final probability rows must be finite and normalized")
+    output = sample_submission.loc[:, required].copy()
+    output["SUBCLASS"] = np.asarray(classes, dtype=object)[probability.argmax(axis=1)]
+    if output.SUBCLASS.isna().any() or not set(output.SUBCLASS).issubset(set(classes)):
+        raise ValueError("submission contains an invalid predicted class")
+    return output
+
+
+def average_seed_probabilities(probabilities: list[np.ndarray]) -> np.ndarray:
+    """Equal-average predeclared full-train seed probabilities."""
+    if not probabilities:
+        raise ValueError("at least one seed probability matrix is required")
+    arrays = [np.asarray(item, dtype=np.float64) for item in probabilities]
+    shape = arrays[0].shape
+    if len(shape) != 2 or any(item.shape != shape for item in arrays):
+        raise ValueError("all seed probability matrices must share shape")
+    if any(not np.allclose(item.sum(axis=1), 1.0, atol=1e-6) for item in arrays):
+        raise ValueError("each seed probability matrix must contain normalized rows")
+    average = np.mean(arrays, axis=0)
+    if not np.allclose(average.sum(axis=1), 1.0, atol=1e-6):
+        raise AssertionError("equal seed average must preserve probability rows")
+    return average.astype(np.float32)
+
+
+def _fit_lr_probability(
+    x_train: sparse.csr_matrix,
+    labels: np.ndarray,
+    x_test: sparse.csr_matrix,
+    classes: np.ndarray,
+    model_seed: int,
+) -> tuple[np.ndarray, int]:
+    model = LogisticRegression(
+        solver="lbfgs", C=0.07, max_iter=2000, class_weight="balanced", random_state=model_seed,
+    )
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", ConvergenceWarning)
+        model.fit(x_train, labels)
+    warning_count = sum(issubclass(item.category, ConvergenceWarning) for item in caught)
+    return _aligned_probability(model, model.predict_proba(x_test), classes).astype(np.float32), int(warning_count)
+
+
+def build_submission_probability(train: pd.DataFrame, test: pd.DataFrame, *, model_seed: int = MODEL_SEED) -> tuple[np.ndarray, np.ndarray, dict]:
+    """Fit the accepted full-train model and apply it to test exactly once."""
+    if "ID" not in train or "SUBCLASS" not in train or "ID" not in test:
+        raise ValueError("train/test schema must include ID and train must include SUBCLASS")
+    genes = [column for column in train.columns if column not in ("ID", "SUBCLASS")]
+    if list(test.columns) != ["ID", *genes]:
+        raise ValueError("test gene columns must exactly match train gene order")
+    if int(train[genes].isna().sum().sum()) != 0:
+        raise ValueError("training gene matrix violates the no-NaN contract")
+    labels = train.SUBCLASS.to_numpy()
+    classes = np.asarray(sorted(np.unique(labels)), dtype=object)
+    train_frame, test_frame = train.loc[:, genes], test.loc[:, genes]
+
+    print("[submission] fit train-only structured mutation features", flush=True)
+    x_train, x_test, names, structured_audit = build_design_matrices(
+        train_frame, test_frame, labels, genes, seed=model_seed,
+    )
+    print("[submission] fit H0 multinomial Logistic Regression", flush=True)
+    non_eb_probability, non_eb_warnings = _fit_lr_probability(x_train, labels, x_test, classes, model_seed)
+
+    print("[submission] fit train-only Empirical-Bayes evidence branch", flush=True)
+    eb_train, eb_test = empirical_bayes_features(
+        train_frame, test_frame, labels, classes, genes, seed=model_seed,
+    )
+    x_train_eb = sparse.hstack([x_train, sparse.csr_matrix(eb_train)], format="csr")
+    x_test_eb = sparse.hstack([x_test, sparse.csr_matrix(eb_test)], format="csr")
+    eb_probability, eb_warnings = _fit_lr_probability(x_train_eb, labels, x_test_eb, classes, model_seed)
+    selective_lr_probability, use_non_eb = selective_probability(non_eb_probability, eb_probability)
+
+    print("[submission] fit full-train LGBM and automatic two-pair specialist", flush=True)
+    lgbm = LGBMClassifier(
+        objective="multiclass", boosting_type="gbdt", num_class=len(classes),
+        n_estimators=400, learning_rate=.05, num_leaves=25, min_child_samples=10,
+        min_child_weight=1e-3, reg_alpha=0.0, reg_lambda=0.0, class_weight="balanced",
+        random_state=model_seed, n_jobs=-1, deterministic=True, force_col_wise=True, verbosity=-1,
+    )
+    lgbm.fit(x_train, labels)
+    lgbm_probability = _aligned_probability(lgbm, lgbm.predict_proba(x_test), classes)
+    specialist_probability, specialist_pairs = _hard_specialist(
+        x_train, labels, x_test, lgbm_probability, classes, names, model_seed,
+    )
+    final_probability = fixed_branch_replacement(selective_lr_probability, specialist_probability)
+    audit = {
+        "run_id": RUN_ID,
+        "model_seed": model_seed,
+        "lr_weight": SELECTIVE_LR_WEIGHT,
+        "specialist_weight": H0_SPECIALIST_WEIGHT,
+        "selective_margin": SELECTIVE_MARGIN,
+        "threshold_retuned": False,
+        "test_role": "transform_and_predict_only",
+        "test_read_for_fit_statistics_selection_or_scaling": False,
+        "raw_train_test_concat": False,
+        "vocabulary_source": "full_train_only",
+        "specialist_pair_source": "full_train_only_automatic_discovery",
+        "fixed_cancer_gene_exact_mutation_rules": False,
+        "nan_as_mutation_count": int(structured_audit["nan_as_mutation_count"]),
+        "leakage_check": bool(not structured_audit["raw_train_test_concat"]),
+        "structured_feature_count": int(x_train.shape[1]),
+        "eb_feature_count": int(eb_train.shape[1]),
+        "final_feature_count": int(x_train_eb.shape[1]),
+        "specialist_pairs": [list(pair) for pair in specialist_pairs],
+        "selective_non_eb_test_rows": int(use_non_eb.sum()),
+        "convergence_warning_count": int(non_eb_warnings + eb_warnings),
+    }
+    del lgbm, x_train_eb, x_test_eb
+    gc.collect()
+    if audit["nan_as_mutation_count"] != 0 or not audit["leakage_check"]:
+        raise AssertionError("submission safety contract failed")
+    return final_probability, classes, audit
+
+
+def run(output_name: str = "submission_h0_selective_eb_lr_lgbm_specialist_seed42.csv") -> Path:
+    started = perf_counter()
+    root = project_root()
+    raw = root / "data" / "raw"
+    print("[submission] read train, test, and sample submission separately", flush=True)
+    train = pd.read_csv(raw / "train.csv")
+    test = pd.read_csv(raw / "test.csv")
+    sample = pd.read_csv(raw / "sample_submission.csv")
+    probability, classes, audit = build_submission_probability(train, test, model_seed=MODEL_SEED)
+    submission = make_submission_frame(sample, test, probability, classes)
+    destination = submission_directory() / output_name
+    submission.to_csv(destination, index=False)
+    audit.update({"output_file": str(destination), "row_count": int(len(submission)), "runtime_seconds": perf_counter() - started})
+    audit_path = destination.with_suffix(".audit.json")
+    audit_path.write_text(json.dumps(audit, ensure_ascii=False, indent=2), encoding="utf-8")
+    reloaded = pd.read_csv(destination)
+    if not reloaded.equals(submission):
+        raise AssertionError("submission round-trip validation failed")
+    print(json.dumps({"submission": str(destination), "audit": str(audit_path), "rows": len(submission), "leakage_check": audit["leakage_check"], "nan_as_mutation_count": audit["nan_as_mutation_count"]}, ensure_ascii=False), flush=True)
+    return destination
+
+
+def run_seed_bagged(
+    output_name: str = "submission_h0_selective_eb_lr_lgbm_specialist_seed42_777_2024_bagged.csv",
+    seeds: tuple[int, ...] = (42, 777, 2024),
+) -> Path:
+    """Fit each predeclared seed on full train and equally average test probabilities."""
+    if tuple(seeds) != (42, 777, 2024):
+        raise ValueError("the validated seed-bagging contract is exactly (42, 777, 2024)")
+    started = perf_counter(); root = project_root(); raw = root / "data" / "raw"
+    print("[submission] read train, test, and sample submission separately", flush=True)
+    train = pd.read_csv(raw / "train.csv"); test = pd.read_csv(raw / "test.csv"); sample = pd.read_csv(raw / "sample_submission.csv")
+    probability_rows, audits, classes = [], [], None
+    for seed in seeds:
+        print(f"[submission] full-train seed {seed}", flush=True)
+        probability, current_classes, audit = build_submission_probability(train, test, model_seed=seed)
+        if classes is None:
+            classes = current_classes
+        elif not np.array_equal(classes, current_classes):
+            raise AssertionError("class order differs between seed fits")
+        probability_rows.append(probability); audits.append(audit)
+    averaged = average_seed_probabilities(probability_rows)
+    submission = make_submission_frame(sample, test, averaged, classes)
+    destination = submission_directory() / output_name; submission.to_csv(destination, index=False)
+    audit = {
+        "run_id": RUN_ID + "-seed-bagging",
+        "seeds": list(seeds),
+        "seed_weights": [1.0 / len(seeds)] * len(seeds),
+        "weight_tuned": False,
+        "test_role": "transform_and_predict_only",
+        "raw_train_test_concat": False,
+        "leakage_check": bool(all(item["leakage_check"] for item in audits)),
+        "nan_as_mutation_count": int(max(item["nan_as_mutation_count"] for item in audits)),
+        "per_seed_audits": audits,
+        "output_file": str(destination),
+        "row_count": int(len(submission)),
+        "runtime_seconds": perf_counter() - started,
+    }
+    audit_path = destination.with_suffix(".audit.json"); audit_path.write_text(json.dumps(audit, ensure_ascii=False, indent=2), encoding="utf-8")
+    if not pd.read_csv(destination).equals(submission) or not audit["leakage_check"] or audit["nan_as_mutation_count"] != 0:
+        raise AssertionError("seed-bagged submission safety validation failed")
+    print(json.dumps({"submission": str(destination), "audit": str(audit_path), "rows": len(submission), "leakage_check": audit["leakage_check"], "nan_as_mutation_count": audit["nan_as_mutation_count"]}, ensure_ascii=False), flush=True)
+    return destination
+
+
+
+# =============================================================================
+# 7. Command-line entry point: equal 42/777/2024 probability bagging
+# =============================================================================
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Reproduce the 3-seed H0 Selective-EB Dacon submission.")
+    parser.add_argument("--output-name", default="submission_h0_selective_eb_lr_lgbm_specialist_seed42_777_2024_bagged.csv")
+    args = parser.parse_args()
+    run_seed_bagged(output_name=args.output_name, seeds=(42, 777, 2024))
+
+
+if __name__ == "__main__":
+    main()

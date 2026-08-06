@@ -1,0 +1,20 @@
+{
+  "purpose": "h0_fold_aligned_prediction_stability_audit",
+  "input_role": "precomputed_train_only_fold_aligned_oof",
+  "test_read": false,
+  "train_test_concat": false,
+  "models_refit": false,
+  "invalid_cross_split_oof_average_used": false,
+  "seeds": [
+    42,
+    777,
+    2024
+  ],
+  "row_count": 6201,
+  "class_count": 26,
+  "recovered_seed42_errors": 114,
+  "broken_seed42_correct": 111,
+  "all_seed_agree_rate": 0.8009998387356878,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0
+}

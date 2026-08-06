@@ -1,0 +1,18 @@
+{
+  "run_id": "exp-raw-canonical-audit-01",
+  "smoke": false,
+  "test_read": false,
+  "train_test_concat": false,
+  "test_path_accessed": false,
+  "train_rows": 6201,
+  "gene_count": 4384,
+  "nan_as_mutation_count": 0,
+  "leakage_check": true,
+  "segment_conservation": true,
+  "raw_segment_count": 249064,
+  "parsed_event_count": 249064,
+  "multi_event_cell_count": 20041,
+  "raw_vs_gene_type_weighted_purity_delta": 0.0004837929366230398,
+  "canonical_event_to_gene_type_merged_rows": 50,
+  "verdict": "raw_token_model_candidate"
+}

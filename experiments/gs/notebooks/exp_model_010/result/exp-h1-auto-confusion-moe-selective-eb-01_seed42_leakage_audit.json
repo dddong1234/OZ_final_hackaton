@@ -1,0 +1,19 @@
+{
+  "run_id": "exp-h1-auto-confusion-moe-selective-eb-01",
+  "h0_reference": 0.547915,
+  "h0_reference_match": true,
+  "h0_reference_delta": -3.387370274277046e-07,
+  "outer_splits": 5,
+  "inner_splits": 3,
+  "automatic_group_count": 6,
+  "positive_fold_count": 0,
+  "low_margin_h0": 0.23409076498652398,
+  "low_margin_h1": 0.1997884921962216,
+  "low_margin_delta": -0.034302272790302374,
+  "test_read": false,
+  "train_test_concat": false,
+  "fixed_class_gene_mutation_rules": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "decision": "rejected"
+}

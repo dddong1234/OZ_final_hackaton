@@ -1,0 +1,125 @@
+{
+  "run_id": "submission-h0-exact-event-eb-3seed-bagging",
+  "seeds": [
+    42,
+    777,
+    2024
+  ],
+  "seed_weights": [
+    0.3333333333333333,
+    0.3333333333333333,
+    0.3333333333333333
+  ],
+  "weights_tuned": false,
+  "test_role": "transform_and_predict_only",
+  "raw_train_test_concat": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "per_seed_audits": [
+    {
+      "model_seed": 42,
+      "seed_weight": 0.3333333333333333,
+      "lr_weight": 0.8,
+      "specialist_weight": 0.2,
+      "selective_margin": 0.05,
+      "threshold_retuned": false,
+      "test_role": "transform_and_predict_only",
+      "test_read_for_fit_statistics_selection_or_scaling": false,
+      "raw_train_test_concat": false,
+      "vocabulary_source": "full_train_only",
+      "exact_event_vocabulary_source": "full_train_only",
+      "exact_event_support_cutoff": null,
+      "specialist_pair_source": "full_train_only_automatic_discovery",
+      "fixed_cancer_gene_exact_mutation_rules": false,
+      "nan_as_mutation_count": 0,
+      "leakage_check": true,
+      "structured_feature_count": 8417,
+      "exact_eb_feature_count": 26,
+      "exact_vocabulary_size": 226795,
+      "final_feature_count": 8443,
+      "specialist_pairs": [
+        [
+          "KIPAN",
+          "KIRC"
+        ],
+        [
+          "GBMLGG",
+          "LGG"
+        ]
+      ],
+      "selective_non_eb_test_rows": 373,
+      "convergence_warning_count": 0
+    },
+    {
+      "model_seed": 777,
+      "seed_weight": 0.3333333333333333,
+      "lr_weight": 0.8,
+      "specialist_weight": 0.2,
+      "selective_margin": 0.05,
+      "threshold_retuned": false,
+      "test_role": "transform_and_predict_only",
+      "test_read_for_fit_statistics_selection_or_scaling": false,
+      "raw_train_test_concat": false,
+      "vocabulary_source": "full_train_only",
+      "exact_event_vocabulary_source": "full_train_only",
+      "exact_event_support_cutoff": null,
+      "specialist_pair_source": "full_train_only_automatic_discovery",
+      "fixed_cancer_gene_exact_mutation_rules": false,
+      "nan_as_mutation_count": 0,
+      "leakage_check": true,
+      "structured_feature_count": 8417,
+      "exact_eb_feature_count": 26,
+      "exact_vocabulary_size": 226795,
+      "final_feature_count": 8443,
+      "specialist_pairs": [
+        [
+          "KIPAN",
+          "KIRC"
+        ],
+        [
+          "GBMLGG",
+          "LGG"
+        ]
+      ],
+      "selective_non_eb_test_rows": 364,
+      "convergence_warning_count": 0
+    },
+    {
+      "model_seed": 2024,
+      "seed_weight": 0.3333333333333333,
+      "lr_weight": 0.8,
+      "specialist_weight": 0.2,
+      "selective_margin": 0.05,
+      "threshold_retuned": false,
+      "test_role": "transform_and_predict_only",
+      "test_read_for_fit_statistics_selection_or_scaling": false,
+      "raw_train_test_concat": false,
+      "vocabulary_source": "full_train_only",
+      "exact_event_vocabulary_source": "full_train_only",
+      "exact_event_support_cutoff": null,
+      "specialist_pair_source": "full_train_only_automatic_discovery",
+      "fixed_cancer_gene_exact_mutation_rules": false,
+      "nan_as_mutation_count": 0,
+      "leakage_check": true,
+      "structured_feature_count": 8417,
+      "exact_eb_feature_count": 26,
+      "exact_vocabulary_size": 226795,
+      "final_feature_count": 8443,
+      "specialist_pairs": [
+        [
+          "KIPAN",
+          "KIRC"
+        ],
+        [
+          "GBMLGG",
+          "LGG"
+        ]
+      ],
+      "selective_non_eb_test_rows": 366,
+      "convergence_warning_count": 0
+    }
+  ],
+  "output_file": "/Users/admin/Documents/FinalProject/OZ_fianl_hackaton/experiments/gs/notebooks/submission/submission_h0_exact_event_eb_seed42_777_2024_bagged.csv",
+  "row_count": 2546,
+  "runtime_seconds": 856.6218968339963
+}
