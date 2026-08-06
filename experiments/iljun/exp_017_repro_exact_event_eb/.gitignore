@@ -1,0 +1,5 @@
+# GIT_STRATEGY 2-6: submission 및 예측 확률 파일은 커밋하지 않는다
+out/*
+!out/.gitkeep
+*.csv
+*.audit.json
