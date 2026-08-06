@@ -1,0 +1,17 @@
+{
+  "seeds": [
+    42,
+    777,
+    2024
+  ],
+  "new_feature_or_parameter_search": false,
+  "all_seed_delta_positive": true,
+  "mean_delta": 0.02118561843921433,
+  "minimum_delta": 0.018750308259361304,
+  "positive_fold_count": 15,
+  "minimum_class_mean_delta": -0.02173537352435671,
+  "class_collapse_absent": true,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "accepted_3seed": true
+}

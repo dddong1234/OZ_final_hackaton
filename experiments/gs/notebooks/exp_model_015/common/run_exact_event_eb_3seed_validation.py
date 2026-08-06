@@ -27,10 +27,19 @@ def aggregate(seed_summaries: pd.DataFrame, folds: pd.DataFrame, classes: pd.Dat
         leakage_check=("leakage_check", "all"),
         nan_as_mutation_count=("nan_as_mutation_count", "max"),
     )
-    aggregate_table = aggregate_table.merge(
-        candidate.paired_delta.agg(delta_vs_h0_mean="mean", delta_vs_h0_std="std", delta_vs_h0_min="min").to_frame().T,
-        how="cross",
+    # Deltas are defined against H0, so they belong only to the candidate
+    # row.  A cross join would incorrectly copy candidate deltas onto H0.
+    delta_stats = candidate.paired_delta.agg(
+        delta_vs_h0_mean="mean",
+        delta_vs_h0_std="std",
+        delta_vs_h0_min="min",
     )
+    for column, value in delta_stats.items():
+        aggregate_table[column] = np.where(
+            aggregate_table.variant.eq("exact_event_EB"),
+            float(value),
+            0.0,
+        )
     pivot = folds.pivot(index=["seed", "fold"], columns="variant", values="macro_f1")
     class_pivot = classes.pivot(index=["seed", "class"], columns="variant", values="f1")
     class_delta = class_pivot["exact_event_EB"] - class_pivot["H0_selective_EB"]
@@ -58,11 +67,11 @@ def aggregate(seed_summaries: pd.DataFrame, folds: pd.DataFrame, classes: pd.Dat
     return aggregate_table, decision
 
 
-def run_validation(run_id: str, reuse_seed42: bool) -> None:
+def run_validation(run_id: str, reuse_existing: bool) -> None:
     for seed in SEEDS:
         summary_path = RESULT_DIR / f"{run_id}_seed{seed}_summary.csv"
-        if reuse_seed42 and seed == 42 and summary_path.exists():
-            print(f"[exact-event EB 3seed] reusing validated seed42 result: {summary_path.name}", flush=True)
+        if reuse_existing and summary_path.exists():
+            print(f"[exact-event EB 3seed] reusing existing seed result: {summary_path.name}", flush=True)
             continue
         print(f"[exact-event EB 3seed] running seed {seed}", flush=True)
         run(run_id, seed)
@@ -94,7 +103,7 @@ def smoke() -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-id", default="exp-exact-event-eb-01")
-    parser.add_argument("--no-reuse-seed42", action="store_true")
+    parser.add_argument("--reuse-existing", action="store_true")
     parser.add_argument("--smoke", action="store_true")
     args = parser.parse_args()
-    smoke() if args.smoke else run_validation(args.run_id, reuse_seed42=not args.no_reuse_seed42)
+    smoke() if args.smoke else run_validation(args.run_id, reuse_existing=args.reuse_existing)

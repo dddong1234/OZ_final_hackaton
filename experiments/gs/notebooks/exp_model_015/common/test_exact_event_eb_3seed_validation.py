@@ -29,6 +29,26 @@ class ExactEventEBThreeSeedTest(unittest.TestCase):
         self.assertFalse(decision["accepted_3seed"])
         self.assertFalse(decision["all_seed_delta_positive"])
 
+    def test_aggregate_assigns_delta_only_to_candidate_row(self):
+        summary = pd.DataFrame([
+            {"seed": seed, "variant": variant, "oof_macro_f1": score, "oof_accuracy": score, "feature_count_mean": 1, "convergence_warning_count": 0, "leakage_check": True, "nan_as_mutation_count": 0}
+            for seed in (42, 777, 2024)
+            for variant, score in (("H0_selective_EB", .50), ("exact_event_EB", .52))
+        ])
+        folds = pd.DataFrame([
+            {"seed": seed, "fold": 1, "variant": variant, "macro_f1": score}
+            for seed in (42, 777, 2024)
+            for variant, score in (("H0_selective_EB", .50), ("exact_event_EB", .52))
+        ])
+        classes = pd.DataFrame([
+            {"seed": seed, "class": "A", "variant": variant, "f1": score}
+            for seed in (42, 777, 2024)
+            for variant, score in (("H0_selective_EB", .50), ("exact_event_EB", .52))
+        ])
+        table, _ = aggregate(summary, folds, classes)
+        self.assertEqual(float(table.loc[table.variant.eq("H0_selective_EB"), "delta_vs_h0_mean"].iloc[0]), 0.0)
+        self.assertAlmostEqual(float(table.loc[table.variant.eq("exact_event_EB"), "delta_vs_h0_mean"].iloc[0]), .02)
+
 
 if __name__ == "__main__":
     unittest.main()
