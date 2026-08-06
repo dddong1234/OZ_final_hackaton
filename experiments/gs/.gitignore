@@ -1,0 +1,16 @@
+# Large, reproducible experiment artefacts stay local. Keep only compact metrics/audits.
+**/*_oof.csv
+**/*_oof_probabilities.csv
+**/*_oof_for_ensemble.csv
+**/*_checkpoint.npz
+**/*_checkpoint.progress.json
+**/*_test_probabilities.csv
+**/submission_*.csv
+**/*.joblib
+**/*.pkl
+**/*.pth
+
+# Notebook runtime checkpoints and common local output roots.
+**/.ipynb_checkpoints/
+artifacts/
+results/

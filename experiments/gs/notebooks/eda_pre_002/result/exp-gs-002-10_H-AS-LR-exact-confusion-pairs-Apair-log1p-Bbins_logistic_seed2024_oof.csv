@@ -1,2 +1,0 @@
-experiment_id,model,seed,oof_macro_f1,oof_accuracy,fold_macro_f1_mean,fold_macro_f1_std,feature_count_mean,runtime_seconds,convergence_warning_count,leakage_check,nan_as_mutation_count
-H-AS-LR-exact-confusion-pairs-Apair-log1p-Bbins,logistic,2024,0.4805974281981337,0.4594420254797613,0.47875298584416404,0.015758689249569857,8187.0,189.19270487500762,0,True,0
