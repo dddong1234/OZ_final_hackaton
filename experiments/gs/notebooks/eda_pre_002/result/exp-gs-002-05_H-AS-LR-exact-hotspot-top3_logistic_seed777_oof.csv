@@ -1,2 +1,0 @@
-experiment_id,model,seed,oof_macro_f1,oof_accuracy,fold_macro_f1_mean,fold_macro_f1_std,feature_count_mean,runtime_seconds,convergence_warning_count,leakage_check,nan_as_mutation_count
-H-AS-LR-exact-hotspot-top3,logistic,777,0.43315007185544285,0.42348008385744235,0.43238290827124015,0.0116881850295556,8215.4,284.68341879200307,5,True,0

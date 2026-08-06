@@ -1,2 +1,0 @@
-experiment_id,model,seed,oof_macro_f1,oof_accuracy,fold_macro_f1_mean,fold_macro_f1_std,feature_count_mean,runtime_seconds,convergence_warning_count,leakage_check,nan_as_mutation_count
-H-AS-LR-exact-minus-PIK3CA-E545K,logistic,42,0.42947312398299353,0.4188034188034188,0.4286107931561597,0.012243150898913058,8216.2,284.63080666599853,5,True,0
