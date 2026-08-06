@@ -1,0 +1,122 @@
+{"kind":"deck","id":"pr/g4ama3","name":"Deck"}
+{"kind":"layout","layoutId":"248203b5-8a75-4582-8c7e-20f552e7f768","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"2fdcae07-008a-4e14-985e-c651ea79ace2","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/dpzz70","slide":1,"title":"EDA 01","textShapes":14}
+{"kind":"textbox","id":"sh/r2d8f29c","slide":1,"text":"EDA 01","textPreview":"EDA 01","textChars":6,"textLines":1,"bbox":[72,48,420,26]}
+{"kind":"shape","id":"sh/s3mp87qx","slide":1,"bbox":[72,646,1136,2]}
+{"kind":"textbox","id":"sh/tovqhsri","slide":1,"text":"암 환자 유전체 변이 기반 암종 분류","textPreview":"암 환자 유전체 변이 기반 암종 분류","textChars":20,"textLines":1,"bbox":[72,665,450,20]}
+{"kind":"textbox","id":"sh/ep47ax83","slide":1,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[1165,665,43,20]}
+{"kind":"textbox","id":"sh/fqd8j29o","slide":1,"text":"변이 문자열에는\n암종을 구분할 단서가 있습니다","textPreview":"변이 문자열에는 | 암종을 구분할 단서가 있습니다","textChars":25,"textLines":2,"bbox":[72,95,820,135]}
+{"kind":"shape","id":"sh/grmpc7q9","slide":1,"bbox":[72,258,1136,2]}
+{"kind":"textbox","id":"sh/1sfqlcre","slide":1,"text":"6,201","textPreview":"6,201","textChars":5,"textLines":1,"bbox":[72,300,250,54]}
+{"kind":"textbox","id":"sh/2to7eh8z","slide":1,"text":"Train 환자 수","textPreview":"Train 환자 수","textChars":10,"textLines":1,"bbox":[72,359,250,22]}
+{"kind":"textbox","id":"sh/3ux8nm9k","slide":1,"text":"4,384","textPreview":"4,384","textChars":5,"textLines":1,"bbox":[402,300,250,54]}
+{"kind":"textbox","id":"sh/v2xwr6ts","slide":1,"text":"유전자 변수 수","textPreview":"유전자 변수 수","textChars":8,"textLines":1,"bbox":[402,359,250,22]}
+{"kind":"textbox","id":"sh/u1ofi1c7","slide":1,"text":"26","textPreview":"26","textChars":2,"textLines":1,"bbox":[732,300,250,54]}
+{"kind":"textbox","id":"sh/h4zetgby","slide":1,"text":"암종 클래스","textPreview":"암종 클래스","textChars":6,"textLines":1,"bbox":[732,359,250,22]}
+{"kind":"textbox","id":"sh/g36xkbud","slide":1,"text":"R132H","textPreview":"R132H","textChars":5,"textLines":1,"bbox":[72,432,210,60]}
+{"kind":"textbox","id":"sh/7exwn6tw","slide":1,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[290,438,50,50]}
+{"kind":"textbox","id":"sh/6dofe1cb","slide":1,"text":"132번째 아미노산 R(아르기닌)이\nH(히스티딘)로 바뀐 변이","textPreview":"132번째 아미노산 R(아르기닌)이 | H(히스티딘)로 바뀐 변이","textChars":34,"textLines":2,"bbox":[356,431,510,66]}
+{"kind":"shape","id":"sh/t0fepwb2","slide":1,"bbox":[72,530,1136,86]}
+{"kind":"shape","id":"sh/8f6xgruh","slide":1,"bbox":[72,530,5,86]}
+{"kind":"textbox","id":"sh/rahgzqt0","slide":1,"text":"대부분이 WT인 고차원 희소 데이터이며, 암종별 표본 수가 달라 Macro F1 기준의 균형 있는 분류가 필요합니다.","textPreview":"대부분이 WT인 고차원 희소 데이터이며, 암종별 표본 수가 달라 Macro F1 기준의 균형 있는 분류가 필요합니다.","textChars":65,"textLines":1,"bbox":[98,551,1075,42]}
+{"kind":"notes","id":"nt/dpzz70","slide":1,"text":""}
+{"kind":"slide","id":"sl/ark08r","slide":2,"title":"SAFETY 02","textShapes":13}
+{"kind":"textbox","id":"sh/c7q903y1","slide":2,"text":"SAFETY 02","textPreview":"SAFETY 02","textChars":9,"textLines":1,"bbox":[72,48,420,26]}
+{"kind":"shape","id":"sh/r6hsryxw","slide":2,"bbox":[72,646,1136,2]}
+{"kind":"textbox","id":"sh/q58rytgb","slide":2,"text":"암 환자 유전체 변이 기반 암종 분류","textPreview":"암 환자 유전체 변이 기반 암종 분류","textChars":20,"textLines":1,"bbox":[72,665,450,20]}
+{"kind":"textbox","id":"sh/1wjax8fy","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1165,665,43,20]}
+{"kind":"textbox","id":"sh/0va94nyd","slide":2,"text":"변이 정보를 안전하게 다루는\n전처리 기준을 세웠습니다","textPreview":"변이 정보를 안전하게 다루는 | 전처리 기준을 세웠습니다","textChars":29,"textLines":2,"bbox":[72,92,930,92]}
+{"kind":"shape","id":"sh/zuhsvixs","slide":2,"bbox":[72,192,1136,2]}
+{"kind":"shape","id":"sh/et8r2dg7","slide":2,"bbox":[72,240,540,125]}
+{"kind":"textbox","id":"sh/h0fqlofe","slide":2,"text":"결측값 분리","textPreview":"결측값 분리","textChars":6,"textLines":1,"bbox":[94,260,496,32]}
+{"kind":"textbox","id":"sh/gz69sjy9","slide":2,"text":"WT·빈 문자열·NaN은 모두 mutation event 생성 대상에서 제외","textPreview":"WT·빈 문자열·NaN은 모두 mutation event 생성 대상에서 제외","textChars":42,"textLines":1,"bbox":[94,302,496,49]}
+{"kind":"shape","id":"sh/29wryloz","slide":2,"bbox":[668,240,540,125]}
+{"kind":"textbox","id":"sh/3u5srqpk","slide":2,"text":"일관된 파싱","textPreview":"일관된 파싱","textChars":6,"textLines":1,"bbox":[690,260,496,32]}
+{"kind":"textbox","id":"sh/ove90v65","slide":2,"text":"문자열을 유전자·변이유형·위치·아미노산 변화로 동일 문법에서 분해","textPreview":"문자열을 유전자·변이유형·위치·아미노산 변화로 동일 문법에서 분해","textChars":36,"textLines":1,"bbox":[690,302,496,49]}
+{"kind":"shape","id":"sh/pwnat07q","slide":2,"bbox":[72,395,540,125]}
+{"kind":"textbox","id":"sh/qxwr2lob","slide":2,"text":"자동 선택","textPreview":"자동 선택","textChars":5,"textLines":1,"bbox":[94,415,496,32]}
+{"kind":"textbox","id":"sh/bypsvqpg","slide":2,"text":"반복 event와 feature vocabulary는 fold-train에서 자동으로 결정","textPreview":"반복 event와 feature vocabulary는 fold-train에서 자동으로 결정","textChars":50,"textLines":1,"bbox":[94,457,496,49]}
+{"kind":"shape","id":"sh/czy94v61","slide":2,"bbox":[668,395,540,125]}
+{"kind":"textbox","id":"sh/d07ax07m","slide":2,"text":"희귀 신호 안정화","textPreview":"희귀 신호 안정화","textChars":9,"textLines":1,"bbox":[690,415,496,32]}
+{"kind":"textbox","id":"sh/y1gb65o7","slide":2,"text":"희귀 변이를 일괄 제거하지 않고 과도한 영향만 보수적으로 낮춤","textPreview":"희귀 변이를 일괄 제거하지 않고 과도한 영향만 보수적으로 낮춤","textChars":34,"textLines":1,"bbox":[690,457,496,49]}
+{"kind":"shape","id":"sh/z2pszaps","slide":2,"bbox":[72,548,1136,86]}
+{"kind":"shape","id":"sh/v698na50","slide":2,"bbox":[72,548,5,86]}
+{"kind":"textbox","id":"sh/a50re54f","slide":2,"text":"데이터를 임의로 보강하기보다, 원본 변이 문자열의 의미를 안전하게 보존하는 전처리에 집중했습니다.","textPreview":"데이터를 임의로 보강하기보다, 원본 변이 문자열의 의미를 안전하게 보존하는 전처리에 집중했습니다.","textChars":54,"textLines":1,"bbox":[98,569,1075,42]}
+{"kind":"notes","id":"nt/ark08r","slide":2,"text":""}
+{"kind":"slide","id":"sl/0jteoq","slide":3,"title":"FEATURE ENGINEERING 03","textShapes":12}
+{"kind":"textbox","id":"sh/1sfehg32","slide":3,"text":"FEATURE ENGINEERING 03","textPreview":"FEATURE ENGINEERING 03","textChars":22,"textLines":1,"bbox":[72,48,420,26]}
+{"kind":"shape","id":"sh/e54fm14b","slide":3,"bbox":[72,646,1136,2]}
+{"kind":"textbox","id":"sh/f6xwf6lw","slide":3,"text":"암 환자 유전체 변이 기반 암종 분류","textPreview":"암 환자 유전체 변이 기반 암종 분류","textChars":20,"textLines":1,"bbox":[72,665,450,20]}
+{"kind":"textbox","id":"sh/s3mdkbm5","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1165,665,43,20]}
+{"kind":"textbox","id":"sh/d4vedw3q","slide":3,"text":"변이 존재 여부를 넘어\n변이의 성격까지 구조화했습니다","textPreview":"변이 존재 여부를 넘어 | 변이의 성격까지 구조화했습니다","textChars":29,"textLines":2,"bbox":[72,94,850,112]}
+{"kind":"shape","id":"sh/q14vi14f","slide":3,"bbox":[72,230,1136,2]}
+{"kind":"shape","id":"sh/r2dwb6lk","slide":3,"bbox":[72,275,540,120]}
+{"kind":"textbox","id":"sh/4zmdgrm9","slide":3,"text":"유전자 변이 여부","textPreview":"유전자 변이 여부","textChars":9,"textLines":1,"bbox":[94,295,496,32]}
+{"kind":"textbox","id":"sh/50ve9w3u","slide":3,"text":"WT는 0, 유효 변이는 1. 암종별 반복 유전자 변이 신호를 반영","textPreview":"WT는 0, 유효 변이는 1. 암종별 반복 유전자 변이 신호를 반영","textChars":37,"textLines":1,"bbox":[94,337,496,44]}
+{"kind":"shape","id":"sh/18vy9o3a","slide":3,"bbox":[668,275,540,120]}
+{"kind":"textbox","id":"sh/g7mhgj25","slide":3,"text":"변이 부담량·구조","textPreview":"변이 부담량·구조","textChars":9,"textLines":1,"bbox":[690,295,496,32]}
+{"kind":"textbox","id":"sh/f6dg7elk","slide":3,"text":"전체 변이 수, 유형별 수, truncating 변이, 다양성, log1p 규모 안정화","textPreview":"전체 변이 수, 유형별 수, truncating 변이, 다양성, log1p 규모 안정화","textChars":48,"textLines":1,"bbox":[690,337,496,44]}
+{"kind":"shape","id":"sh/e54ze9kz","slide":3,"bbox":[72,425,540,120]}
+{"kind":"textbox","id":"sh/t4by543e","slide":3,"text":"기능성 변이 유형","textPreview":"기능성 변이 유형","textChars":9,"textLines":1,"bbox":[94,445,496,32]}
+{"kind":"textbox","id":"sh/s32hcz2t","slide":3,"text":"missense, nonsense, frameshift, synonymous 등 단백질 영향 차이를 분리","textPreview":"missense, nonsense, frameshift, synonymous 등 단백질 영향 차이를 분리","textChars":58,"textLines":1,"bbox":[94,487,496,44]}
+{"kind":"shape","id":"sh/r2tg3ul8","slide":3,"bbox":[668,425,540,120]}
+{"kind":"textbox","id":"sh/6hkzapkn","slide":3,"text":"아미노산 치환 방향","textPreview":"아미노산 치환 방향","textChars":10,"textLines":1,"bbox":[690,445,496,32]}
+{"kind":"textbox","id":"sh/5gby143i","slide":3,"text":"R132H를 R→H로 변환해 유전자 단위만으로 놓치는 변이 성질을 보완","textPreview":"R132H를 R→H로 변환해 유전자 단위만으로 놓치는 변이 성질을 보완","textChars":39,"textLines":1,"bbox":[690,487,496,44]}
+{"kind":"notes","id":"nt/0jteoq","slide":3,"text":""}
+{"kind":"slide","id":"sl/dyyc04","slide":4,"title":"CORE IDEA 04","textShapes":16}
+{"kind":"textbox","id":"sh/3ip8bqps","slide":4,"text":"CORE IDEA 04","textPreview":"CORE IDEA 04","textChars":12,"textLines":1,"bbox":[72,48,420,26]}
+{"kind":"shape","id":"sh/4jypkv6d","slide":4,"bbox":[72,646,1136,2]}
+{"kind":"textbox","id":"sh/pk7qd07i","slide":4,"text":"암 환자 유전체 변이 기반 암종 분류","textPreview":"암 환자 유전체 변이 기반 암종 분류","textChars":20,"textLines":1,"bbox":[72,665,450,20]}
+{"kind":"textbox","id":"sh/qlg7m5o3","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1165,665,43,20]}
+{"kind":"textbox","id":"sh/rmp8fapo","slide":4,"text":"각 변이가 어느 암종을 지지하는지 계산해\n환자별 26개 증거 점수로 요약했습니다","textPreview":"각 변이가 어느 암종을 지지하는지 계산해 | 환자별 26개 증거 점수로 요약했습니다","textChars":44,"textLines":2,"bbox":[72,86,985,112]}
+{"kind":"shape","id":"sh/c7ypov69","slide":4,"bbox":[72,226,220,74]}
+{"kind":"textbox","id":"sh/d87qh0nu","slide":4,"text":"환자의 변이 목록","textPreview":"환자의 변이 목록","textChars":9,"textLines":1,"bbox":[82,249,200,28]}
+{"kind":"textbox","id":"sh/6pc7a1oz","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[292,244,58,36]}
+{"kind":"shape","id":"sh/7ql836pk","slide":4,"bbox":[350,226,220,74]}
+{"kind":"textbox","id":"sh/fqp8vqp8","slide":4,"text":"암종별 발생 비교","textPreview":"암종별 발생 비교","textChars":9,"textLines":1,"bbox":[360,249,200,28]}
+{"kind":"textbox","id":"sh/upgrmlon","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[570,244,58,36]}
+{"kind":"shape","id":"sh/hs7qxg7e","slide":4,"bbox":[628,226,220,74]}
+{"kind":"textbox","id":"sh/gry9ov6t","slide":4,"text":"26개 암종 점수","textPreview":"26개 암종 점수","textChars":9,"textLines":1,"bbox":[638,249,200,28]}
+{"kind":"textbox","id":"sh/7mp8r6pc","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[848,244,58,36]}
+{"kind":"shape","id":"sh/61gri1or","slide":4,"bbox":[906,226,220,74]}
+{"kind":"textbox","id":"sh/to7qtg7i","slide":4,"text":"Logistic Regression","textPreview":"Logistic Regression","textChars":19,"textLines":1,"bbox":[916,249,200,28]}
+{"kind":"shape","id":"sh/sny9kb6x","slide":4,"bbox":[72,336,1136,2]}
+{"kind":"textbox","id":"sh/jy58n6p0","slide":4,"text":"예시: 환자에게 변이 A와 변이 B가 있을 때","textPreview":"예시: 환자에게 변이 A와 변이 B가 있을 때","textChars":25,"textLines":1,"bbox":[72,370,570,30]}
+{"kind":"textbox","id":"sh/ixwre1of","slide":4,"text":"암종 1  │  변이 A +1.2  +  변이 B −0.3  =  +0.9\n암종 2  │  변이 A −0.4  +  변이 B +1.1  =  +0.7\n… 26개 암종마다 같은 방식으로 증거를 합산","textPreview":"암종 1  │  변이 A +1.2  +  변이 B −0.3  =  +0.9 | 암종 2  │  변이 A −0.4  +  변이 B +1.1  =  +0.7 | … 26개 암종마다 같은 방식으로 증거를 합산","textChars":109,"textLines":3,"bbox":[72,416,570,102]}
+{"kind":"textbox","id":"sh/mtcrq1sn","slide":4,"text":"점수의 의미","textPreview":"점수의 의미","textChars":6,"textLines":1,"bbox":[668,370,420,30]}
+{"kind":"textbox","id":"sh/nu5sz698","slide":4,"text":"+ 점수: 해당 암종에서 상대적으로 더 자주 관찰된 변이\n− 점수: 해당 암종보다 다른 암종에서 더 자주 관찰된 변이\n즉, 여러 변이의 찬성·반대 근거를 암종별로 비교","textPreview":"+ 점수: 해당 암종에서 상대적으로 더 자주 관찰된 변이 | − 점수: 해당 암종보다 다른 암종에서 더 자주 관찰된 변이 | 즉, 여러 변이의 찬성·반대 근거를 암종별로 비교","textChars":93,"textLines":3,"bbox":[668,416,510,102]}
+{"kind":"shape","id":"sh/ove9srad","slide":4,"bbox":[72,545,1136,86]}
+{"kind":"shape","id":"sh/9wna1wry","slide":4,"bbox":[72,545,5,86]}
+{"kind":"textbox","id":"sh/axwru1sj","slide":4,"text":"Empirical-Bayes는 표본이 적은 희귀 변이의 극단적인 점수를 전체 발생률 쪽으로 보수적으로 조정하는 방법입니다. 희귀 신호는 남기되 우연한 과신은 줄였습니다.","textPreview":"Empirical-Bayes는 표본이 적은 희귀 변이의 극단적인 점수를 전체 발생률 쪽으로 보수적으로 조정하는 방법입니다. 희귀 신호는 남기되 우연한 과신은 줄였습니다.","textChars":94,"textLines":1,"bbox":[98,566,1075,42]}
+{"kind":"notes","id":"nt/dyyc04","slide":4,"text":""}
+{"kind":"slide","id":"sl/w9rvse","slide":5,"title":"TAKEAWAY 05","textShapes":18}
+{"kind":"textbox","id":"sh/apgj2tg7","slide":5,"text":"TAKEAWAY 05","textPreview":"TAKEAWAY 05","textChars":11,"textLines":1,"bbox":[72,48,420,26]}
+{"kind":"shape","id":"sh/xcrix8fy","slide":5,"bbox":[72,646,1136,2]}
+{"kind":"textbox","id":"sh/wbi143yd","slide":5,"text":"암 환자 유전체 변이 기반 암종 분류","textPreview":"암 환자 유전체 변이 기반 암종 분류","textChars":20,"textLines":1,"bbox":[72,665,450,20]}
+{"kind":"textbox","id":"sh/je90zixo","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1165,665,43,20]}
+{"kind":"textbox","id":"sh/id0j6dwj","slide":5,"text":"핵심은 피처 수가 아니라\n변이를 해석하는 방식이었습니다","textPreview":"핵심은 피처 수가 아니라 | 변이를 해석하는 방식이었습니다","textChars":30,"textLines":2,"bbox":[72,92,870,112]}
+{"kind":"shape","id":"sh/5gri18fu","slide":5,"bbox":[72,252,220,74]}
+{"kind":"textbox","id":"sh/kfi183e9","slide":5,"text":"안전한 파싱","textPreview":"안전한 파싱","textChars":6,"textLines":1,"bbox":[82,275,200,28]}
+{"kind":"textbox","id":"sh/zi50nexk","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[292,270,58,36]}
+{"kind":"shape","id":"sh/ehwzu9gz","slide":5,"bbox":[350,252,220,74]}
+{"kind":"textbox","id":"sh/kz2hgnux","slide":5,"text":"변이 구조화","textPreview":"변이 구조화","textChars":6,"textLines":1,"bbox":[360,275,200,28]}
+{"kind":"textbox","id":"sh/50bi9svi","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[570,270,58,36]}
+{"kind":"shape","id":"sh/ixkzedc7","slide":5,"bbox":[628,252,220,74]}
+{"kind":"textbox","id":"sh/jyt0nidc","slide":5,"text":"암종별 증거","textPreview":"암종별 증거","textChars":6,"textLines":1,"bbox":[638,275,200,28]}
+{"kind":"textbox","id":"sh/snmhk7u9","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[848,270,58,36]}
+{"kind":"shape","id":"sh/tovidsvu","slide":5,"bbox":[906,252,220,74]}
+{"kind":"textbox","id":"sh/61kzixc3","slide":5,"text":"선형 분류","textPreview":"선형 분류","textChars":5,"textLines":1,"bbox":[916,275,200,28]}
+{"kind":"shape","id":"sh/72d0b2do","slide":5,"bbox":[72,390,350,118]}
+{"kind":"textbox","id":"sh/87ih83ep","slide":5,"text":"1. 문자열 의미 보존","textPreview":"1. 문자열 의미 보존","textChars":12,"textLines":1,"bbox":[94,410,306,32]}
+{"kind":"textbox","id":"sh/9sryh8va","slide":5,"text":"WT와 결측은 분리하고, 변이는 유형·위치·아미노산 변화까지 구조화","textPreview":"WT와 결측은 분리하고, 변이는 유형·위치·아미노산 변화까지 구조화","textChars":37,"textLines":1,"bbox":[94,452,306,42]}
+{"kind":"shape","id":"sh/pcz6p0j2","slide":5,"bbox":[465,390,350,118]}
+{"kind":"textbox","id":"sh/obq5wv2h","slide":5,"text":"2. 암종 특이 신호 추출","textPreview":"2. 암종 특이 신호 추출","textChars":14,"textLines":1,"bbox":[487,410,306,32]}
+{"kind":"textbox","id":"sh/3ahonq1w","slide":5,"text":"각 변이를 단순 열이 아니라 특정 암종을 지지하는 근거로 재표현","textPreview":"각 변이를 단순 열이 아니라 특정 암종을 지지하는 근거로 재표현","textChars":35,"textLines":1,"bbox":[487,452,306,42]}
+{"kind":"shape","id":"sh/298nulkb","slide":5,"bbox":[858,390,350,118]}
+{"kind":"textbox","id":"sh/dgj6tkjy","slide":5,"text":"3. 희귀 변이 과신 방지","textPreview":"3. 희귀 변이 과신 방지","textChars":14,"textLines":1,"bbox":[880,410,306,32]}
+{"kind":"textbox","id":"sh/cfap0f2d","slide":5,"text":"Empirical-Bayes 수축으로 적은 표본의 극단적 신호를 안정화","textPreview":"Empirical-Bayes 수축으로 적은 표본의 극단적 신호를 안정화","textChars":39,"textLines":1,"bbox":[880,452,306,42]}
+{"kind":"shape","id":"sh/be1ora18","slide":5,"bbox":[72,545,1136,86]}
+{"kind":"shape","id":"sh/qds7y5kn","slide":5,"bbox":[72,545,5,86]}
+{"kind":"textbox","id":"sh/lkj6xkja","slide":5,"text":"결론: 수천 개의 희소 변이를 무작정 늘리지 않고, ‘이 변이가 26개 암종 중 어디를 지지하는가’라는 판별 가능한 정보로 바꾼 것이 핵심입니다.","textPreview":"결론: 수천 개의 희소 변이를 무작정 늘리지 않고, ‘이 변이가 26개 암종 중 어디를 지지하는가’라는 판별 가능한 정보로 바꾼 것이 핵심입니다.","textChars":81,"textLines":1,"bbox":[98,566,1075,42]}
+{"kind":"notes","id":"nt/w9rvse","slide":5,"text":""}
