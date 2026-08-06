@@ -1,0 +1,14 @@
+{
+  "run_id": "exp-exact-evidence-confidence-01",
+  "seed": 42,
+  "delta_required": 0.008,
+  "delta_vs_exact_event_eb": -0.012067427568581257,
+  "positive_fold_count": 0,
+  "minimum_class_delta": -0.1485826001955035,
+  "screen_pass": false,
+  "test_read": false,
+  "train_test_concat": false,
+  "fixed_class_gene_exact_mutation_rules": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0
+}
