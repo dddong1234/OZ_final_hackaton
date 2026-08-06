@@ -4,12 +4,11 @@
 
 It performs these stages in one file:
 
-1. reads train/test/sample submission separately;
-2. reports train-only EDA fields in the audit JSON;
-3. parses WT, blank and NaN as zero events;
-4. learns all mutation vocabularies, recurrent events, gene×event-type EB and exact-event EB only from train;
-5. trains the structured logistic branches and fold-train-discovered LGBM specialists;
-6. averages predeclared full-train seed `42/777/2024` probabilities and writes a submission CSV.
+1. reads `train.csv` only and reports train-only EDA fields in the audit JSON;
+2. fits all seed-specific vocabularies, EB states, LR branches, LGBM and automatic specialists from train only;
+3. only after every train fit is complete, reads `test.csv` and `sample_submission.csv`;
+4. applies the frozen train-fitted transforms to test and predicts;
+5. averages predeclared full-train seed `42/777/2024` probabilities and writes a submission CSV.
 
 No cancer, gene or exact-mutation names are fixed in the script. Test is never concatenated with train or used to fit vocabulary, statistics, scaling, feature selection or specialist pairs.
 

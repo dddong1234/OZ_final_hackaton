@@ -600,6 +600,167 @@ def _fit_lr_probability(
     return _aligned_probability(model, model.predict_proba(x_test), classes).astype(np.float32), int(warning_count)
 
 
+@dataclass
+class _FittedSubmissionState:
+    """All train-fitted objects.  This object intentionally contains no test row."""
+    genes: list[str]
+    classes: np.ndarray
+    structured_vocabulary: Vocabulary
+    structured_active: np.ndarray
+    structured_truncating: np.ndarray
+    structured_recurrent: np.ndarray
+    structured_enrichment_selected: np.ndarray
+    structured_enrichment_weights: np.ndarray
+    structured_enrichment_keep: np.ndarray
+    structured_enrichment_mean: np.ndarray
+    structured_enrichment_std: np.ndarray
+    structured_keep: np.ndarray
+    names: list[str]
+    p1_vocabulary: Vocabulary
+    p1_selected: np.ndarray
+    p1_weights: np.ndarray
+    p1_keep: np.ndarray
+    p1_mean: np.ndarray
+    p1_std: np.ndarray
+    exact_vocabulary: Vocabulary
+    exact_selected: np.ndarray
+    exact_weights: np.ndarray
+    exact_keep: np.ndarray
+    exact_mean: np.ndarray
+    exact_std: np.ndarray
+    non_eb_lr: LogisticRegression
+    exact_lr: LogisticRegression
+    lgbm: LGBMClassifier
+    specialist_models: list[tuple[tuple[str, str], LGBMClassifier]]
+
+
+def _structured_raw_parts(parsed: Parsed, active: np.ndarray, truncating: np.ndarray, recurrent: np.ndarray) -> list[sparse.csr_matrix]:
+    return [
+        parsed.mutation[:, active], sparse.csr_matrix(np.log1p(parsed.burden)), sparse.csr_matrix(np.log1p(parsed.variant)),
+        parsed.truncation[:, truncating], sparse.csr_matrix(parsed.truncation.sum(axis=1)),
+        parsed.exact[:, recurrent], sparse.csr_matrix(parsed.exact[:, recurrent].sum(axis=1)),
+        sparse.csr_matrix(np.log1p(parsed.amino_pair)), sparse.csr_matrix(parsed.topology),
+    ]
+
+
+def _fit_score_state(matrix: sparse.csr_matrix, labels: np.ndarray, classes: np.ndarray, seed: int, *, exact: bool) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Return train OOF score plus final train-only EB state and scaling values."""
+    scores = np.zeros((matrix.shape[0], len(classes)), dtype=np.float32)
+    splitter = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
+    for fit_index, valid_index in splitter.split(np.zeros(len(labels)), labels):
+        if exact:
+            state = fit_exact_eb(matrix[fit_index], labels[fit_index], classes)
+            scores[valid_index] = apply_exact_eb(matrix[valid_index], state, len(classes))
+        else:
+            selected, weights = _fit_weights(matrix[fit_index], labels[fit_index], classes)
+            scores[valid_index] = _apply_weights(matrix[valid_index], selected, weights)
+    if exact:
+        final = fit_exact_eb(matrix, labels, classes)
+        selected, weights = final.selected, final.weights
+    else:
+        selected, weights = _fit_weights(matrix, labels, classes)
+    keep = scores.min(axis=0) != scores.max(axis=0)
+    scores = scores[:, keep]
+    mean = scores.mean(axis=0, keepdims=True)
+    std = np.maximum(scores.std(axis=0, keepdims=True), 1e-6)
+    return ((scores - mean) / std).astype(np.float32), selected, weights, keep, mean.astype(np.float32), std.astype(np.float32)
+
+
+def _apply_score_state(matrix: sparse.csr_matrix, selected: np.ndarray, weights: np.ndarray, keep: np.ndarray, mean: np.ndarray, std: np.ndarray) -> np.ndarray:
+    raw = _apply_weights(matrix, selected, weights) if weights.shape[0] else np.zeros((matrix.shape[0], len(keep)), np.float32)
+    return ((raw[:, keep] - mean) / std).astype(np.float32)
+
+
+def _fit_specialist_models(x_train: sparse.csr_matrix, labels: np.ndarray, names: list[str], seed: int) -> list[tuple[tuple[str, str], LGBMClassifier]]:
+    models: list[tuple[tuple[str, str], LGBMClassifier]] = []
+    for pair in _discover_pairs(x_train, labels, names):
+        mask = np.isin(labels, pair)
+        model = LGBMClassifier(objective="binary", boosting_type="gbdt", n_estimators=100, learning_rate=.02, num_leaves=20, min_child_samples=10, reg_alpha=0.0, reg_lambda=0.0, importance_type="gain", class_weight="balanced", random_state=seed, n_jobs=-1, deterministic=True, force_col_wise=True, verbosity=-1)
+        model.fit(x_train[mask], labels[mask] == pair[1])
+        models.append((pair, model))
+    return models
+
+
+def _apply_specialist_models(x_apply: sparse.csr_matrix, main_probability: np.ndarray, classes: np.ndarray, models: list[tuple[tuple[str, str], LGBMClassifier]]) -> tuple[np.ndarray, list[tuple[str, str]]]:
+    probability = main_probability.copy(); lookup = {label: index for index, label in enumerate(classes)}
+    original_prediction = classes[main_probability.argmax(axis=1)]
+    for pair, model in models:
+        pair_columns = [lookup[label] for label in pair]
+        apply_mask = np.isin(original_prediction, pair)
+        if not apply_mask.any():
+            continue
+        raw = model.predict_proba(x_apply[apply_mask])
+        model_lookup = {bool(label): index for index, label in enumerate(model.classes_)}
+        specialist = np.column_stack([raw[:, model_lookup[False]], raw[:, model_lookup[True]]])
+        pair_mass = main_probability[:, pair_columns].sum(axis=1)
+        probability[np.ix_(apply_mask, pair_columns)] = pair_mass[apply_mask, None] * specialist
+    return probability.astype(np.float32), [pair for pair, _ in models]
+
+
+def fit_submission_from_train(train: pd.DataFrame, *, model_seed: int) -> tuple[_FittedSubmissionState, dict]:
+    """PHASE 1: fit every vocabulary, statistic, scaler and model from train only."""
+    if "ID" not in train or "SUBCLASS" not in train:
+        raise ValueError("train.csv must include ID and SUBCLASS")
+    genes = [column for column in train.columns if column not in ("ID", "SUBCLASS")]
+    if int(train[genes].isna().sum().sum()) != 0:
+        raise ValueError("training gene matrix violates the no-NaN contract")
+    labels = train.SUBCLASS.to_numpy(); classes = np.asarray(sorted(np.unique(labels)), dtype=object)
+    train_frame = train.loc[:, genes]
+
+    print("[fit/train-only] structured vocabulary and train feature matrix", flush=True)
+    vocabulary = fit_vocabulary(train_frame, genes); parsed = transform_rows(train_frame, genes, vocabulary)
+    active = np.flatnonzero(np.asarray(parsed.mutation.getnnz(axis=0)).ravel())
+    truncating = np.flatnonzero(np.asarray(parsed.truncation.getnnz(axis=0)).ravel())
+    exact_count = np.asarray(parsed.exact.getnnz(axis=0)).ravel()
+    exact_type = np.asarray([classify_event(name.split("__", 1)[1]) for name in vocabulary.exact_events])
+    recurrent = np.flatnonzero((exact_count >= RECURRENT_MIN_COUNT) & (exact_type == "MISSENSE"))
+    structured_train, structured_selected, structured_weights, structured_class_keep, structured_mean, structured_std = _fit_score_state(parsed.gene_type, labels, classes, model_seed, exact=False)
+    base_parts = _structured_raw_parts(parsed, active, truncating, recurrent)
+    names = [f"G__{genes[i]}" for i in active] + ["B__mutated_gene_count", "B__event_count", "B__multi_event_gene_count"] + [f"V__{name.lower()}_event_count" for name in EVENT_TYPES] + [f"T__{genes[i]}" for i in truncating] + ["T__truncating_gene_count"] + [f"R__{vocabulary.exact_events[i]}" for i in recurrent] + ["R__recurrent_missense_event_count"] + [f"A_pair__{i}" for i in range(380)] + [f"S__{i}" for i in range(8)] + [f"E__gene_type__{label}" for label, keep in zip(classes, structured_class_keep) if keep]
+    x_structured_unfiltered = sparse.hstack([*base_parts, sparse.csr_matrix(structured_train)], format="csr")
+    structured_keep = _nonconstant(x_structured_unfiltered)
+    x_structured = x_structured_unfiltered[:, structured_keep]
+    names = [name for name, keep in zip(names, structured_keep) if keep]
+
+    print("[fit/train-only] gene×event-type and exact-event EB states", flush=True)
+    p1_vocabulary = fit_vocabulary(train_frame, genes); p1_parsed = transform_rows(train_frame, genes, p1_vocabulary)
+    p1_train, p1_selected, p1_weights, p1_keep, p1_mean, p1_std = _fit_score_state(p1_parsed.gene_type, labels, classes, model_seed, exact=True)
+    exact_vocabulary = fit_vocabulary(train_frame, genes); exact_parsed = transform_rows(train_frame, genes, exact_vocabulary)
+    exact_train, exact_selected, exact_weights, exact_keep, exact_mean, exact_std = _fit_score_state(exact_parsed.exact, labels, classes, model_seed, exact=True)
+    x_exact = sparse.hstack([x_structured, sparse.csr_matrix(p1_train), sparse.csr_matrix(exact_train)], format="csr")
+
+    print("[fit/train-only] LR branches, LGBM and automatic specialists", flush=True)
+    non_eb_lr = LogisticRegression(solver="lbfgs", C=0.07, max_iter=2000, class_weight="balanced", random_state=model_seed).fit(x_structured, labels)
+    exact_lr = LogisticRegression(solver="lbfgs", C=0.07, max_iter=2000, class_weight="balanced", random_state=model_seed).fit(x_exact, labels)
+    lgbm = LGBMClassifier(objective="multiclass", boosting_type="gbdt", num_class=len(classes), n_estimators=400, learning_rate=.05, num_leaves=25, min_child_samples=10, min_child_weight=1e-3, reg_alpha=0.0, reg_lambda=0.0, class_weight="balanced", random_state=model_seed, n_jobs=-1, deterministic=True, force_col_wise=True, verbosity=-1).fit(x_structured, labels)
+    specialist_models = _fit_specialist_models(x_structured, labels, names, model_seed)
+    audit = {"phase": "train_fit_complete_before_test_read", "model_seed": model_seed, "test_read_during_fit": False, "raw_train_test_concat": False, "vocabulary_source": "full_train_only", "fixed_cancer_gene_exact_mutation_rules": False, "nan_as_mutation_count": 0, "leakage_check": True, "structured_feature_count": int(x_structured.shape[1]), "gene_type_eb_feature_count": int(p1_train.shape[1]), "exact_eb_feature_count": int(exact_train.shape[1]), "exact_vocabulary_size": int(exact_parsed.exact.shape[1]), "final_feature_count": int(x_exact.shape[1]), "eda_train_rows": int(len(train)), "eda_gene_count": int(len(genes)), "eda_class_count": int(len(classes)), "eda_train_nan_cell_count": 0}
+    state = _FittedSubmissionState(genes, classes, vocabulary, active, truncating, recurrent, structured_selected, structured_weights, structured_class_keep, structured_mean, structured_std, structured_keep, names, p1_vocabulary, p1_selected, p1_weights, p1_keep, p1_mean, p1_std, exact_vocabulary, exact_selected, exact_weights, exact_keep, exact_mean, exact_std, non_eb_lr, exact_lr, lgbm, specialist_models)
+    return state, audit
+
+
+def predict_submission_from_fitted_state(state: _FittedSubmissionState, test: pd.DataFrame) -> tuple[np.ndarray, dict]:
+    """PHASE 2: read/apply test only after PHASE 1 train fitting has completed."""
+    if list(test.columns) != ["ID", *state.genes]:
+        raise ValueError("test gene columns must exactly match the fitted train gene order")
+    test_frame = test.loc[:, state.genes]
+    parsed = transform_rows(test_frame, state.genes, state.structured_vocabulary)
+    structured_score = _apply_score_state(parsed.gene_type, state.structured_enrichment_selected, state.structured_enrichment_weights, state.structured_enrichment_keep, state.structured_enrichment_mean, state.structured_enrichment_std)
+    x_structured = sparse.hstack([*_structured_raw_parts(parsed, state.structured_active, state.structured_truncating, state.structured_recurrent), sparse.csr_matrix(structured_score)], format="csr")[:, state.structured_keep]
+    p1_parsed = transform_rows(test_frame, state.genes, state.p1_vocabulary)
+    p1_score = _apply_score_state(p1_parsed.gene_type, state.p1_selected, state.p1_weights, state.p1_keep, state.p1_mean, state.p1_std)
+    exact_parsed = transform_rows(test_frame, state.genes, state.exact_vocabulary)
+    exact_score = _apply_score_state(exact_parsed.exact, state.exact_selected, state.exact_weights, state.exact_keep, state.exact_mean, state.exact_std)
+    x_exact = sparse.hstack([x_structured, sparse.csr_matrix(p1_score), sparse.csr_matrix(exact_score)], format="csr")
+    non_eb = _aligned_probability(state.non_eb_lr, state.non_eb_lr.predict_proba(x_structured), state.classes)
+    exact = _aligned_probability(state.exact_lr, state.exact_lr.predict_proba(x_exact), state.classes)
+    selective, use_non_eb = selective_probability(non_eb, exact)
+    lgbm_probability = _aligned_probability(state.lgbm, state.lgbm.predict_proba(x_structured), state.classes)
+    specialist, pairs = _apply_specialist_models(x_structured, lgbm_probability, state.classes, state.specialist_models)
+    final_probability = fixed_branch_replacement(selective, specialist)
+    return final_probability, {"phase": "test_transform_and_predict_only", "test_used_for_fit_statistics_selection_or_scaling": False, "specialist_pairs": [list(pair) for pair in pairs], "selective_non_eb_test_rows": int(use_non_eb.sum())}
+
+
 def build_submission_probability(train: pd.DataFrame, test: pd.DataFrame, *, model_seed: int = MODEL_SEED) -> tuple[np.ndarray, np.ndarray, dict]:
     """Fit the accepted full-train model and apply it to test exactly once."""
     if "ID" not in train or "SUBCLASS" not in train or "ID" not in test:
@@ -688,12 +849,15 @@ def build_submission_probability(train: pd.DataFrame, test: pd.DataFrame, *, mod
 def run(output_name: str = "submission_h0_exact_event_eb_seed42.csv") -> Path:
     started = perf_counter()
     raw = data_directory()
-    print("[submission] read train, test, and sample submission separately", flush=True)
+    print("[submission] PHASE 1/2 — read train only and fit all train-only states", flush=True)
     train = pd.read_csv(raw / "train.csv")
+    state, audit = fit_submission_from_train(train, model_seed=MODEL_SEED)
+    print("[submission] PHASE 1/2 complete — now read test for transform/prediction only", flush=True)
     test = pd.read_csv(raw / "test.csv")
     sample = pd.read_csv(raw / "sample_submission.csv")
-    probability, classes, audit = build_submission_probability(train, test, model_seed=MODEL_SEED)
-    submission = make_submission_frame(sample, test, probability, classes)
+    probability, prediction_audit = predict_submission_from_fitted_state(state, test)
+    audit.update(prediction_audit)
+    submission = make_submission_frame(sample, test, probability, state.classes)
     destination = submission_directory() / output_name
     submission.to_csv(destination, index=False)
     audit.update({"output_file": str(destination), "row_count": int(len(submission)), "runtime_seconds": perf_counter() - started, "environment": environment_metadata()})
@@ -714,17 +878,25 @@ def run_seed_bagged(
     if tuple(seeds) != (42, 777, 2024):
         raise ValueError("the validated seed-bagging contract is exactly (42, 777, 2024)")
     started = perf_counter(); raw = data_directory()
-    print("[submission] read train, test, and sample submission separately", flush=True)
-    train = pd.read_csv(raw / "train.csv"); test = pd.read_csv(raw / "test.csv"); sample = pd.read_csv(raw / "sample_submission.csv")
-    probability_rows, audits, classes = [], [], None
+    print("[submission] PHASE 1/2 — read train only; fit all three seed models before test is read", flush=True)
+    train = pd.read_csv(raw / "train.csv")
+    states, audits, classes = [], [], None
     for seed in seeds:
-        print(f"[submission] full-train seed {seed}", flush=True)
-        probability, current_classes, audit = build_submission_probability(train, test, model_seed=seed)
+        print(f"[submission] train-only full-train seed {seed}", flush=True)
+        state, audit = fit_submission_from_train(train, model_seed=seed)
+        current_classes = state.classes
         if classes is None:
             classes = current_classes
         elif not np.array_equal(classes, current_classes):
             raise AssertionError("class order differs between seed fits")
-        probability_rows.append(probability); audits.append(audit)
+        states.append(state); audits.append(audit)
+    print("[submission] PHASE 1/2 complete — read test only for frozen-state transformation and prediction", flush=True)
+    test = pd.read_csv(raw / "test.csv"); sample = pd.read_csv(raw / "sample_submission.csv")
+    probability_rows = []
+    for state, audit in zip(states, audits):
+        probability, prediction_audit = predict_submission_from_fitted_state(state, test)
+        audit.update(prediction_audit)
+        probability_rows.append(probability)
     averaged = average_seed_probabilities(probability_rows)
     submission = make_submission_frame(sample, test, averaged, classes)
     destination = submission_directory() / output_name; submission.to_csv(destination, index=False)
