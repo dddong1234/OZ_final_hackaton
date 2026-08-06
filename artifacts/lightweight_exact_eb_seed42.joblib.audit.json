@@ -1,0 +1,12 @@
+{
+  "seed": 42,
+  "train_rows": 6201,
+  "gene_count": 4384,
+  "class_count": 26,
+  "feature_count": 4537,
+  "convergence_warning_count": 0,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0,
+  "test_read_during_fit": false,
+  "raw_train_test_concat": false
+}

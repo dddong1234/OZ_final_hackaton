@@ -1,0 +1,11 @@
+{
+  "seeds": [
+    42,
+    777,
+    2024
+  ],
+  "test_read": false,
+  "train_test_concat": false,
+  "leakage_check": true,
+  "nan_as_mutation_count": 0
+}
